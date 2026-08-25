@@ -13,8 +13,8 @@ jobs:
 
       - name: Skill conformance
         run: |
-          chmod +x scripts/validate-skill.sh
-          scripts/validate-skill.sh skills
+          chmod +x .github/validate-skill.sh
+          .github/validate-skill.sh skills
 
       - name: No .DS_Store committed
         run: |

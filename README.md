@@ -94,7 +94,7 @@ the skill tells you which parts and why.
 ## Validating
 
 ```bash
-scripts/validate-skill.sh skills
+.github/validate-skill.sh skills
 ```
 
 Dependency-free. Every skill must carry frontmatter, the four gates, verdict
@@ -107,9 +107,6 @@ block**, and clean tool naming with no internal identifiers leaked. Runs on ever
 
 | | |
 |---|---|
-| [`docs/DEPLOYMENT-PLAN.md`](docs/DEPLOYMENT-PLAN.md) | Release waves and execution |
-| [`docs/RANKING.md`](docs/RANKING.md) | How shipping order was decided |
-| [`docs/conventions/`](docs/conventions/) | Gate contract, verdicts, house style |
 | [`deploy-queue.tsv`](deploy-queue.tsv) | Full ship order |
 
 ---

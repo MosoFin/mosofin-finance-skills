@@ -12,7 +12,7 @@
    that string is composed by whichever MCP client is running.
 5. **Never print a numeric tenant or workspace id.** Name the workspace.
 6. **Keep the professional term.** Add plain language alongside it; do not replace it.
-7. Run `scripts/validate-skill.sh skills` before opening a PR.
+7. Run `.github/validate-skill.sh skills` before opening a PR.
 
 ## Adding a reference file
 
@@ -22,4 +22,4 @@ identifiers in a reference — they go stale silently and a reader trusting them
 
 ## Style
 
-See `docs/conventions/house-style.md`. Do not mix the two styles within one file.
+Do not mix section-naming styles within one file.
