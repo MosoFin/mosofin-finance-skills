@@ -24,9 +24,15 @@ jobs:
             exit 1
           fi
 
-      - name: Queue covers every skill
+      - name: Every shipped skill is in the queue
         run: |
-          q=$(grep -vc '^#' deploy-queue.tsv)
-          s=$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-          echo "queue rows: $q   skill folders: $s"
-          [ "$q" -eq "$s" ] || { echo "::error::queue and skills/ disagree"; exit 1; }
+          total=$(grep -vc '^#' deploy-queue.tsv)
+          shipped=$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+          echo "shipped $shipped of $total planned skills"
+          rc=0
+          for d in skills/*/; do
+            n=$(basename "$d")
+            grep -qP "^[^#]*\t${n}\t" deploy-queue.tsv || {
+              echo "::error::$n is not listed in deploy-queue.tsv"; rc=1; }
+          done
+          exit $rc
