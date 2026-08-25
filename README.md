@@ -10,8 +10,9 @@ Mosofin gateway.
 > file are required.** Without them a skill still runs, but every step becomes manual
 > and you supply the data by export.
 >
-> **These are standalone skills, not a plugin.** Each one carries its own onboarding
-> section and its own gateway handling — install only the ones you need.
+> **Each skill stands on its own.** Every one carries its own onboarding section and
+> its own gateway handling, so nothing here depends on anything else being installed.
+> Take a single folder, or install the whole set as a plugin — see **Getting started**.
 
 ---
 
@@ -36,8 +37,17 @@ and [Connect QuickBooks](https://docs.mosofin.com/source-and-destination/sources
 If a connection will not authenticate, see
 [Common issues](https://docs.mosofin.com/source-and-destination/destinations/claude/common-issues).
 
-**3. Install a skill.** Copy the folder into `~/.claude/skills/` (all projects) or
-`.claude/skills/` (one project):
+**3. Install the skills.** Either as a plugin, from the MosoFin marketplace in
+[mosofin/mosofin-plugins](https://github.com/mosofin/mosofin-plugins) — this installs
+all ten and keeps them updatable:
+
+```text
+/plugin marketplace add mosofin/mosofin-plugins
+/plugin install mosofin-finance@financehub
+```
+
+Or copy individual folders into `~/.claude/skills/` (all projects) or
+`.claude/skills/` (one project), taking only what you want:
 
 ```bash
 cp -R skills/month-end-close-checklist ~/.claude/skills/
@@ -132,6 +142,12 @@ In this repo:
 | | |
 |---|---|
 | [`deploy-queue.tsv`](deploy-queue.tsv) | Full ship order |
+
+Related repos:
+
+| | |
+|---|---|
+| [mosofin/mosofin-plugins](https://github.com/mosofin/mosofin-plugins) | The `financehub` marketplace that publishes these skills as the `mosofin-finance` plugin, and the `mosofin` plugin that provides the MCP connection itself |
 
 ---
 
