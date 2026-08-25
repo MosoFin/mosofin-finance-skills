@@ -1,7 +1,7 @@
 {
   "name": "mosofin-finance",
   "displayName": "MosoFin Finance",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Accounting procedures that read your live books through MosoFin: journal entries, three-way match, reconciliation, month-end close, financial statements. Read-only \u2014 every output is a proposal for a person to post.",
   "author": {
     "name": "MosoFin",
