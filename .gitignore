@@ -1,3 +1,7 @@
 .DS_Store
 *.zip
 node_modules/
+
+# local-only — planning docs and working scripts, never published
+docs/
+scripts/
