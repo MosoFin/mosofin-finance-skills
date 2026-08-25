@@ -114,6 +114,27 @@ block**, and clean tool naming with no internal identifiers leaked. Runs on ever
 
 ---
 
+---
+
+## Licence
+
+Copyright © 2026 MosoFin.
+
+This program is free software: you can redistribute it and/or modify it under the
+terms of the **GNU Affero General Public License, version 3**, as published by the
+Free Software Foundation. See [LICENSE](LICENSE).
+
+**AGPL §13 — network use.** If you modify these skills and make them available to
+users over a network, you must offer those users the source of your modified version.
+
+This licence governs the skills themselves. It does not grant access to the MosoFin
+service — **running these skills against live data still requires an active MosoFin
+subscription**, governed separately by the MosoFin Terms of Service.
+
+This program is distributed in the hope that it will be useful, but **WITHOUT ANY
+WARRANTY**; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
 ## Support
 
 Skills are delivered to Mosofin subscribers. For access, billing or connection issues,
