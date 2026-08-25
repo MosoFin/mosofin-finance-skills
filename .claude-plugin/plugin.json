@@ -1,0 +1,21 @@
+{
+  "name": "mosofin-finance",
+  "displayName": "MosoFin Finance",
+  "version": "0.1.0",
+  "description": "Accounting procedures that read your live books through MosoFin: journal entries, three-way match, reconciliation, month-end close, financial statements. Read-only — every output is a proposal for a person to post.",
+  "author": {
+    "name": "MosoFin",
+    "email": "support@mosofin.com"
+  },
+  "homepage": "https://mosofin.com",
+  "keywords": [
+    "accounting",
+    "bookkeeping",
+    "month-end-close",
+    "reconciliation",
+    "journal-entry",
+    "quickbooks",
+    "mosofin"
+  ],
+  "license": "MIT"
+}

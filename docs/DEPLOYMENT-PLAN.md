@@ -23,14 +23,14 @@ gates later waves.
 
 ## 1. Repository
 
-**Name:** `mosofin-accounting-skills`
+**Name:** `mosofin-finance-skills`
 **Distribution:** standalone skills for Mosofin subscribers — **not a plugin.** Each skill carries its own onboarding and gateway handling.
 
 **Visibility:** decide before first push. See R1 — the source pack carries no
 licence, and public release is a decision you make deliberately, not a default.
 
 ```
-mosofin-accounting-skills/
+mosofin-finance-skills/
 ├── README.md                     # what this is, how to use a skill, the gate model
 ├── LICENSE                       # ⚠️ blocked on R1 — do not populate until settled
 ├── CONTRIBUTING.md               # conversion conventions; how to add/change a skill
@@ -183,13 +183,13 @@ Run from the workspace root. **Nothing below has been run** — the repo skeleto
 docs exist; no git history, no remote, no skills copied.
 
 ```bash
-cd /Users/travis/Mosofin-skills-workplace/mosofin-accounting-skills
+cd /Users/travis/Mosofin-skills-workplace/mosofin-finance-skills
 ```
 
 **Step 1 — copy skills in queue order** (all 114, per option A above):
 
 ```bash
-SRC="../competitor_resources/claude_accounting_os/Accounting Automation Complete Pack_v1/01-Skills/Mosofin-Complete/mosofin-accounting-skills"
+SRC="../competitor_resources/claude_accounting_os/Accounting Automation Complete Pack_v1/01-Skills/Mosofin-Complete/mosofin-finance-skills"
 while IFS=$'\t' read -r wave name auto gate; do
   case "$wave" in \#*|"") continue;; esac
   mkdir -p "skills/$name" && cp -R "$SRC/$name/." "skills/$name/"
@@ -214,7 +214,7 @@ git commit -m "Wave 0: scaffolding, conventions, validator"
 **Step 4 — create the remote as private:**
 
 ```bash
-gh repo create mosofin-accounting-skills --private --source=. --remote=origin --push
+gh repo create mosofin-finance-skills --private --source=. --remote=origin --push
 ```
 
 **Step 5 — tag the wave:**
