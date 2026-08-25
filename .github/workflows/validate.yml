@@ -1,0 +1,32 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skill conformance
+        run: |
+          chmod +x scripts/validate-skill.sh
+          scripts/validate-skill.sh skills
+
+      - name: No .DS_Store committed
+        run: |
+          if find . -name .DS_Store -not -path './.git/*' | grep -q .; then
+            echo "::error::.DS_Store files present"
+            find . -name .DS_Store -not -path './.git/*'
+            exit 1
+          fi
+
+      - name: Queue covers every skill
+        run: |
+          q=$(grep -vc '^#' deploy-queue.tsv)
+          s=$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+          echo "queue rows: $q   skill folders: $s"
+          [ "$q" -eq "$s" ] || { echo "::error::queue and skills/ disagree"; exit 1; }
