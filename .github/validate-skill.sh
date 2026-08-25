@@ -53,7 +53,11 @@ for f in "$DIR"/*/SKILL.md; do
   req "$f" "$name: onboarding missing gateway endpoint"    "mcp\\.mosofin\\.com"
   req "$f" "$name: onboarding missing degraded-mode note"  -i "running without a connection"
 
-  # 8. Gate 0 must call list_workspaces
+  # 8. setup documentation must be linked, including the destination connect page
+  req "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
+  req "$f" "$name: onboarding does not link the destination setup page" "destinations/claude/connect-claude"
+
+  # 9. Gate 0 must call list_workspaces
   req "$f" "$name: Gate 0 does not call list_workspaces" 'list_workspaces'
 
   [ "$fail" -eq "$errs_before" ] && echo "  ok    $name"

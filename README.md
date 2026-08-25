@@ -17,7 +17,7 @@ Mosofin gateway.
 
 ## Getting started
 
-**1. Subscribe.** The gateway returns data only for an authenticated, subscribed account.
+**1. Subscribe.** The gateway returns data only for an authenticated, subscribed account. See [Sign in and account basics](https://docs.mosofin.com/start-here/register-a-mosofin-account) and [Billing](https://docs.mosofin.com/account/billing).
 
 **2. Connect the gateway.**
 
@@ -28,6 +28,13 @@ claude mcp add --transport http mosofin https://mcp.mosofin.com/mcp
 On claude.ai, add it through connector settings instead. Authentication is **OAuth** —
 no credentials are stored locally, and **no skill here ever asks you for a password,
 token or account number.**
+
+Full step-by-step instructions for each destination, and for connecting your books on
+the source side, are at **[docs.mosofin.com](https://docs.mosofin.com)** —
+[Connect MosoFin to Claude](https://docs.mosofin.com/source-and-destination/destinations/claude/connect-claude)
+and [Connect QuickBooks](https://docs.mosofin.com/source-and-destination/sources/quickbooks/connect-quickbooks).
+If a connection will not authenticate, see
+[Common issues](https://docs.mosofin.com/source-and-destination/destinations/claude/common-issues).
 
 **3. Install a skill.** Copy the folder into `~/.claude/skills/` (all projects) or
 `.claude/skills/` (one project):
@@ -105,11 +112,26 @@ block**, and clean tool naming with no internal identifiers leaked. Runs on ever
 
 ## Docs
 
+Product and setup documentation lives at **[docs.mosofin.com](https://docs.mosofin.com)**.
+The same table appears in every skill, so it is to hand at the point you need it.
+
+| If you need to… | Read |
+|---|---|
+| Do the whole setup start to finish | [Quickstart](https://docs.mosofin.com/start-here/quickstart) |
+| Create an account or sign in | [Sign in and account basics](https://docs.mosofin.com/start-here/register-a-mosofin-account) |
+| Create the workspace a skill will read | [Set up your first workspace](https://docs.mosofin.com/start-here/create-your-first-data-flow) |
+| **Connect Mosofin to your destination** | [Destinations overview](https://docs.mosofin.com/source-and-destination/destinations) → [Claude](https://docs.mosofin.com/source-and-destination/destinations/claude) → [Connect MosoFin to Claude](https://docs.mosofin.com/source-and-destination/destinations/claude/connect-claude) |
+| Connect the books themselves | [Sources overview](https://docs.mosofin.com/source-and-destination/sources) → [Connect QuickBooks](https://docs.mosofin.com/source-and-destination/sources/quickbooks/connect-quickbooks) |
+| See which data and tools are exposed | [Available financial data](https://docs.mosofin.com/source-and-destination/sources/quickbooks/data-overview) · [API tools reference](https://docs.mosofin.com/source-and-destination/sources/quickbooks/api-tools) |
+| Fix a connection that will not authenticate | [Common issues](https://docs.mosofin.com/source-and-destination/destinations/claude/common-issues) · [Claude FAQ](https://docs.mosofin.com/source-and-destination/destinations/claude/faq) |
+| Check your subscription, seats or limits | [Billing](https://docs.mosofin.com/account/billing) · [Usage and plan limits](https://docs.mosofin.com/account/plan-limits) |
+| Get a person involved | [Contact support](https://docs.mosofin.com/troubleshooting/contact-support) |
+
+In this repo:
+
 | | |
 |---|---|
 | [`deploy-queue.tsv`](deploy-queue.tsv) | Full ship order |
-
----
 
 ---
 
@@ -135,4 +157,6 @@ PARTICULAR PURPOSE.
 ## Support
 
 Skills are delivered to Mosofin subscribers. For access, billing or connection issues,
-contact Mosofin support. For a problem with a skill's accounting logic, open an issue.
+contact [Mosofin support](https://docs.mosofin.com/troubleshooting/contact-support). For setup
+questions start at [docs.mosofin.com](https://docs.mosofin.com). For a problem with a
+skill's accounting logic, open an issue.
