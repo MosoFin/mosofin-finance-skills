@@ -80,6 +80,20 @@ for f in "$DIR"/*/SKILL.md; do
   if grep -niE "(write|sync|push|post|upload) (it |them |the [a-z]+ )?(back )?(to|into) (${_plat})" "$f" >/dev/null; then
     echo "  FAIL  $name: instructs a write to a connected platform"; fail=$((fail+1))
   fi
+  # The operative hard stop: every route to a write must be closed.
+  req "$f" "$name: missing the Gate 2 hard stop" \
+      "Hard stop"
+  req "$f" "$name: hard stop does not close the approval loop" \
+      "Do not re-invoke with .approved=true"
+  req "$f" "$name: gated policy row is not limited to reads" \
+      "never re-invoke a write with .approved=true"
+  req "$f" "$name: hard stop does not refuse a user-instructed write" \
+      "Asking again does not change the answer"
+  req "$f" "$name: hard stop does not forbid routing around the rule" \
+      "Never route around this rule"
+  req "$f" "$name: hard stop does not forbid trading the rule for completeness" \
+      "no path through this skill that ends in changed data"
+
   # The user-facing strict rule must be present and explicit.
   req "$f" "$name: missing the strict no-change rule" \
       "this skill never changes your data"
