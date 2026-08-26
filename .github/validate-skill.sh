@@ -80,6 +80,14 @@ for f in "$DIR"/*/SKILL.md; do
   if grep -niE "(write|sync|push|post|upload) (it |them |the [a-z]+ )?(back )?(to|into) (${_plat})" "$f" >/dev/null; then
     echo "  FAIL  $name: instructs a write to a connected platform"; fail=$((fail+1))
   fi
+  # The user-facing strict rule must be present and explicit.
+  req "$f" "$name: missing the strict no-change rule" \
+      "this skill never changes your data"
+  req "$f" "$name: strict rule does not name write/update/delete" \
+      "never write, update or delete existing data in any data source"
+  req "$f" "$name: strict rule does not disclaim directing the user" \
+      "direct you to update, overwrite or delete existing data"
+
   # The Gate 2 guardrail must be present and must override effective_policy.
   req "$f" "$name: missing the Gate 2 write-tool guardrail" \
       "Write tools are out of scope"
