@@ -75,9 +75,18 @@ for f in "$DIR"/*/SKILL.md; do
   if grep -niE '"method"[[:space:]]*:[[:space:]]*"(POST|PUT|PATCH|DELETE)"' "$f" >/dev/null; then
     echo "  FAIL  $name: HTTP write verb in a tool invocation"; fail=$((fail+1))
   fi
-  if grep -niE 'write back (to|into) (quickbooks|the (books|ledger))|push (to|into) quickbooks|create the entry in quickbooks' "$f" >/dev/null; then
-    echo "  FAIL  $name: instructs a write to the accounting system"; fail=$((fail+1))
+  # No write-back to ANY connected platform, not just the books.
+  _plat='quickbooks|qbo|xero|netsuite|stripe|square|paypal|shopify|plaid|bill\.com|ramp|brex|expensify|gusto|adp|rippling|the (data ?source|platform|source system|connected (system|platform))'
+  if grep -niE "(write|sync|push|post|upload) (it |them |the [a-z]+ )?(back )?(to|into) (${_plat})" "$f" >/dev/null; then
+    echo "  FAIL  $name: instructs a write to a connected platform"; fail=$((fail+1))
   fi
+  # The Gate 2 guardrail must be present and must override effective_policy.
+  req "$f" "$name: missing the Gate 2 write-tool guardrail" \
+      "Write tools are out of scope"
+  req "$f" "$name: guardrail does not override effective_policy" \
+      "scope even when .effective_policy. is .enabled."
+  req "$f" "$name: guardrail is not platform-agnostic" \
+      "every connected platform, not only the books" 
 
   [ "$fail" -eq "$errs_before" ] && echo "  ok    $name"
 done

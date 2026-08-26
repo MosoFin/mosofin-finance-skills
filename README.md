@@ -77,11 +77,17 @@ says so and names who owns it.**
 **Nothing is ever posted.** The gateway is read-only. Every entry, filing and
 communication these skills produce is a **proposal for a person to review and act on.**
 
-**No skill writes to your accounting system.** Not to QuickBooks, not to any connected
-source — there is no code path that posts, edits or deletes a record in your books.
-`.github/validate-skill.sh` enforces this: a skill that names a write tool, carries an
-HTTP write verb, or tells the reader to write back to the accounting system fails CI
-and cannot ship.
+**No skill writes to any connected platform.** Not QuickBooks, not Stripe, Square,
+PayPal, a bank feed, a payroll or billing system — none of them. There is no code path
+that creates, edits, deletes or posts a record in a source, and none that moves data
+from one platform into another.
+
+This is enforced in two places. Every skill's **Gate 2** carries a standing guardrail:
+if the tool catalogue lists a write operation, it is out of scope **even when the
+policy has it enabled** — a permission to write is not an instruction to write. And
+`.github/validate-skill.sh` fails any skill that omits that guardrail, names a write
+tool, carries an HTTP write verb, or tells the reader to write, sync, push, post or
+upload into a connected platform. A skill that does any of those cannot ship.
 
 The one write that exists anywhere goes to **your own Mosofin workspace, never to the
 books**: at the end of a run a skill may offer to save what it learned — account

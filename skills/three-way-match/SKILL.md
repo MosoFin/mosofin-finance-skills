@@ -140,6 +140,27 @@ Refer to company files by `display_name`. Pass `data_source_id` between tools; n
 
 ## Gate 2 — Map what you can actually do
 
+### Write tools are out of scope — always
+
+`get_datasource_tools` describes what the connection *could* do. This skill uses only
+the reads.
+
+**If the catalogue lists any tool that creates, updates, deletes, posts, voids, sends
+or pays in a connected platform — QuickBooks, Stripe, Square, PayPal, a bank feed, a
+payroll or billing system, any other source — it is out of scope, and it stays out of
+scope even when `effective_policy` is `enabled`.** A permission to write is not an
+instruction to write. Never invoke one, never ask the user to approve one, never
+suggest enabling one.
+
+This holds for **every connected platform, not only the books.** Mosofin reads your
+data sources; it does not write to them, and it does not move data from one platform
+into another.
+
+If a step appears to need a write, that step is **`[manual]`**. Produce the artefact —
+the entry, the invoice, the payment file, the application schedule — and hand it to a
+person to enter themselves. Say so plainly in the output, so nobody assumes it was
+done.
+
 Call `get_datasource_tools` for the chosen company file and read the **`effective_policy`** on each tool.
 
 | `effective_policy` | Verdict | Behaviour |
