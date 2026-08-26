@@ -60,6 +60,25 @@ for f in "$DIR"/*/SKILL.md; do
   # 9. Gate 0 must call list_workspaces
   req "$f" "$name: Gate 0 does not call list_workspaces" 'list_workspaces'
 
+
+  # 10. read-only posture — no skill may write to the accounting system.
+  #     create_skill is permitted: it writes the user's own decisions back to
+  #     their Mosofin workspace, never to the books, and only on explicit
+  #     consent after results are shown.
+  req "$f" "$name: missing the read-only guarantee" \
+      "Nothing in this skill posts an entry, files a return"
+  for bad in 'update_skill' 'delete_skill'; do
+    if grep -nE "\\b$bad\\b" "$f" >/dev/null; then
+      echo "  FAIL  $name: uses write tool '$bad'"; fail=$((fail+1))
+    fi
+  done
+  if grep -niE '"method"[[:space:]]*:[[:space:]]*"(POST|PUT|PATCH|DELETE)"' "$f" >/dev/null; then
+    echo "  FAIL  $name: HTTP write verb in a tool invocation"; fail=$((fail+1))
+  fi
+  if grep -niE 'write back (to|into) (quickbooks|the (books|ledger))|push (to|into) quickbooks|create the entry in quickbooks' "$f" >/dev/null; then
+    echo "  FAIL  $name: instructs a write to the accounting system"; fail=$((fail+1))
+  fi
+
   [ "$fail" -eq "$errs_before" ] && echo "  ok    $name"
 done
 

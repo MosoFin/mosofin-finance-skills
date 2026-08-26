@@ -77,6 +77,19 @@ says so and names who owns it.**
 **Nothing is ever posted.** The gateway is read-only. Every entry, filing and
 communication these skills produce is a **proposal for a person to review and act on.**
 
+**No skill writes to your accounting system.** Not to QuickBooks, not to any connected
+source — there is no code path that posts, edits or deletes a record in your books.
+`.github/validate-skill.sh` enforces this: a skill that names a write tool, carries an
+HTTP write verb, or tells the reader to write back to the accounting system fails CI
+and cannot ship.
+
+The one write that exists anywhere goes to **your own Mosofin workspace, never to the
+books**: at the end of a run a skill may offer to save what it learned — account
+mappings, tolerances, vendor and payer aliases, your naming conventions — so the next
+run does not re-ask. It is proposed only after you have seen the results, requires an
+explicit yes at that moment, and stores *decisions and rules*, never transaction
+records or balances. Decline and nothing is written at all.
+
 **Your permissions are read fresh every run.** No skill assumes what it could do last
 time. If your access changes, its behaviour changes with it — and the coverage sheet
 produced on every run records exactly what was available.
