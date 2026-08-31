@@ -11,6 +11,11 @@ balance, a statement, an export, the documents themselves. **The accounting logi
 edge cases and the output standards are identical** — only where the numbers come from
 changes, and the output always says which is which.
 
+**You choose, and you are asked.** Where a connection exists, the skill asks at the
+start whether to use it for this run or whether you would rather supply the data
+yourself — **a connected gateway is not taken as consent to read your books.** Say no
+and it runs manually without asking again.
+
 ### Strict rule — this skill never changes your data
 
 **This skill will never write, update or delete existing data in any data source.**

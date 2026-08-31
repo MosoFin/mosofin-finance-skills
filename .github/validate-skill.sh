@@ -5,6 +5,16 @@ set -u
 DIR="${1:-skills}"
 fail=0; checked=0
 
+reqn() { # reqn <file> <label> <regex>  — prose match, wrap-proof.
+         # Collapses all runs of whitespace to single spaces before matching, so a
+         # phrase that happens to break across two lines still matches. Use this for
+         # any sentence-shaped assertion; use req() for line-anchored ones.
+  local f="$1" label="$2" pat="$3"
+  if ! tr '\n' ' ' < "$f" | tr -s ' \t' ' ' | grep -qiE "$pat"; then
+    echo "  FAIL  $label"; fail=$((fail+1))
+  fi
+}
+
 req() { # req <file> <label> <grep-args...>  — must appear in SKILL.md itself
   local f="$1" label="$2"; shift 2
   if ! grep -qE "$@" "$f"; then
@@ -50,19 +60,19 @@ for f in "$DIR"/*/SKILL.md; do
   fi
 
   # 7. subscription onboarding block — required for standalone distribution
-  req "$f" "$name: missing the with/without-Mosofin opening" \
-      -i "works with or without Mosofin"
-  req "$f" "$name: does not say the skill works without Mosofin" \
-      -i "Without it, the skill still works"
-  req "$f" "$name: does not say the user is not blocked without a subscription" \
-      -i "not blocked and you are not asked to buy anything first"
+  reqn "$f" "$name: missing the with/without-Mosofin opening" \
+      "works with or without Mosofin"
+  reqn "$f" "$name: does not say the skill works without Mosofin" \
+      "Without it, the skill still works"
+  reqn "$f" "$name: does not say the user is not blocked without a subscription" \
+      "not blocked and you are not asked to buy anything first"
 
   # 8. setup documentation must be linked, including the destination connect page
   req "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
   req "$f" "$name: does not point at the shared onboarding" "shared/onboarding\\.md"
 
   # 8b. onboarding is required, and Part A is the exploration that follows it
-  req "$f" "$name: onboarding is not stated as required" \
+  reqn "$f" "$name: onboarding is not stated as required" \
       "Onboarding . required, every skill, once per workspace|Required for every skill, every run"
   req "$f" "$name: missing the ONBOARDING part heading"  '^# ONBOARDING'
   req "$f" "$name: missing the PART A part heading"      '^# PART A'
@@ -80,27 +90,32 @@ for f in "$DIR"/*/SKILL.md; do
   fi
 
   # 8c. a skill with no Mosofin connector must still work, manually
-  req "$f" "$name: no precondition check for an absent gateway" \
-      "First . is Mosofin connected at all|is Mosofin connected at all"
-  req "$f" "$name: does not skip the gates when the gateway is absent" \
-      "skip Gates 0-2 entirely"
-  req "$f" "$name: makes connecting a condition of helping" \
+  reqn "$f" "$name: does not ask whether to use Mosofin" \
+      "ask whether to use Mosofin for this run"
+  reqn "$f" "$name: does not wait for the answer" \
+      "A connected gateway is \\*\\*not\\*\\* consent to read from it"
+  reqn "$f" "$name: no check for an absent gateway" \
+      "Are the Mosofin tools present at all"
+  reqn "$f" "$name: asks even when the gateway is absent" \
+      "If the tools are not present, do not ask"
+  reqn "$f" "$name: does not skip the gates without Mosofin" "skip Gates 0-2 entirely"
+  reqn "$f" "$name: makes connecting a condition of helping" \
       "not make connecting a condition of helping"
-  req "$f" "$name: does not fall back to the normal manual workflow" \
+  reqn "$f" "$name: does not fall back to the normal manual workflow" \
       "carry on with the skill.s normal workflow"
-  req "$f" "$name: does not distinguish absent from unauthenticated" \
+  reqn "$f" "$name: does not distinguish absent from unauthenticated" \
       "Present but not authenticated is not the same as absent"
 
   # 9. the shared scope-confirmation protocol: workspace -> datasources -> tools
-  req "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
-  req "$f" "$name: scope protocol does not order the three questions" \
+  reqn "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
+  reqn "$f" "$name: scope protocol does not order the three questions" \
       "workspace, then data sources, then tools"
-  req "$f" "$name: scope protocol does not forbid auto-picking" -i "never auto-pick"
-  req "$f" "$name: scope protocol does not say silence is not a yes" -i "silence is not a yes"
-  req "$f" "$name: scope protocol does not forbid disabled tools" \
+  reqn "$f" "$name: scope protocol does not forbid auto-picking" "never auto-pick"
+  reqn "$f" "$name: scope protocol does not say silence is not a yes" "silence is not a yes"
+  reqn "$f" "$name: scope protocol does not forbid disabled tools" \
       "[Nn]ever call a tool whose .effective_policy. is .disabled"
-  req "$f" "$name: scope protocol does not forbid inventing tool names" -i "do not.{0,3}invent a tool name"
-  req "$f" "$name: scope protocol does not note per-company permissions" -i "permissions are per compan"
+  reqn "$f" "$name: scope protocol does not forbid inventing tool names" "do not.{0,3}invent a tool name"
+  reqn "$f" "$name: scope protocol does not note per-company permissions" "permissions are per compan"
 
   # 10. Gate 0 must call list_workspaces
   req "$f" "$name: Gate 0 does not call list_workspaces" 'list_workspaces'
@@ -124,33 +139,33 @@ for f in "$DIR"/*/SKILL.md; do
     echo "  FAIL  $name: instructs a write to a connected platform"; fail=$((fail+1))
   fi
   # The operative hard stop: every route to a write must be closed.
-  req "$f" "$name: missing the Gate 2 hard stop" \
+  reqn "$f" "$name: missing the Gate 2 hard stop" \
       "Hard stop"
-  req "$f" "$name: hard stop does not close the approval loop" \
+  reqn "$f" "$name: hard stop does not close the approval loop" \
       "Do not re-invoke with .approved=true"
-  req "$f" "$name: gated policy row is not limited to reads" \
+  reqn "$f" "$name: gated policy row is not limited to reads" \
       "never re-invoke a write with .approved=true"
-  req "$f" "$name: hard stop does not refuse a user-instructed write" \
+  reqn "$f" "$name: hard stop does not refuse a user-instructed write" \
       "Asking again does not change the answer"
-  req "$f" "$name: hard stop does not forbid routing around the rule" \
+  reqn "$f" "$name: hard stop does not forbid routing around the rule" \
       "Never route around this rule"
-  req "$f" "$name: hard stop does not forbid trading the rule for completeness" \
+  reqn "$f" "$name: hard stop does not forbid trading the rule for completeness" \
       "no path through this skill that ends in changed data"
 
   # The user-facing strict rule must be present and explicit.
-  req "$f" "$name: missing the strict no-change rule" \
+  reqn "$f" "$name: missing the strict no-change rule" \
       "this skill never changes your data"
-  req "$f" "$name: strict rule does not name write/update/delete" \
+  reqn "$f" "$name: strict rule does not name write/update/delete" \
       "never write, update or delete existing data in any data source"
-  req "$f" "$name: strict rule does not disclaim directing the user" \
+  reqn "$f" "$name: strict rule does not disclaim directing the user" \
       "direct you to update, overwrite or delete existing data"
 
   # The Gate 2 guardrail must be present and must override effective_policy.
-  req "$f" "$name: missing the Gate 2 write-tool guardrail" \
+  reqn "$f" "$name: missing the Gate 2 write-tool guardrail" \
       "Write tools are out of scope"
-  req "$f" "$name: guardrail does not override effective_policy" \
+  reqn "$f" "$name: guardrail does not override effective_policy" \
       "scope even when .effective_policy. is .enabled."
-  req "$f" "$name: guardrail is not platform-agnostic" \
+  reqn "$f" "$name: guardrail is not platform-agnostic" \
       "every connected platform, not only the books" 
 
   [ "$fail" -eq "$errs_before" ] && echo "  ok    $name"

@@ -99,6 +99,7 @@ And what `scope-protocol.md` commits every skill to, before Gate 0 runs:
 
 | Rule | Purpose |
 |------|---------|
+| **Ask before using Mosofin** | Where the gateway is present, ask once whether to use it for this run or let the user supply the data. A connected gateway is not consent to read from it. Where it is absent, do not ask — say once that the run is manual and carry on |
 | **Three questions, in order** | Which workspace → which data sources in it → which tools those sources expose. Each depends on the answer before it; none may be skipped, merged or guessed |
 | **Never auto-pick, silence is not a yes** | Not the workspace, not the company file, not the entity scenario. An answer to one question is not an answer to the next |
 | **Names, never internal ids** | Workspaces by name, companies by `display_name`; never a numeric tenant id or a raw `data_source_id` |

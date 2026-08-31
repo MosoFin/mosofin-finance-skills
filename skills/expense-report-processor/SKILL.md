@@ -17,6 +17,11 @@ balance, a statement, an export, the documents themselves. **The accounting logi
 edge cases and the output standards are identical** — only where the numbers come from
 changes, and the output always says which is which.
 
+**You choose, and you are asked.** Where a connection exists, the skill asks at the
+start whether to use it for this run or whether you would rather supply the data
+yourself — **a connected gateway is not taken as consent to read your books.** Say no
+and it runs manually without asking again.
+
 ### Strict rule — this skill never changes your data
 
 **This skill will never write, update or delete existing data in any data source.**
@@ -159,23 +164,41 @@ Call the Mosofin tools by the **bare names your own tool list exposes** — `lis
 `mcp__…` namespace; that string is composed by whichever MCP client is running.
 
 <!-- shared:scope-protocol start -->
-### First — is Mosofin connected at all?
+### First — ask whether to use Mosofin for this run
 
-**Before Gate 0, check whether the Mosofin tools are present** — `list_workspaces` and
-the rest of the gateway.
+Two things decide how this skill runs, and they are settled **before Gate 0**.
 
-**If they are not present** — the skill was copied on its own, the connector was never
-added, or there is no subscription — **skip Gates 0-2 entirely.**
-**Do not make connecting a condition of helping.** Say once, plainly, that Mosofin is not connected
-and this run will be manual, then **carry on with the skill's normal workflow**: ask
-for what each step needs — a trial balance, a statement, an export, the documents
-themselves — and do the accounting work on what the user provides.
+**1. Are the Mosofin tools present at all?** — `list_workspaces` and the rest of the
+gateway. Check before doing anything else.
 
-In that mode:
+**2. If they are present, ask the user. Once, in these terms:**
+
+> Do you want me to use your Mosofin connection for this — reading the figures straight
+> from your books — or would you rather provide the data yourself?
+
+**Wait for the answer.** A connected gateway is **not** consent to read from it, and
+this skill does not open with a data read. Never assume, never auto-pick.
+
+- **Use Mosofin** → onboarding is required. Run Gates 0-1 to confirm the workspace and
+  its data sources, then Part A explores what those sources expose.
+- **Provide the data myself** → **skip Gates 0-2 entirely** and run manually, exactly as
+  though no connector were present. **Do not ask again during the run.** Raise it once
+  more only if the user asks for something their supplied data cannot answer, and then
+  as an offer, not a demand.
+
+**If the tools are not present, do not ask** — there is nothing to choose. The skill was
+copied on its own, the connector was never added, or there is no subscription.
+**Do not make connecting a condition of helping.** Say once, plainly, that Mosofin is
+not connected and this run will be manual, then **carry on with the skill's normal
+workflow**: ask for what each step needs — a trial balance, a statement, an export, the
+documents themselves — and do the accounting work on what the user provides.
+
+**In manual mode**, whether chosen or unavoidable:
 
 - every step is `[manual]`; there are no `[auto]` verdicts to claim, and none may be
   implied
-- the coverage sheet records that **the gateway was absent** — not that checks passed
+- the coverage sheet records **why** it was manual — gateway absent, or the user chose
+  to supply the data — not that checks passed
 - the accounting logic, edge cases and output standards are **unchanged**. That is the
   part of this skill that never depended on a connection
 - mention **once** that connecting Mosofin would automate the manual steps, with a link
@@ -185,8 +208,6 @@ In that mode:
 **Present but not authenticated is not the same as absent.** If the tools are there and
 a call returns a `reconnect_url` or an auth error, surface it and let the user choose —
 reconnect, or continue manually. Do not silently fall back.
-
-**If the tools are present, onboarding is required** and the gates below run as written.
 
 ### Confirming scope — workspace, then data sources, then tools
 
