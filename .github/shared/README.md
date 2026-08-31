@@ -7,6 +7,7 @@ copies inside each `SKILL.md` are generated from here.
 | File | Goes to | Lines |
 |------|---------|-------|
 | [`onboarding-inline.md`](onboarding-inline.md) | the top of every `SKILL.md`, before its title | 48 |
+| [`scope-protocol.md`](scope-protocol.md) | directly above every skill's **Gate 0** | 33 |
 | [`write-guardrail.md`](write-guardrail.md) | the top of every skill's **Gate 2** | 37 |
 
 The onboarding **steps** are not in this directory and are not injected anywhere. They
@@ -72,6 +73,16 @@ What `onboarding.md` commits every skill to, in order:
 | **Where the setup instructions live** | The docs.mosofin.com table — quickstart, account, workspace, destination and source connection, troubleshooting, billing, support |
 | **What the subscription requirement means in practice** | Read-only posture, workspace scoping, permissions re-read every run, coverage sheet |
 | **Running without a connection** | Degraded mode: every step becomes `[manual]`, and the output says which figures came from the books and which were supplied by hand |
+
+And what `scope-protocol.md` commits every skill to, before Gate 0 runs:
+
+| Rule | Purpose |
+|------|---------|
+| **Three questions, in order** | Which workspace → which data sources in it → which tools those sources expose. Each depends on the answer before it; none may be skipped, merged or guessed |
+| **Never auto-pick, silence is not a yes** | Not the workspace, not the company file, not the entity scenario. An answer to one question is not an answer to the next |
+| **Names, never internal ids** | Workspaces by name, companies by `display_name`; never a numeric tenant id or a raw `data_source_id` |
+| **Only then does the work begin** | Availability decides `[auto]` / `[gated]` / `[manual]`. Where the confirmed tools cannot answer the request, say so and ask — never substitute an assumption for a capability |
+| **The catalogue is authoritative** | Exact `tool_name` from the listing, never invented; `UNKNOWN_TOOL` re-read; **never call a `disabled` tool**; permissions are per company file |
 
 And what `write-guardrail.md` commits every skill's Gate 2 to:
 

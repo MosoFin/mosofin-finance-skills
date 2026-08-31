@@ -56,7 +56,18 @@ for f in "$DIR"/*/SKILL.md; do
   req "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
   req "$f" "$name: does not point at the shared onboarding" "shared/onboarding\\.md"
 
-  # 9. Gate 0 must call list_workspaces
+  # 9. the shared scope-confirmation protocol: workspace -> datasources -> tools
+  req "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
+  req "$f" "$name: scope protocol does not order the three questions" \
+      "workspace, then data sources, then tools"
+  req "$f" "$name: scope protocol does not forbid auto-picking" -i "never auto-pick"
+  req "$f" "$name: scope protocol does not say silence is not a yes" -i "silence is not a yes"
+  req "$f" "$name: scope protocol does not forbid disabled tools" \
+      "[Nn]ever call a tool whose .effective_policy. is .disabled"
+  req "$f" "$name: scope protocol does not forbid inventing tool names" -i "do not.{0,3}invent a tool name"
+  req "$f" "$name: scope protocol does not note per-company permissions" -i "permissions are per compan"
+
+  # 10. Gate 0 must call list_workspaces
   req "$f" "$name: Gate 0 does not call list_workspaces" 'list_workspaces'
 
 

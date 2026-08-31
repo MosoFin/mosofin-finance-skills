@@ -35,7 +35,7 @@ for f in "$dir"/*/SKILL.md; do
   [ -f "$f" ] || continue
   name=$(basename "$(dirname "$f")")
   checked=$((checked+1))
-  for block in onboarding-inline write-guardrail; do
+  for block in onboarding-inline scope-protocol write-guardrail; do
     src=".github/shared/$block.md"
     if [ ! -f "$src" ]; then echo "  FAIL  missing $src"; rc=1; continue; fi
     if ! grep -q "<!-- shared:$block start -->" "$f" || ! grep -q "<!-- shared:$block end -->" "$f"; then
