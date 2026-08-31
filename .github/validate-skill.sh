@@ -56,6 +56,24 @@ for f in "$DIR"/*/SKILL.md; do
   req "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
   req "$f" "$name: does not point at the shared onboarding" "shared/onboarding\\.md"
 
+  # 8b. onboarding is required, and Part A is the exploration that follows it
+  req "$f" "$name: onboarding is not stated as required" \
+      "Onboarding . required, every skill, once per workspace|Required for every skill, every run"
+  req "$f" "$name: missing the ONBOARDING part heading"  '^# ONBOARDING'
+  req "$f" "$name: missing the PART A part heading"      '^# PART A'
+  req "$f" "$name: Part A is not framed as explore/personalise" \
+      '^# PART A .* [Ee]xplore the confirmed sources, and personalise this run'
+  # ordering: ONBOARDING must precede PART A, and both must precede Gate 2
+  ob=$(grep -n '^# ONBOARDING' "$f" | head -1 | cut -d: -f1)
+  pa=$(grep -n '^# PART A'     "$f" | head -1 | cut -d: -f1)
+  g0=$(grep -n '^## Gate 0'    "$f" | head -1 | cut -d: -f1)
+  g2=$(grep -n '^## Gate 2'    "$f" | head -1 | cut -d: -f1)
+  if [ -n "$ob" ] && [ -n "$pa" ] && [ -n "$g0" ] && [ -n "$g2" ]; then
+    if ! { [ "$ob" -lt "$g0" ] && [ "$g0" -lt "$pa" ] && [ "$pa" -lt "$g2" ]; }; then
+      echo "  FAIL  $name: parts out of order (ONBOARDING<Gate0<PART A<Gate2)"; fail=$((fail+1))
+    fi
+  fi
+
   # 9. the shared scope-confirmation protocol: workspace -> datasources -> tools
   req "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
   req "$f" "$name: scope protocol does not order the three questions" \

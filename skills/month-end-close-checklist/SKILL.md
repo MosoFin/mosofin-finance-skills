@@ -36,20 +36,26 @@ Whether anything reaches your books is a decision you make outside this skill, i
 own system, by your own hand. **If you act on none of it, nothing in your data has
 changed.**
 
-### Onboarding and setup
+### Onboarding — required, every skill, once per workspace
 
-**First run in this workspace?** Work through the onboarding once — subscription,
-connecting the gateway, confirming your workspace and company file, the capability
-check and the profile. It is the same for every Mosofin skill, so it is kept in one
-place rather than repeated in each:
+**Onboarding is not optional and it is not per-skill.** Before any skill reads
+anything, the workspace and the data sources in it must be confirmed with you. It is
+the same sequence for every Mosofin skill, so it is kept in one place rather than
+repeated in each:
 
 - in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
 - installed on its own, or you would rather read the product docs:
   [docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)
 
-**Read it before the gates below.** If you have already onboarded this workspace, you
-can skip it — but **the skill still reads no data until you explicitly confirm your
-workspace** at Gate 0, whether or not you read the onboarding.
+**Already onboarded this workspace?** Then you have answered it once and will not be
+asked again from scratch — but **the confirmation itself still happens every run.**
+Gate 0 reads your workspace back and waits for an explicit yes; Gate 1 settles which
+company file. Those are not skippable, and no data is read before them.
+
+What follows in **Part A** is not more onboarding. It is this skill exploring what your
+confirmed workspace and data sources can actually do — which tools exist, which serve
+this particular request — so the run is shaped around your books rather than a generic
+template.
 
 ---
 <!-- shared:onboarding-inline end -->
@@ -105,7 +111,12 @@ almost nobody checks by hand and the one that catches a reopened prior period.
 
 ---
 
-# PART A — Prerequisites: confirm scope, discover the capability map
+# ONBOARDING — Confirm the workspace and its data sources
+
+**Required for every skill, every run.** Gates 0 and 1 settle *which books this
+is about*: the workspace, and the data sources inside it. **Part A then explores
+what those confirmed sources can actually do** and personalises the run around
+them. Nothing is read before Gate 0 is answered.
 
 Run Gates 0 → 1 → 2 → 3 in this order, before building the checklist. This ordering is the contract. Do not
 skip a gate because a previous conversation covered it — connections, permissions, and company files
@@ -184,6 +195,13 @@ Day 6:
 — **they simply cannot be status-checked from here.** Say which.
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
+
+# PART A — Explore the confirmed sources, and personalise this run
+
+The workspace and its data sources are settled. This part finds out **what they
+expose and which of it serves this request** — the tool catalogue in Gate 2, then
+what is already known about this entity plus whatever still has to be asked in
+Gate 3. The result is a run shaped around these books, not a generic template.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 

@@ -61,6 +61,19 @@ Adding a skill? Put the two marker pairs where the blocks belong — the
 `.github/sync-shared.sh` to fill them. Nothing else is needed — the onboarding steps
 are linked, not copied.
 
+## Where each part of the flow lives
+
+| Stage | Question it answers | Where |
+|-------|--------------------|-------|
+| **Onboarding** — required, every skill | *Which books is this about?* Workspace, then the data sources in it | Described in [`shared/onboarding.md`](../../shared/onboarding.md); executed by Gates 0-1, under each skill's `# ONBOARDING` heading |
+| **Part A** — explore and personalise | *What can those confirmed sources do, and which of it serves this request?* | Gates 2-3, under each skill's `# PART A` heading. Gate 2 reads the tool catalogue; Gate 3 reads the profile and interviews for the rest |
+| **Part B** | The domain work itself | Per skill |
+
+Onboarding is **not optional and not per-skill**: the confirmation happens every run,
+and no data is read before Gate 0 is answered. `validate-skill.sh` enforces the
+headings, their order (`ONBOARDING` < Gate 0 < `PART A` < Gate 2), and that Part A is
+framed as exploration rather than prerequisites.
+
 ## The onboarding standard
 
 What `onboarding.md` commits every skill to, in order:

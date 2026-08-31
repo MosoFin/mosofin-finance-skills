@@ -30,19 +30,25 @@ Whether anything reaches your books is a decision you make outside this skill, i
 own system, by your own hand. **If you act on none of it, nothing in your data has
 changed.**
 
-### Onboarding and setup
+### Onboarding — required, every skill, once per workspace
 
-**First run in this workspace?** Work through the onboarding once — subscription,
-connecting the gateway, confirming your workspace and company file, the capability
-check and the profile. It is the same for every Mosofin skill, so it is kept in one
-place rather than repeated in each:
+**Onboarding is not optional and it is not per-skill.** Before any skill reads
+anything, the workspace and the data sources in it must be confirmed with you. It is
+the same sequence for every Mosofin skill, so it is kept in one place rather than
+repeated in each:
 
 - in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
 - installed on its own, or you would rather read the product docs:
   [docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)
 
-**Read it before the gates below.** If you have already onboarded this workspace, you
-can skip it — but **the skill still reads no data until you explicitly confirm your
-workspace** at Gate 0, whether or not you read the onboarding.
+**Already onboarded this workspace?** Then you have answered it once and will not be
+asked again from scratch — but **the confirmation itself still happens every run.**
+Gate 0 reads your workspace back and waits for an explicit yes; Gate 1 settles which
+company file. Those are not skippable, and no data is read before them.
+
+What follows in **Part A** is not more onboarding. It is this skill exploring what your
+confirmed workspace and data sources can actually do — which tools exist, which serve
+this particular request — so the run is shaped around your books rather than a generic
+template.
 
 ---

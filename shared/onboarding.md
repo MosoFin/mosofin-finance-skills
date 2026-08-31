@@ -1,8 +1,14 @@
 # Onboarding — connecting a Mosofin skill to your books
 
-Read this once per workspace on your first run, or whenever a gate reports it cannot
-reach your data. **It is the same for every Mosofin skill** — every skill in this repo
-points here rather than repeating it.
+**Required before any Mosofin skill reads anything.** Work through it once per
+workspace, and return to it whenever a gate reports it cannot reach your data. **It is
+the same for every skill** — every skill in this repo points here rather than repeating
+it.
+
+Onboarding settles **which books this is about**: your workspace, and the data sources
+inside it. What each skill does *next* — exploring which tools those sources expose and
+which of them serve your request — is **Part A** of that skill, and it is shaped by the
+answers you give here.
 
 ### First-run onboarding
 
