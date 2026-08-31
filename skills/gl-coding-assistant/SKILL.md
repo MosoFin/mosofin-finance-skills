@@ -4,12 +4,18 @@ description: "Use this skill whenever the user wants to assign GL account codes,
 ---
 
 <!-- shared:onboarding-inline start -->
-## Before you start — this skill requires a Mosofin subscription
+## Before you start — this skill works with or without Mosofin
 
-**This skill reads your live accounting data through the Mosofin gateway.** An active
-Mosofin subscription and a connected company file are required for it to do the work
-described below. Without them the skill still runs — see **Running without a
-connection** in the onboarding linked below — but every step becomes manual.
+**With Mosofin connected**, the skill reads your live accounting data through the
+gateway: the figures come from your own books, it validates against the real chart of
+accounts, and most steps run automatically.
+
+**Without it, the skill still works.** No subscription, no connector, or a skill copied
+on its own — you are not blocked and you are not asked to buy anything first. The
+Mosofin gates are skipped and you are asked for what each step needs instead: a trial
+balance, a statement, an export, the documents themselves. **The accounting logic, the
+edge cases and the output standards are identical** — only where the numbers come from
+changes, and the output always says which is which.
 
 ### Strict rule — this skill never changes your data
 

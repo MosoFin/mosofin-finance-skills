@@ -1,26 +1,35 @@
 # Mosofin Accounting Skills
 
-Accounting agent skills that work against **your own books**, read live through the
-Mosofin gateway.
+Accounting agent skills that work against **your own books** — read live through the
+Mosofin gateway when it is connected, and from data you supply when it is not.
 
-> ## Requires an active Mosofin subscription
+> ## Works with or without a Mosofin subscription
 >
-> These skills read your accounting data through the Mosofin gateway
-> (`https://mcp.mosofin.com/mcp`). **An active subscription and a connected company
-> file are required.** Without them a skill still runs, but every step becomes manual
-> and you supply the data by export.
+> **With Mosofin connected** (`https://mcp.mosofin.com/mcp`), a skill reads your live
+> accounting data: figures come from your own books, validated against the real chart
+> of accounts, and most steps run automatically.
 >
-> **Each skill stands on its own.** Every one carries its own onboarding section and
-> its own gateway handling, so nothing here depends on anything else being installed.
-> Take a single folder, or install the whole set as a plugin — see **Getting started**.
+> **Without it, the skills still work.** No subscription, no connector, or a single
+> folder copied out on its own — you are not blocked and you are not asked to buy
+> anything first. The Mosofin gates are skipped and the skill asks for what each step
+> needs instead: a trial balance, a statement, an export. **The accounting logic, the
+> edge cases and the output standards are identical** — only where the numbers come
+> from changes, and the output always says which is which.
+>
+> **Each skill stands on its own.** Every one carries its own gate handling, so nothing
+> here depends on anything else being installed. Take a single folder, or install the
+> whole set as a plugin — see **Getting started**.
 
 ---
 
 ## Getting started
 
-**1. Subscribe.** The gateway returns data only for an authenticated, subscribed account. See [Sign in and account basics](https://docs.mosofin.com/start-here/register-a-mosofin-account) and [Billing](https://docs.mosofin.com/account/billing).
+**Want it to read your live books?** Steps 1-2 connect Mosofin. **Just want to use a
+skill?** Skip to step 3 — it will ask you for the data it needs.
 
-**2. Connect the gateway.**
+**1. Subscribe** *(optional)*. The gateway returns data only for an authenticated, subscribed account. See [Sign in and account basics](https://docs.mosofin.com/start-here/register-a-mosofin-account) and [Billing](https://docs.mosofin.com/account/billing).
+
+**2. Connect the gateway** *(optional)*.
 
 ```bash
 claude mcp add --transport http mosofin https://mcp.mosofin.com/mcp

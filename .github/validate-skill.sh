@@ -50,7 +50,12 @@ for f in "$DIR"/*/SKILL.md; do
   fi
 
   # 7. subscription onboarding block — required for standalone distribution
-  req "$f" "$name: missing subscription onboarding block" -i "requires a Mosofin subscription"
+  req "$f" "$name: missing the with/without-Mosofin opening" \
+      -i "works with or without Mosofin"
+  req "$f" "$name: does not say the skill works without Mosofin" \
+      -i "Without it, the skill still works"
+  req "$f" "$name: does not say the user is not blocked without a subscription" \
+      -i "not blocked and you are not asked to buy anything first"
 
   # 8. setup documentation must be linked, including the destination connect page
   req "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
