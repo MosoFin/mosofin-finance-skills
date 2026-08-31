@@ -30,12 +30,12 @@ Whether anything reaches your books is a decision you make outside this skill, i
 own system, by your own hand. **If you act on none of it, nothing in your data has
 changed.**
 
-### Onboarding — required, every skill, once per workspace
+### Onboarding — required whenever Mosofin is connected
 
-**Onboarding is not optional and it is not per-skill.** Before any skill reads
-anything, the workspace and the data sources in it must be confirmed with you. It is
-the same sequence for every Mosofin skill, so it is kept in one place rather than
-repeated in each:
+**If the Mosofin gateway is connected, onboarding is not optional and not per-skill.**
+Before any skill reads anything, the workspace and the data sources in it must be
+confirmed with you. It is the same sequence for every Mosofin skill, so it is kept in
+one place rather than repeated in each:
 
 - in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
 - installed on its own, or you would rather read the product docs:
@@ -45,6 +45,12 @@ repeated in each:
 asked again from scratch — but **the confirmation itself still happens every run.**
 Gate 0 reads your workspace back and waits for an explicit yes; Gate 1 settles which
 company file. Those are not skippable, and no data is read before them.
+
+**No Mosofin connector? The skill still works.** If the gateway is not present at all,
+there is nothing to onboard: the gates are skipped, every step becomes `[manual]`, and
+you are asked for what each step needs — a trial balance, a statement, an export.
+**The accounting work is unchanged**; only the data source is. You will be told this
+once, and you will not be asked to install anything before being helped.
 
 What follows in **Part A** is not more onboarding. It is this skill exploring what your
 confirmed workspace and data sources can actually do — which tools exist, which serve

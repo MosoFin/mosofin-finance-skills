@@ -1,6 +1,11 @@
 # Onboarding — connecting a Mosofin skill to your books
 
-**Required before any Mosofin skill reads anything.** Work through it once per
+**Required before any Mosofin skill reads anything — whenever the gateway is
+connected.** If you have no Mosofin connector at all, skip this document: the skill
+runs manually on data you supply, and nothing here applies. See **Running without a
+connection** at the end.
+
+**When Mosofin is connected:** Work through it once per
 workspace, and return to it whenever a gate reports it cannot reach your data. **It is
 the same for every skill** — every skill in this repo points here rather than repeating
 it.
@@ -56,7 +61,17 @@ below reports that it cannot reach your data, start here:
 
 ### Running without a connection
 
-The skill **degrades rather than failing**. Every step that would have been automatic
-becomes `[manual]`, and you supply the data by export instead. The output says so
-explicitly — you will always be able to tell which figures came from your books and
-which you provided by hand.
+**No connector, no subscription, or a skill copied on its own — the skill still works.**
+It degrades rather than failing, and it will not withhold help until you connect
+something.
+
+There is nothing to onboard, so the gates are skipped. Every step that would have been
+automatic becomes `[manual]`, and you are asked for what it needs instead — a trial
+balance, a statement, an export, the documents themselves. **The accounting logic, the
+edge cases and the output standards are identical**; only where the numbers come from
+changes.
+
+The output says so explicitly: the coverage sheet records that the gateway was absent
+rather than that checks passed, so you can always tell which figures came from your
+books and which you supplied by hand. You will be told once that connecting Mosofin
+would automate the manual steps — once, not repeatedly.

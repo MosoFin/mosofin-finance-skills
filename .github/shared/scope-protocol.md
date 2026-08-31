@@ -1,3 +1,32 @@
+### First — is Mosofin connected at all?
+
+**Before Gate 0, check whether the Mosofin tools are present** — `list_workspaces` and
+the rest of the gateway.
+
+**If they are not present** — the skill was copied on its own, the connector was never
+added, or there is no subscription — **skip Gates 0-2 entirely.**
+**Do not make connecting a condition of helping.** Say once, plainly, that Mosofin is not connected
+and this run will be manual, then **carry on with the skill's normal workflow**: ask
+for what each step needs — a trial balance, a statement, an export, the documents
+themselves — and do the accounting work on what the user provides.
+
+In that mode:
+
+- every step is `[manual]`; there are no `[auto]` verdicts to claim, and none may be
+  implied
+- the coverage sheet records that **the gateway was absent** — not that checks passed
+- the accounting logic, edge cases and output standards are **unchanged**. That is the
+  part of this skill that never depended on a connection
+- mention **once** that connecting Mosofin would automate the manual steps, with a link
+  to [docs.mosofin.com](https://docs.mosofin.com). Do not raise it again, and never
+  withhold work to press the point
+
+**Present but not authenticated is not the same as absent.** If the tools are there and
+a call returns a `reconnect_url` or an auth error, surface it and let the user choose —
+reconnect, or continue manually. Do not silently fall back.
+
+**If the tools are present, onboarding is required** and the gates below run as written.
+
 ### Confirming scope — workspace, then data sources, then tools
 
 **Nothing is read until scope is confirmed, and scope is confirmed in this order.**

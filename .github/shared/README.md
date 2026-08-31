@@ -69,8 +69,16 @@ are linked, not copied.
 | **Part A** — explore and personalise | *What can those confirmed sources do, and which of it serves this request?* | Gates 2-3, under each skill's `# PART A` heading. Gate 2 reads the tool catalogue; Gate 3 reads the profile and interviews for the rest |
 | **Part B** | The domain work itself | Per skill |
 
-Onboarding is **not optional and not per-skill**: the confirmation happens every run,
-and no data is read before Gate 0 is answered. `validate-skill.sh` enforces the
+Onboarding is **not optional and not per-skill** *when Mosofin is connected*: the
+confirmation happens every run, and no data is read before Gate 0 is answered.
+
+**When it is not connected at all** — a skill copied on its own, no connector, no
+subscription — there is nothing to onboard. `scope-protocol.md` opens with a
+precondition check: skip Gates 0-2, say once that the run is manual, and carry on with
+the skill's normal workflow on data the user supplies. The accounting logic is
+unchanged; only the source of the numbers is. Connecting is never a condition of being
+helped, and *present but unauthenticated* is treated as a `reconnect_url` case, not as
+absent. `validate-skill.sh` enforces the
 headings, their order (`ONBOARDING` < Gate 0 < `PART A` < Gate 2), and that Part A is
 framed as exploration rather than prerequisites.
 

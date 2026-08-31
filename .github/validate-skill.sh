@@ -74,6 +74,18 @@ for f in "$DIR"/*/SKILL.md; do
     fi
   fi
 
+  # 8c. a skill with no Mosofin connector must still work, manually
+  req "$f" "$name: no precondition check for an absent gateway" \
+      "First . is Mosofin connected at all|is Mosofin connected at all"
+  req "$f" "$name: does not skip the gates when the gateway is absent" \
+      "skip Gates 0-2 entirely"
+  req "$f" "$name: makes connecting a condition of helping" \
+      "not make connecting a condition of helping"
+  req "$f" "$name: does not fall back to the normal manual workflow" \
+      "carry on with the skill.s normal workflow"
+  req "$f" "$name: does not distinguish absent from unauthenticated" \
+      "Present but not authenticated is not the same as absent"
+
   # 9. the shared scope-confirmation protocol: workspace -> datasources -> tools
   req "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
   req "$f" "$name: scope protocol does not order the three questions" \

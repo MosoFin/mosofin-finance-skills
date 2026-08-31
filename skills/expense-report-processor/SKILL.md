@@ -36,12 +36,12 @@ Whether anything reaches your books is a decision you make outside this skill, i
 own system, by your own hand. **If you act on none of it, nothing in your data has
 changed.**
 
-### Onboarding — required, every skill, once per workspace
+### Onboarding — required whenever Mosofin is connected
 
-**Onboarding is not optional and it is not per-skill.** Before any skill reads
-anything, the workspace and the data sources in it must be confirmed with you. It is
-the same sequence for every Mosofin skill, so it is kept in one place rather than
-repeated in each:
+**If the Mosofin gateway is connected, onboarding is not optional and not per-skill.**
+Before any skill reads anything, the workspace and the data sources in it must be
+confirmed with you. It is the same sequence for every Mosofin skill, so it is kept in
+one place rather than repeated in each:
 
 - in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
 - installed on its own, or you would rather read the product docs:
@@ -51,6 +51,12 @@ repeated in each:
 asked again from scratch — but **the confirmation itself still happens every run.**
 Gate 0 reads your workspace back and waits for an explicit yes; Gate 1 settles which
 company file. Those are not skippable, and no data is read before them.
+
+**No Mosofin connector? The skill still works.** If the gateway is not present at all,
+there is nothing to onboard: the gates are skipped, every step becomes `[manual]`, and
+you are asked for what each step needs — a trial balance, a statement, an export.
+**The accounting work is unchanged**; only the data source is. You will be told this
+once, and you will not be asked to install anything before being helped.
 
 What follows in **Part A** is not more onboarding. It is this skill exploring what your
 confirmed workspace and data sources can actually do — which tools exist, which serve
@@ -128,10 +134,14 @@ Everything below is a *proposal*.
 
 # ONBOARDING — Confirm the workspace and its data sources
 
-**Required for every skill, every run.** Gates 0 and 1 settle *which books this
-is about*: the workspace, and the data sources inside it. **Part A then explores
-what those confirmed sources can actually do** and personalises the run around
-them. Nothing is read before Gate 0 is answered.
+**Required for every skill, every run — whenever Mosofin is connected.** Gates 0 and 1
+settle *which books this is about*: the workspace, and the data sources inside it.
+**Part A then explores what those confirmed sources can actually do** and personalises
+the run around them. Nothing is read before Gate 0 is answered.
+
+**If the Mosofin tools are not present at all, skip this part.** There is nothing to
+onboard: say so once, then run the skill manually on data the user supplies. See the
+precondition check below.
 
 Run Gates 0 → 1 → 2 → 3 in this order, before processing anything. This ordering is the contract. Do not
 skip a gate because a previous conversation covered it — connections, permissions, and company files
@@ -143,6 +153,35 @@ Call the Mosofin tools by the **bare names your own tool list exposes** — `lis
 `mcp__…` namespace; that string is composed by whichever MCP client is running.
 
 <!-- shared:scope-protocol start -->
+### First — is Mosofin connected at all?
+
+**Before Gate 0, check whether the Mosofin tools are present** — `list_workspaces` and
+the rest of the gateway.
+
+**If they are not present** — the skill was copied on its own, the connector was never
+added, or there is no subscription — **skip Gates 0-2 entirely.**
+**Do not make connecting a condition of helping.** Say once, plainly, that Mosofin is not connected
+and this run will be manual, then **carry on with the skill's normal workflow**: ask
+for what each step needs — a trial balance, a statement, an export, the documents
+themselves — and do the accounting work on what the user provides.
+
+In that mode:
+
+- every step is `[manual]`; there are no `[auto]` verdicts to claim, and none may be
+  implied
+- the coverage sheet records that **the gateway was absent** — not that checks passed
+- the accounting logic, edge cases and output standards are **unchanged**. That is the
+  part of this skill that never depended on a connection
+- mention **once** that connecting Mosofin would automate the manual steps, with a link
+  to [docs.mosofin.com](https://docs.mosofin.com). Do not raise it again, and never
+  withhold work to press the point
+
+**Present but not authenticated is not the same as absent.** If the tools are there and
+a call returns a `reconnect_url` or an auth error, surface it and let the user choose —
+reconnect, or continue manually. Do not silently fall back.
+
+**If the tools are present, onboarding is required** and the gates below run as written.
+
 ### Confirming scope — workspace, then data sources, then tools
 
 **Nothing is read until scope is confirmed, and scope is confirmed in this order.**
