@@ -8,6 +8,10 @@
 # and every copy is generated from it.
 #
 #   .github/sync-shared.sh            apply the canonical blocks to all skills
+#
+# The onboarding steps are NOT injected: they live once at shared/onboarding.md and
+# every skill links to it. Only the inline half and the write guardrail are copied
+# into each SKILL.md, because that text must be impossible to miss.
 #   .github/sync-shared.sh --check    verify they match; non-zero if any drifted
 #
 # Edit .github/shared/*.md, run this, commit. Never hand-edit a block inside a
@@ -54,22 +58,6 @@ for f in "$dir"/*/SKILL.md; do
     fi
   done
 
-  # the procedural half lives in the skill's own references/ dir so it travels
-  # with a copied folder; SKILL.md points at it
-  ref="$(dirname "$f")/references/onboarding.md"
-  src=".github/shared/onboarding-reference.md"
-  if [ ! -f "$src" ]; then
-    echo "  FAIL  missing $src"; rc=1
-  elif [ -f "$ref" ] && cmp -s "$ref" "$src"; then
-    :
-  elif [ "$mode" = "check" ]; then
-    if [ -f "$ref" ]; then echo "  DRIFT $name: references/onboarding.md does not match $src"
-    else echo "  DRIFT $name: references/onboarding.md is missing"; fi
-    rc=1
-  else
-    mkdir -p "$(dirname "$ref")" && cp "$src" "$ref"
-    echo "  sync  $name: references/onboarding.md"; changed=$((changed+1))
-  fi
 done
 
 echo

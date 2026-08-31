@@ -26,11 +26,13 @@ produced by a script, never by hand.
 .github/sync-shared.sh --check    # verify nothing drifted (CI runs this)
 ```
 
-Editing that text inside a `SKILL.md`, or inside a skill's
-`references/onboarding.md`, will be reverted by the next sync and will fail CI in the
-meantime. Edit `.github/shared/onboarding-inline.md`,
-`.github/shared/onboarding-reference.md` or `.github/shared/write-guardrail.md`
-instead.
+Editing that text inside a `SKILL.md` will be reverted by the next sync and will fail
+CI in the meantime. Edit `.github/shared/onboarding-inline.md` or
+`.github/shared/write-guardrail.md` instead.
+
+The onboarding **steps** are not synced at all: they live once at
+[`shared/onboarding.md`](shared/onboarding.md) and every skill links there, so editing
+that file is the whole job.
 
 ## Adding a reference file
 

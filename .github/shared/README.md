@@ -6,29 +6,35 @@ copies inside each `SKILL.md` are generated from here.
 
 | File | Goes to | Lines |
 |------|---------|-------|
-| [`onboarding-inline.md`](onboarding-inline.md) | the top of every `SKILL.md`, before its title | 44 |
-| [`onboarding-reference.md`](onboarding-reference.md) | copied to `skills/<name>/references/onboarding.md` | 55 |
+| [`onboarding-inline.md`](onboarding-inline.md) | the top of every `SKILL.md`, before its title | 48 |
 | [`write-guardrail.md`](write-guardrail.md) | the top of every skill's **Gate 2** | 37 |
 
-**Why onboarding is split.** The subscription requirement and the strict no-change rule
-stay **inline in `SKILL.md`** — they are the text that must be impossible to miss. The
-procedural half — the six onboarding steps, the docs.mosofin.com setup table, what the
-subscription means in practice, and degraded mode — moved to the skill's own
-`references/onboarding.md`, which `SKILL.md` points at. That keeps `SKILL.md` about
-40 lines shorter without the reference leaving the skill folder: it still travels with
-a copied directory, so a standalone install loses nothing.
+The onboarding **steps** are not in this directory and are not injected anywhere. They
+live once, at [`shared/onboarding.md`](../../shared/onboarding.md), and every skill
+links to it.
+
+**What is inline, and why.** Only two things are copied into each `SKILL.md`: the
+subscription requirement with the strict no-change rule, and the Gate 2 write
+guardrail. That is the text that must be impossible to miss, and that must survive
+someone copying a single skill folder out of the repo. Everything procedural — the six
+onboarding steps, the setup links, what the subscription means in practice, degraded
+mode — is a link, so editing it is one file and no sync.
+
+If a skill is installed on its own and the relative link cannot resolve, the same
+pointer also carries the public URL
+([docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)),
+so the reader is never left without a route to the setup instructions.
 
 ## Why the text is duplicated into every skill
 
 These skills are distributed **standalone**: a user may copy one folder into
-`~/.claude/skills/` and run it with nothing else present. A skill that referenced an
-external onboarding doc would break the moment it was copied on its own, and the
-subscription, setup and write-prohibition text is exactly the text that must not go
-missing.
+`~/.claude/skills/` and run it with nothing else present. The subscription notice, the
+strict no-change rule and the write guardrail must survive that, so those are copied
+into every `SKILL.md` rather than linked.
 
-So duplication is deliberate. What this directory removes is not the duplication — it
-is the *drift*. One place to edit, a script to propagate, and CI to prove every copy
-still matches.
+So the remaining duplication is deliberate. What this directory removes is not the
+duplication — it is the *drift*. One place to edit, a script to propagate, and CI to
+prove every copy still matches.
 
 ## Maintaining it
 
@@ -51,8 +57,8 @@ the canonical copy. Change it here instead, and every skill picks it up.
 Adding a skill? Put the two marker pairs where the blocks belong — the
 `shared:onboarding-inline` pair immediately after the frontmatter, the
 `shared:write-guardrail` pair directly under the `## Gate 2` heading — then run
-`.github/sync-shared.sh`. It fills both and creates `references/onboarding.md` for you;
-that file is copied whole, so it needs no markers.
+`.github/sync-shared.sh` to fill them. Nothing else is needed — the onboarding steps
+are linked, not copied.
 
 ## The onboarding standard
 

@@ -9,8 +9,7 @@ description: "Use this skill whenever the user uploads a vendor invoice (PDF, im
 **This skill reads your live accounting data through the Mosofin gateway.** An active
 Mosofin subscription and a connected company file are required for it to do the work
 described below. Without them the skill still runs — see **Running without a
-connection** in [`references/onboarding.md`](references/onboarding.md) — but every
-step becomes manual.
+connection** in the onboarding linked below — but every step becomes manual.
 
 ### Strict rule — this skill never changes your data
 
@@ -39,14 +38,18 @@ changed.**
 
 ### Onboarding and setup
 
-**First run in this workspace?** The onboarding sequence — subscription, connecting the
-gateway, confirming your workspace and company file, the capability check and the
-profile — is in **[`references/onboarding.md`](references/onboarding.md)**, together
-with the setup links for [docs.mosofin.com](https://docs.mosofin.com) and what happens
-when there is no connection. **Read it before the gates below.**
+**First run in this workspace?** Work through the onboarding once — subscription,
+connecting the gateway, confirming your workspace and company file, the capability
+check and the profile. It is the same for every Mosofin skill, so it is kept in one
+place rather than repeated in each:
 
-**The skill reads no data until you have explicitly confirmed your workspace** at
-Gate 0. That confirmation is required whether or not you have read the onboarding.
+- in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
+- installed on its own, or you would rather read the product docs:
+  [docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)
+
+**Read it before the gates below.** If you have already onboarded this workspace, you
+can skip it — but **the skill still reads no data until you explicitly confirm your
+workspace** at Gate 0, whether or not you read the onboarding.
 
 ---
 <!-- shared:onboarding-inline end -->
