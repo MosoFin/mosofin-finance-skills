@@ -3,6 +3,7 @@ name: three-way-match
 description: "Use this skill whenever the user wants to perform a three-way match between purchase orders, goods receipts and vendor invoices against a connected Mosofin workspace. Triggers include: 'three-way match these documents', 'verify the invoice against the PO and receipt', 'match PO to receipt to invoice', 'PO matching', 'GRN matching', 'run the match across all open invoices', uploading a PO + receipt + invoice trio, or any AP control task involving PO-to-invoice verification. Do NOT use for invoice extraction alone — use invoice-data-extractor. Do NOT use for duplicate detection — use duplicate-invoice-detection. Where the workspace holds purchase orders and item receipts, this runs across the full population every period rather than document by document. Outputs a match result with line-by-line comparison and exception list. Proposes only — Mosofin pays nothing and releases nothing."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Three-Way Match — Mosofin Seed
 
 Performs a three-way match between a purchase order (PO), a goods receipt note (GRN) or proof of delivery, and a vendor invoice. Identifies pricing, quantity and authorisation exceptions **before payment.**
@@ -165,6 +167,7 @@ Refer to company files by `display_name`. Pass `data_source_id` between tools; n
 
 ## Gate 2 — Map what you can actually do
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -202,6 +205,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 Call `get_datasource_tools` for the chosen company file and read the **`effective_policy`** on each tool.
 

@@ -11,6 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Shared blocks in sync
+        run: |
+          chmod +x .github/sync-shared.sh
+          .github/sync-shared.sh --check
+
       - name: Skill conformance
         run: |
           chmod +x .github/validate-skill.sh

@@ -3,6 +3,7 @@ name: ar-aging-and-collections
 description: "Use the confirmed Mosofin workspace and its connected accounting datasource to pull live A/R, build and reconcile an aging, prioritize collections, calculate receivables metrics, and draft review-only reminders. Trigger for 'run an AR aging,' 'who owes us money,' 'prioritize collections,' 'calculate DSO,' or 'draft overdue-invoice reminders.' Workspace-scoped: require the Mosofin workspace and an active connection, discover which read-only tools are enabled, and resolve every task against that capability map before reading data. Do not use for cash application, bad-debt write-offs, invoice creation, or sending reminders."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # A/R Aging and Collections (Mosofin)
 
 Builds an **accounts receivable (A/R) aging**, reconciles it, prioritizes collections, computes
@@ -153,6 +155,7 @@ Settle the entity scenario:
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -190,6 +193,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 6. Call `get_datasource_tools` for each in-scope datasource — and **per company file** when
    several are live, since **permissions are per company**. Bucket every tool by

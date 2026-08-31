@@ -3,6 +3,7 @@ name: month-end-close-checklist
 description: "Use this skill whenever the user wants to plan, run, or audit a monthly close against their Mosofin workspace. Triggers include: 'run the month-end close', 'month-end checklist', 'what's left to close', 'close calendar', 'organize the close for [month]', 'close coordination', or any orchestration of the periodic close process. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then scopes the checklist from the entity's actual chart of accounts, pre-populates the status of every task that leaves ledger evidence, and runs the final tie-out including inter-period continuity. Do NOT use for an individual close task (a specific reconciliation, accrual, or JE) — use the corresponding specific skill. Outputs a comprehensive close checklist with owners, deadlines, dependencies, status tracking, a final tie-out workpaper, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Month-End Close Checklist (Mosofin)
 
 Plans, orchestrates, and audits the **monthly close process**. Produces a comprehensive **task list with
@@ -186,6 +188,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -223,6 +226,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

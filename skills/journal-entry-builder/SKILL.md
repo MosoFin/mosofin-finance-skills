@@ -3,6 +3,7 @@ name: journal-entry-builder
 description: "Use this skill whenever the user wants to construct, format, or validate a journal entry against their Mosofin workspace. Triggers include: 'book a JE for...', 'create a journal entry to record...', 'how do I record this transaction', 'make me an accrual JE', 'reclass these entries', 'reverse this entry', or any request involving debits and credits to specific accounts. Also trigger for adjusting entries, correcting entries, closing entries, intercompany entries, and import-ready JE files for accounting systems. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then builds entries against the real chart of accounts and validates them against the books — checking that accounts exist, signs match account types, the period is open, and no prior accrual already covers the item. Mosofin never posts: every entry is a proposal for a person to post. Do NOT use for GL coding decisions only — use gl-coding-assistant. Do NOT use for full period close — use month-end-close-checklist. Outputs balanced journal entries with supporting narration, validation results, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Journal Entry Builder (Mosofin)
 
 Constructs **properly balanced journal entries** for any accounting scenario — **standard, adjusting,
@@ -210,6 +212,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -247,6 +250,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

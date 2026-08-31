@@ -3,6 +3,7 @@ name: invoice-data-extractor
 description: "Use this skill whenever the user uploads a vendor invoice (PDF, image, or scanned doc) and wants structured data extracted, validated against their Mosofin workspace. Triggers include: 'extract the data from this invoice', 'pull the fields from this bill', 'parse these invoices', 'turn this PDF into a row I can post', or uploading any vendor invoice with implicit intent to capture it. Also trigger for bills, receipts, purchase invoices, and supplier statements where the goal is to convert visual document data into structured fields. Workspace-scoped on the validation side: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then checks each extracted invoice against the vendor master, the posted transaction history and the Bill-To entity — catching duplicates before they are paid. Do NOT use for OCR alone — extract semantically. Do NOT use for posting the JE — pair with journal-entry-builder. Outputs a structured row per invoice with vendor, dates, amounts, line items, tax breakdown, validation results, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Invoice Data Extractor (Mosofin)
 
 Extracts **structured data from vendor invoices** — PDFs, scans, photos — into **accounting-ready fields**.
@@ -188,6 +190,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -225,6 +228,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

@@ -3,6 +3,7 @@ name: financial-statement-builder
 description: "Use this skill whenever the user wants to build a complete set of financial statements from their Mosofin workspace — Balance Sheet, Income Statement, and Statement of Cash Flows, with comparatives. Triggers include: 'build financial statements from this TB', 'produce a P&L and balance sheet', 'monthly financials package', 'GAAP financial statements', 'IFRS financial statements', 'investor financials', or uploading a trial balance and asking for statements. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then pulls the trial balance and the comparative period directly, reclassifies into framework presentation, and proves the seven cross-statement tie-outs on the statements it built. Do NOT use for just the cash flow statement — use cash-flow-statement-indirect-method. Do NOT use for footnotes — use notes-to-financial-statements. Outputs a complete statement package with comparatives, classifications, tie-outs, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Financial Statement Builder (Mosofin)
 
 Assembles a complete set of financial statements from a **trial balance** — **Balance Sheet**, **Income
@@ -188,6 +190,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -225,6 +228,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

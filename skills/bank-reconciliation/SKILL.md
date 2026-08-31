@@ -3,6 +3,7 @@ name: bank-reconciliation
 description: "Use this skill whenever the user needs to reconcile a bank account (cash GL) to bank statements for a period, working from their Mosofin workspace. Triggers include: bank recon, reconcile bank, cash reconciliation, bank statement tie-out, unreconciled items, outstanding checks, deposits in transit, or investigating recon differences. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then builds the complete book side from live ledger data and prepares the bridge — while stating plainly that the bank statement is outside any accounting datasource and must be supplied before a reconciliation can actually be completed. Produces a recon output, variance explanations, a clean list of required journal entries or corrective actions, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Bank Reconciliation (Mosofin)
 
 Reconciles the cash balance per the **general ledger (GL)** to the **bank statement** balance for
@@ -189,6 +191,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -226,6 +229,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

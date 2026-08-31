@@ -3,6 +3,7 @@ name: gl-coding-assistant
 description: "Use this skill whenever the user wants to assign GL account codes, expense categories, or tax codes to transactions in their Mosofin workspace. Triggers include: pasting a list of transactions and asking 'what account should this go to', 'code these expenses', 'categorize these transactions', 'suggest a GL account for [vendor/description]', or uploading a bank/credit card export that needs categorization. Also trigger when the user mentions an uncoded transaction, an unclassified vendor, or asks Claude to map descriptions to accounts. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then codes against the real chart of accounts and grounds every suggestion in how this entity has actually coded the same vendor before. Do NOT use for building the chart of accounts itself — use chart-of-accounts-designer. Do NOT use for posting actual journal entries — use journal-entry-builder. Outputs a coded transaction list with confidence ratings, reasoning, evidence, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # GL Coding Assistant (Mosofin)
 
 Suggests the correct **general ledger account**, **expense category**, and **tax code** for transactions
@@ -189,6 +191,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -226,6 +229,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

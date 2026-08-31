@@ -3,6 +3,7 @@ name: expense-report-processor
 description: "Use this skill whenever the user wants to process, review, or post employee expense reports against their Mosofin workspace. Triggers include: uploading an expense report export (Concur, Expensify, Brex, SAP Concur, Pleo, Spendesk, Soldo, or any other T&E tool), pasting an expense report, 'review these expense claims', 'check this expense report against policy', 'code these employee expenses', 'post the expense report to the GL', or any reference to T&E (travel & entertainment) reimbursements. Also trigger for per-diem calculations, mileage reimbursements, and corporate card reconciliation tied to employee submissions. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then codes against the real chart of accounts, matches claims against transactions already posted, and checks the reimbursement and card-clearing balances. Do NOT use for vendor invoices — use invoice-data-extractor. Do NOT use for petty cash — use petty-cash-management. Outputs a policy-validated, GL-coded expense report ready for reimbursement and posting, with a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Expense Report Processor (Mosofin)
 
 Reviews employee expense reports for **policy compliance**, codes them to **GL accounts**, flags exceptions,
@@ -201,6 +203,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -238,6 +241,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

@@ -3,6 +3,7 @@ name: duplicate-invoice-detection
 description: "Use this skill whenever the user wants to detect duplicate or fraudulent invoices in AP from their Mosofin workspace. Triggers include: 'check for duplicate invoices', 'find duplicate payments', 'scan AP for duplicates', 'detect invoice fraud', 'have we paid this twice', uploading a payment history or AP register, or any AP control review focused on payment integrity. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then runs the detection rules directly against live bills, payments and the vendor master — nine of the ten rules are pure queries. The bank-account rule cannot run, because Mosofin deliberately does not expose vendor bank details. Do NOT use for general fraud detection across all transaction types — use fraud-detection-and-forensics. Outputs a duplicate-suspect list with confidence ratings, supporting evidence, and a coverage sheet."
 ---
 
+<!-- shared:onboarding start -->
 ## Before you start — this skill requires a Mosofin subscription
 
 **This skill reads your live accounting data through the Mosofin gateway.** An active
@@ -88,6 +89,7 @@ which you provided by hand.
 
 ---
 
+<!-- shared:onboarding end -->
 # Duplicate Invoice Detection (Mosofin)
 
 Scans the **accounts payable register** for likely duplicate invoices and payments. Designed to catch the
@@ -182,6 +184,7 @@ Refer to companies by `display_name`; never show the raw `data_source_id`.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -219,6 +222,7 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->
 
 For **each in-scope datasource** (and **per company file** when several are live — pass
 `data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:

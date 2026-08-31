@@ -14,6 +14,22 @@
 6. **Keep the professional term.** Add plain language alongside it; do not replace it.
 7. Run `.github/validate-skill.sh skills` before opening a PR.
 
+## Shared onboarding and guardrail text
+
+The onboarding sequence and the write guardrails are **identical in every skill and
+generated from one place** — [`.github/shared/`](.github/shared/README.md). Each skill
+carries its own full copy because skills are distributed standalone, but the copies are
+produced by a script, never by hand.
+
+```bash
+.github/sync-shared.sh            # propagate .github/shared/*.md into every skill
+.github/sync-shared.sh --check    # verify nothing drifted (CI runs this)
+```
+
+Editing that text inside a `SKILL.md` will be reverted by the next sync and will fail
+CI in the meantime. Edit `.github/shared/onboarding.md` or
+`.github/shared/write-guardrail.md` instead.
+
 ## Adding a reference file
 
 Reference files orient; **`get_datasource_tools` is authority.** Do not put tool
