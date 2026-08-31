@@ -31,7 +31,7 @@ for f in "$dir"/*/SKILL.md; do
   [ -f "$f" ] || continue
   name=$(basename "$(dirname "$f")")
   checked=$((checked+1))
-  for block in onboarding write-guardrail; do
+  for block in onboarding-inline write-guardrail; do
     src=".github/shared/$block.md"
     if [ ! -f "$src" ]; then echo "  FAIL  missing $src"; rc=1; continue; fi
     if ! grep -q "<!-- shared:$block start -->" "$f" || ! grep -q "<!-- shared:$block end -->" "$f"; then
@@ -53,6 +53,23 @@ for f in "$dir"/*/SKILL.md; do
       fi
     fi
   done
+
+  # the procedural half lives in the skill's own references/ dir so it travels
+  # with a copied folder; SKILL.md points at it
+  ref="$(dirname "$f")/references/onboarding.md"
+  src=".github/shared/onboarding-reference.md"
+  if [ ! -f "$src" ]; then
+    echo "  FAIL  missing $src"; rc=1
+  elif [ -f "$ref" ] && cmp -s "$ref" "$src"; then
+    :
+  elif [ "$mode" = "check" ]; then
+    if [ -f "$ref" ]; then echo "  DRIFT $name: references/onboarding.md does not match $src"
+    else echo "  DRIFT $name: references/onboarding.md is missing"; fi
+    rc=1
+  else
+    mkdir -p "$(dirname "$ref")" && cp "$src" "$ref"
+    echo "  sync  $name: references/onboarding.md"; changed=$((changed+1))
+  fi
 done
 
 echo

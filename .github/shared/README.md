@@ -4,10 +4,19 @@ Every skill in this repo opens with the same onboarding sequence and carries the
 write guardrails. **This directory is the single source of truth for that text.** The
 copies inside each `SKILL.md` are generated from here.
 
-| File | Injected into | Lines |
-|------|---------------|-------|
-| [`onboarding.md`](onboarding.md) | the top of every skill, before its title | 85 |
+| File | Goes to | Lines |
+|------|---------|-------|
+| [`onboarding-inline.md`](onboarding-inline.md) | the top of every `SKILL.md`, before its title | 44 |
+| [`onboarding-reference.md`](onboarding-reference.md) | copied to `skills/<name>/references/onboarding.md` | 55 |
 | [`write-guardrail.md`](write-guardrail.md) | the top of every skill's **Gate 2** | 37 |
+
+**Why onboarding is split.** The subscription requirement and the strict no-change rule
+stay **inline in `SKILL.md`** — they are the text that must be impossible to miss. The
+procedural half — the six onboarding steps, the docs.mosofin.com setup table, what the
+subscription means in practice, and degraded mode — moved to the skill's own
+`references/onboarding.md`, which `SKILL.md` points at. That keeps `SKILL.md` about
+40 lines shorter without the reference leaving the skill folder: it still travels with
+a copied directory, so a standalone install loses nothing.
 
 ## Why the text is duplicated into every skill
 
@@ -39,9 +48,11 @@ $EDITOR .github/shared/onboarding.md
 next sync overwrites whatever is between them, and CI fails until the file matches
 the canonical copy. Change it here instead, and every skill picks it up.
 
-Adding a skill? Put the two marker pairs where the blocks belong — the onboarding pair
-immediately after the frontmatter, the guardrail pair directly under the `## Gate 2`
-heading — then run `.github/sync-shared.sh` to fill them.
+Adding a skill? Put the two marker pairs where the blocks belong — the
+`shared:onboarding-inline` pair immediately after the frontmatter, the
+`shared:write-guardrail` pair directly under the `## Gate 2` heading — then run
+`.github/sync-shared.sh`. It fills both and creates `references/onboarding.md` for you;
+that file is copied whole, so it needs no markers.
 
 ## The onboarding standard
 

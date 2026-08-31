@@ -5,9 +5,19 @@ set -u
 DIR="${1:-skills}"
 fail=0; checked=0
 
-req() { # req <file> <label> <grep-args...>
+req() { # req <file> <label> <grep-args...>  — must appear in SKILL.md itself
   local f="$1" label="$2"; shift 2
   if ! grep -qE "$@" "$f"; then
+    echo "  FAIL  $label"; fail=$((fail+1))
+  fi
+}
+
+reqb() { # reqb <skill-file> <label> <grep-args...>  — may appear anywhere in the
+         # skill bundle: SKILL.md or its references/*.md. Used for text that is
+         # allowed to live in a reference file, so long as it ships with the skill.
+  local f="$1" label="$2"; shift 2
+  local d; d="$(dirname "$f")"
+  if ! grep -rqE "$@" "$f" "$d/references" 2>/dev/null; then
     echo "  FAIL  $label"; fail=$((fail+1))
   fi
 }
@@ -49,13 +59,13 @@ for f in "$DIR"/*/SKILL.md; do
   fi
 
   # 7. subscription onboarding block — required for standalone distribution
-  req "$f" "$name: missing subscription onboarding block" -i "requires a Mosofin subscription"
-  req "$f" "$name: onboarding missing gateway endpoint"    "mcp\\.mosofin\\.com"
-  req "$f" "$name: onboarding missing degraded-mode note"  -i "running without a connection"
+  reqb "$f" "$name: missing subscription onboarding block" -i "requires a Mosofin subscription"
+  reqb "$f" "$name: onboarding missing gateway endpoint"    "mcp\\.mosofin\\.com"
+  reqb "$f" "$name: onboarding missing degraded-mode note"  -i "running without a connection"
 
   # 8. setup documentation must be linked, including the destination connect page
-  req "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
-  req "$f" "$name: onboarding does not link the destination setup page" "destinations/claude/connect-claude"
+  reqb "$f" "$name: onboarding does not link docs.mosofin.com" "docs\\.mosofin\\.com"
+  reqb "$f" "$name: onboarding does not link the destination setup page" "destinations/claude/connect-claude"
 
   # 9. Gate 0 must call list_workspaces
   req "$f" "$name: Gate 0 does not call list_workspaces" 'list_workspaces'
@@ -65,7 +75,7 @@ for f in "$DIR"/*/SKILL.md; do
   #     create_skill is permitted: it writes the user's own decisions back to
   #     their Mosofin workspace, never to the books, and only on explicit
   #     consent after results are shown.
-  req "$f" "$name: missing the read-only guarantee" \
+  reqb "$f" "$name: missing the read-only guarantee" \
       "Nothing in this skill posts an entry, files a return"
   for bad in 'update_skill' 'delete_skill'; do
     if grep -nE "\\b$bad\\b" "$f" >/dev/null; then

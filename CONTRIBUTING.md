@@ -26,9 +26,11 @@ produced by a script, never by hand.
 .github/sync-shared.sh --check    # verify nothing drifted (CI runs this)
 ```
 
-Editing that text inside a `SKILL.md` will be reverted by the next sync and will fail
-CI in the meantime. Edit `.github/shared/onboarding.md` or
-`.github/shared/write-guardrail.md` instead.
+Editing that text inside a `SKILL.md`, or inside a skill's
+`references/onboarding.md`, will be reverted by the next sync and will fail CI in the
+meantime. Edit `.github/shared/onboarding-inline.md`,
+`.github/shared/onboarding-reference.md` or `.github/shared/write-guardrail.md`
+instead.
 
 ## Adding a reference file
 
