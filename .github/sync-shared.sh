@@ -15,8 +15,16 @@
 set -u
 cd "$(dirname "$0")/.." || exit 2
 
-mode="apply"; [ "${1:-}" = "--check" ] && mode="check"
-dir="${2:-skills}"
+mode="apply"; dir=""
+for a in "$@"; do
+  case "$a" in
+    --check) mode="check" ;;
+    -*)      echo "unknown option: $a" >&2; exit 2 ;;
+    *)       dir="$a" ;;
+  esac
+done
+dir="${dir:-skills}"
+[ -d "$dir" ] || { echo "no such directory: $dir" >&2; exit 2; }
 rc=0; changed=0; checked=0
 
 for f in "$dir"/*/SKILL.md; do

@@ -63,6 +63,19 @@ And what `write-guardrail.md` commits every skill's Gate 2 to:
 | **Write tools are out of scope — always** | A write tool is out of scope **even when `effective_policy` is `enabled`** — a permission to write is not an instruction to write |
 | **Hard stop** | The four routes a write could take, and the required behaviour for each: enabled write tool, `approval_required` on a write, a user asking for one, and a write being the only way to finish |
 
+## One line that is not in a shared block
+
+The Gate 2 policy table lives in each skill (its wording varies by skill), so the
+`[gated]` row cannot be injected. It must end with:
+
+```
+**Reads only** — never re-invoke a write with `approved=true`; see the hard stop below. |
+```
+
+Without it the table says "re-invoke with `approved=true`" unqualified, which is the
+one instruction that could carry a write through the approval loop.
+`validate-skill.sh` fails any skill missing it.
+
 `.github/validate-skill.sh` independently asserts that the load-bearing sentences of
 both blocks are present in every skill, so a skill cannot ship with them stripped —
 even if someone deletes the markers along with the text.
