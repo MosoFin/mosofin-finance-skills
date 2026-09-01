@@ -1,6 +1,8 @@
 .DS_Store
 *.zip
 node_modules/
+__pycache__/
+*.pyc
 
 # local-only — planning docs and working scripts, never published.
 # Anchored to the repo root: a skill's own scripts/ and docs/ must still ship.

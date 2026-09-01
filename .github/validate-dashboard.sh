@@ -102,7 +102,8 @@ PYEOF
   # 8. the generator and its example data actually work together
   for s in "$d"/scripts/*.py; do
     [ -e "$s" ] || continue
-    python3 -m py_compile "$s" 2>/dev/null || { echo "  FAIL  $name: $(basename "$s") does not compile"; fail=$((fail+1)); }
+    python3 -c 'import sys; compile(open(sys.argv[1]).read(), sys.argv[1], "exec")' "$s" 2>/dev/null \
+      || { echo "  FAIL  $name: $(basename "$s") does not compile"; fail=$((fail+1)); }
   done
   for j in "$d"/assets/*.json; do
     [ -e "$j" ] || continue
