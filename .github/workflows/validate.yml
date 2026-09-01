@@ -21,6 +21,11 @@ jobs:
           chmod +x .github/validate-skill.sh
           .github/validate-skill.sh skills
 
+      - name: Dashboard conformance
+        run: |
+          chmod +x .github/validate-dashboard.sh
+          .github/validate-dashboard.sh dashboards
+
       - name: No .DS_Store committed
         run: |
           if find . -name .DS_Store -not -path './.git/*' | grep -q .; then

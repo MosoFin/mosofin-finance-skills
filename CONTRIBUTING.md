@@ -14,6 +14,21 @@
 6. **Keep the professional term.** Add plain language alongside it; do not replace it.
 7. Run `.github/validate-skill.sh skills` before opening a PR.
 
+## Two genres, two standards
+
+| Folder | Genre | Checked by |
+|--------|-------|-----------|
+| `skills/` | Written analysis, four-gate protocol | `.github/validate-skill.sh` |
+| `dashboards/` | Interactive HTML output, visual spec + generator | `.github/validate-dashboard.sh` |
+
+A dashboard skill is **not** held to the analysis protocol — no four gates, no
+`[auto]`/`[manual]` verdicts, no coverage sheet, no seed-to-evolved step. Those describe how
+an analysis is produced and say nothing useful about building a dashboard. What it *is* held
+to comes from its own SKILL.md: the user chooses the data path, every number traces to a tool
+result or an uploaded file, nothing is interpolated, the run is read-only, the UI spec is
+authoritative, the template is generated rather than hand-edited, and the output is verified
+before it is shown.
+
 ## Shared onboarding and guardrail text
 
 The onboarding sequence and the write guardrails are **identical in every skill and

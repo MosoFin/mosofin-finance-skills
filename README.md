@@ -134,6 +134,21 @@ computed from the files, not estimated. **It is not a quality score.** A low per
 usually means the work genuinely needs evidence from outside the accounting system, and
 the skill tells you which parts and why.
 
+### Dashboards
+
+`dashboards/` holds skills whose output is an interactive HTML file rather than a written
+analysis. They are a **separate genre with their own standard** — same read-only posture and
+the same choice of data path, but built around a visual spec and a generator script instead of
+the four-gate protocol.
+
+| Dashboard | What it builds |
+|---|---|
+| [`multi-entity-forecast-dashboard`](dashboards/multi-entity-forecast-dashboard/) | A single-file cash forecast for a multi-entity group — per-entity and consolidated views, P10/P90 band, receivables detail, and a paper-style report. Reads through MosoFin when you agree, or from a CSV you upload. |
+
+Each dashboard skill carries its own `references/` — the UI spec, both data paths, and its
+method — and is checked by [`.github/validate-dashboard.sh`](.github/validate-dashboard.sh)
+against the rules it sets for itself, not against the analysis-skill protocol.
+
 ---
 
 ## Validating

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forecast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --body:#dfe9ec; --canvas:#f2f8f9; --card:#fff; --border:#e4edee; --rule:#e8eff0; --rule-frame:#e3ecee;
+    --grid:#eef3f4; --ink:#16262e; --secondary:#7b8f96; --tertiary:#9db0b6; --label:#8298a0; --meta:#728790;
+    --sky:#7cbcda; --sky-line:#5fb4d8; --sky-band:#7fc7e4; --teal:#1c6c7d; --teal-soft:#e3f1f6;
+    --green:#17a06a; --green-bg:#e4f4ec; --amber:#d08a12; --amber-bg:#fdf1dc; --blue:#4a94b3; --blue-bg:#e6f3f9;
+    --neutral:#b3c2c7; --neutral-bg:#eef3f4; --qb:#2CA01C; --hover:#f6fafb; --selected:#f2f8fa; --selected-border:#9ecfe4;
+    --today:#d5e1e4; --neg:#b5453a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--body);color:var(--ink);font-family:"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:13px;line-height:1.55;font-variant-numeric:tabular-nums;text-wrap:pretty;-webkit-font-smoothing:antialiased}
+  button,input{font:inherit;color:inherit}
+  button{cursor:pointer}
+  button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+  .app{min-height:100vh;background:var(--canvas);max-width:1440px;margin:0 auto;display:flex;flex-direction:column}
+
+  /* ---------- top nav ---------- */
+  .nav{height:60px;flex:none;background:linear-gradient(#e7f0f3,#eff5f7);border-bottom:1px solid #dbe6e9;display:flex;align-items:stretch;padding:0 28px;gap:28px}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--sky);font-weight:600;font-size:16px;letter-spacing:-.2px}
+  .ring{width:16px;height:16px;border:1.6px solid var(--sky);border-radius:50%;display:inline-block}
+  .tag{font-size:9.5px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--secondary);border:1px solid #c9d8dc;border-radius:20px;padding:2px 8px;line-height:1.4}
+  .tabs{display:flex;align-items:stretch;gap:22px;margin-left:8px}
+  .tabs button{background:none;border:0;padding:0;font-size:13px;color:var(--secondary);position:relative;font-weight:500}
+  .tabs button[aria-current="true"]{color:var(--ink)}
+  .tabs button[aria-current="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .search{height:31px;width:210px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:12.5px;color:var(--ink)}
+  .search::placeholder{color:var(--tertiary)}
+  .ask{height:31px;padding:0 12px;background:var(--teal-soft);color:var(--teal);border:0;border-radius:6px;font-weight:500;font-size:12.5px}
+  .ask kbd{font-family:inherit;opacity:.7;margin-left:4px}
+  .src{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--meta)}
+  .src i{width:12px;height:12px;border-radius:3px;background:var(--qb);display:inline-block;flex:none}
+
+  /* ---------- warning strip ---------- */
+  .strip{background:var(--amber-bg);color:#7a5209;border-bottom:1px solid #f1e2bf;padding:9px 28px;font-size:12.5px;display:none}
+  .strip.show{display:block}
+  .strip strong{color:#5f3f05;font-weight:600}
+
+  /* ---------- layout ---------- */
+  .main{flex:1;padding:28px 28px 60px;display:flex;flex-direction:column;gap:22px}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  h1{font-size:29px;font-weight:600;letter-spacing:-.7px;margin:0;line-height:1.15}
+  .meta{display:flex;align-items:center;gap:14px;margin-top:6px;font-size:12.5px;color:var(--secondary);flex-wrap:wrap}
+  .head-actions{display:flex;align-items:center;gap:10px}
+  .btn{height:32px;padding:0 13px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:500;color:var(--ink);display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{background:var(--hover)}
+  .btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+  .btn.primary:hover{background:#185f6e}
+  .btn.connect{background:var(--qb);border-color:var(--qb);color:#fff}
+  .btn:disabled{opacity:.55;cursor:default}
+  .btn .sq{width:10px;height:10px;border-radius:2.5px;background:var(--qb)}
+  .btn.primary .sq,.btn.connect .sq{background:#fff;opacity:.9}
+
+  /* status */
+  .pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px 0 8px;border-radius:20px;font-size:11.5px;font-weight:500;white-space:nowrap}
+  .pill i{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .pill.ok{background:var(--green-bg);color:#0f7a50}.pill.ok i{background:var(--green)}
+  .pill.warn{background:var(--amber-bg);color:#8a5c0a}.pill.warn i{background:var(--amber)}
+  .pill.busy{background:var(--blue-bg);color:#2f6f89}.pill.busy i{background:var(--blue);animation:pulse 1.1s ease-in-out infinite}
+  .pill.idle{background:var(--neutral-bg);color:var(--secondary)}.pill.idle i{background:var(--neutral)}
+  .dot{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--secondary)}
+  .dot i{width:6px;height:6px;border-radius:50%;display:inline-block}
+
+  /* entity selector */
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;background:#fff;padding:2px;gap:2px}
+  .seg button{border:0;background:transparent;padding:5px 12px;border-radius:6px;font-size:12.5px;color:var(--secondary);font-weight:500}
+  .seg button:hover{background:var(--hover);color:var(--ink)}
+  .seg button[aria-pressed="true"]{background:var(--selected);color:var(--ink);box-shadow:inset 0 0 0 1px var(--selected-border)}
+
+  /* KPI band */
+  .band{border-top:1px solid var(--rule-frame);border-bottom:1px solid var(--rule-frame);display:grid;grid-template-columns:repeat(4,1fr)}
+  .kpi{padding:18px 22px 20px}
+  .kpi + .kpi{border-left:1px solid var(--rule)}
+  .lbl{font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--label);margin:0 0 8px}
+  .kpi .v{font-size:34px;font-weight:600;letter-spacing:-1px;line-height:1.05;margin:0}
+  .kpi .s{margin:8px 0 0;font-size:12px;color:var(--secondary)}
+  .neg{color:var(--neg)}
+
+  /* cards */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 3px rgba(16,44,54,.05);padding:20px 22px}
+  .card-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+  .card h2{font-size:14px;font-weight:600;margin:0;letter-spacing:-.1px}
+  .card p.sub{margin:3px 0 0;font-size:12.5px;color:var(--secondary)}
+  .two{display:grid;grid-template-columns:1.6fr 1fr;gap:22px}
+  @media(max-width:980px){.two{grid-template-columns:1fr}.band{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(3){border-left:0}}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+
+  /* controls */
+  .ctl-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:16px;padding-top:16px;border-top:1px solid var(--rule)}
+  @media(max-width:700px){.ctl-row{grid-template-columns:1fr}}
+  .ctl label{display:block;font-size:12px;color:var(--secondary);margin-bottom:7px;display:flex;justify-content:space-between}
+  .ctl label b{color:var(--ink);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--teal);margin:0}
+  .presets{display:flex;gap:6px;flex-wrap:wrap}
+  .presets button{height:26px;padding:0 10px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:11.5px;color:var(--secondary);font-weight:500}
+  .presets button[aria-pressed="true"]{background:var(--teal-soft);color:var(--teal);border-color:#c5e2ec}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--rule)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--label);border-bottom:1px solid var(--rule-frame);padding-bottom:8px}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:var(--hover)}
+  tbody tr.sel{background:var(--selected);box-shadow:inset 3px 0 0 var(--selected-border)}
+  tfoot td{font-weight:600;border-bottom:0;border-top:1px solid var(--rule-frame)}
+  tfoot tr.sub td{font-weight:400;color:var(--secondary);border-top:0;padding-top:4px}
+  .muted{color:var(--tertiary)}
+  .flag{margin-top:14px;padding:10px 12px;border-radius:8px;font-size:12.5px;color:var(--secondary);background:var(--canvas);border:1px solid var(--border)}
+  .flag strong{color:var(--ink);font-weight:600}
+  .flag + .flag{margin-top:8px}
+
+  /* report */
+  .report{background:#fff;border-radius:6px;box-shadow:0 6px 26px rgba(16,44,54,.07);max-width:660px;margin:8px auto 0;padding:40px 44px}
+  .report h2{font-size:20px;letter-spacing:-.4px;margin:0 0 4px;font-weight:600}
+  .report .rmeta{font-size:12px;color:var(--secondary);margin-bottom:22px}
+  .report p{margin:0 0 12px;font-size:13px}
+  .report h3{font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--label);margin:22px 0 8px}
+  .report .rfoot{margin-top:28px;padding-top:14px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--secondary)}
+  .report code{font-family:inherit;background:var(--canvas);padding:1px 5px;border-radius:4px;font-size:11.5px}
+
+  /* drawer */
+  .scrim{position:fixed;inset:0;background:rgba(16,38,46,.12);display:none}
+  .scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:396px;background:#fff;border-left:1px solid var(--border);display:none;flex-direction:column;z-index:20}
+  .drawer.open{display:flex;animation:slidein .18s ease-out}
+  .dhead{height:60px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--border);gap:12px}
+  .dhead strong{font-weight:600;font-size:13.5px}
+  .dhead .src{margin-left:auto}
+  .dhead .x{background:none;border:0;color:var(--secondary);font-size:18px;padding:4px;margin-left:6px}
+  .dbody{flex:1;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .msg-a{font-size:13px;white-space:pre-wrap}
+  .msg-u{align-self:flex-end;max-width:85%;background:#eef7fb;color:#26647d;border-radius:12px 12px 4px 12px;padding:9px 12px;font-size:13px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chips button{border:1px solid var(--border);background:#fff;border-radius:10px;padding:5px 10px;font-size:12px;color:var(--secondary);text-align:left}
+  .chips button:hover{background:var(--hover);color:var(--ink)}
+  .dfoot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+  .dfoot input{flex:1;height:34px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:12.5px}
+  .dfoot input::placeholder{color:var(--tertiary)}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#fff;border:1px solid var(--border);box-shadow:0 6px 26px rgba(16,44,54,.09);border-radius:8px;padding:10px 14px;font-size:12.5px;display:none;animation:popin .16s ease-out;z-index:30}
+  .toast.show{display:block}
+  .spin{width:12px;height:12px;border:1.6px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes popin{from{opacity:0;transform:translate(-50%,6px) scale(.985)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+  @keyframes slidein{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand"><span class="ring"></span>Goodcast</div>
+    <span class="tag" style="align-self:center">Forecast</span>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-current="true" data-tab="overview">Overview</button>
+      <button role="tab" aria-current="false" data-tab="accounts">Accounts</button>
+      <button role="tab" aria-current="false" data-tab="forecast">Forecast</button>
+      <button role="tab" aria-current="false" data-tab="report">Report</button>
+    </div>
+    <div class="nav-right">
+      <span class="src" id="nav-src"><i></i></span>
+      <input class="search" placeholder="Search accounts" aria-label="Search accounts" id="search">
+      <button class="ask" id="ask-btn">Ask <kbd>⌘</kbd></button>
+    </div>
+  </nav>
+
+  <div class="strip" id="strip"></div>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1 id="title"></h1>
+        <div class="meta">
+          <span class="src"><i></i><span id="meta-src"></span></span>
+          <span id="meta-fetched"></span>
+          <span class="pill ok" id="status"><i></i></span>
+        </div>
+      </div>
+      <div class="head-actions">
+        <div class="seg" role="group" aria-label="Entity"></div>
+        <button class="btn connect" id="sync"><span class="sq"></span>Sync from QuickBooks</button>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div data-panel="overview">
+      <div class="band" id="kpis"></div>
+      <div class="two" style="margin-top:22px">
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Cash balance</h2><p class="sub" id="fc-sub">Actual through August, base forecast through February 2027</p></div>
+            <div class="presets" id="presets">
+              <button data-preset="cons">Conservative</button>
+              <button data-preset="base" aria-pressed="true">Base</button>
+              <button data-preset="up">Upside</button>
+            </div>
+          </div>
+          <div id="chart-main"></div>
+          <div class="ctl-row">
+            <div class="ctl"><label for="ocf"><span>Monthly operating cash flow</span><b id="ocf-val"></b></label><input type="range" id="ocf" min="-15000" max="60000" step="250"></div>
+            <div class="ctl"><label for="growth"><span>Month-on-month change</span><b id="growth-val"></b></label><input type="range" id="growth" min="-20" max="20" step="1" value="0"></div>
+            <div class="ctl"><label for="capex"><span>One-off spend, month 1</span><b id="capex-val"></b></label><input type="range" id="capex" min="0" max="60000" step="500" value="0"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h2>Six-month outlook</h2><p class="sub">P10 and P90 use the conservative and upside rates</p></div></div>
+          <div id="outlook"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:22px">
+        <div class="card-head"><div><h2>Monthly cash flow</h2><p class="sub">As reported by QuickBooks, indirect method</p></div></div>
+        <table><thead><tr id="mon-head"></tr></thead><tbody id="mon-body"></tbody></table>
+        <div class="flag" id="flag-july"></div>
+      </div>
+    </div>
+
+    <!-- ACCOUNTS -->
+    <div data-panel="accounts" hidden>
+      <div class="two">
+        <div class="card">
+          <div class="card-head"><div><h2>Working capital by company file</h2><p class="sub" id="acct-asof"></p></div></div>
+          <table>
+            <thead><tr><th>Company file</th><th>Cash</th><th>Receivables</th><th>Payables</th><th>Inventory</th><th>Net WC</th></tr></thead>
+            <tbody id="acct-body"></tbody><tfoot id="acct-foot"></tfoot>
+          </table>
+          <div id="acct-notes"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h2>Receivables by age</h2><p class="sub" id="aging-sub"></p></div></div>
+          <div id="chart-aging"></div>
+          <div class="flag" id="aging-flag"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:22px">
+        <div class="card-head"><div><h2 id="cust-title">Open receivables</h2><p class="sub">Customer-level detail from the aging report</p></div></div>
+        <table><thead><tr><th>Customer</th><th>1–30</th><th>31–60</th><th>61–90</th><th>Total</th><th>Status</th></tr></thead><tbody id="cust-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- FORECAST -->
+    <div data-panel="forecast" hidden>
+      <div class="card">
+        <div class="card-head"><div><h2>Projected balances</h2><p class="sub">Adjust the scenario on the Overview tab; this table follows it</p></div></div>
+        <table><thead><tr><th>Month</th><th>P10</th><th>Base</th><th>P90</th><th>Monthly net</th></tr></thead><tbody id="fc-body"></tbody></table>
+        <div class="flag" id="fc-basis"></div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div data-panel="report" hidden>
+      <article class="report" id="report"></article>
+    </div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Assistant">
+  <div class="dhead"><strong>Assistant</strong><span class="src" id="drawer-src"><i></i></span><button class="x" id="close" aria-label="Close">×</button></div>
+  <div class="dbody" id="dbody">
+    <div class="msg-a">Ask about anything in these books. I'll read QuickBooks through MosoFin and answer from what's actually there.</div>
+    <div class="chips" id="chips">
+      <button>Which customers are most overdue?</button>
+      <button>What drove the biggest month of operating cash flow?</button>
+      <button>Pull the latest month's P&amp;L for each entity</button>
+    </div>
+  </div>
+  <div class="dfoot"><input id="q" placeholder="Ask about the books"><button class="btn primary" id="send">Send</button></div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ======================= DATA (from MosoFin reads, 1 Sep 2026 21:02-21:03 UTC, mock:false) ======================= */
+var DATA=/*__DATA__*/null;
+if(!DATA){DATA={group:"Untitled group",mode:"manual",source:"No data loaded",fetched:"",year:2026,months:[],entities:{},order:[],notes:[]}}
+var MONTHS=DATA.months.slice();
+var ORDER=DATA.order.slice();
+var MCP_URL=DATA.mcpUrl||"https://mcp.mosofin.com/mcp";
+var HORIZON=6;
+
+/* ======================= helpers ======================= */
+function $(id){return document.getElementById(id)}
+function sum(a){return a.reduce(function(s,v){return s+v},0)}
+function sumArr(list){var o=MONTHS.map(function(){return 0});list.forEach(function(a){a.forEach(function(v,i){o[i]+=v})});return o}
+function cum(a){var r=0;return a.map(function(v){r+=v;return r})}
+function money(v,dp){var d=dp===undefined?0:dp;return (v<0?"−$":"$")+Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d})}
+function k(v){return (v<0?"−$":"$")+Math.round(Math.abs(v)/1000)+"k"}
+function scopeOf(key){
+  if(key==="group"){var L=ORDER.map(function(x){return DATA.entities[x]});
+    return{label:DATA.group,ocf:sumArr(L.map(function(e){return e.ocf})),icf:sumArr(L.map(function(e){return e.icf})),fcf:sumArr(L.map(function(e){return e.fcf})),ni:sumArr(L.map(function(e){return e.ni})),
+      ar:sum(L.map(function(e){return e.ar})),arIc:sum(L.map(function(e){return e.arIc})),ap:sum(L.map(function(e){return e.ap})),inv:sum(L.map(function(e){return e.inv})),aging:null,customers:null}}
+  return DATA.entities[key];
+}
+var current="group",scope=scopeOf(current);
+function cashSeries(s){return cum(s.ocf.map(function(v,i){return v+s.icf[i]+s.fcf[i]}))}
+function opening(){return cashSeries(scope)[MONTHS.length-1]}
+function presets(){var n=MONTHS.length;return{cons:scope.ni[n-1],base:scope.ocf[n-1],up:(scope.ocf[n-2]+scope.ocf[n-1])/2}}
+function fcLabels(){var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var out=[];var idx=MONTHS.length%12,yr=(DATA.year||2026)+Math.floor(MONTHS.length/12);for(var i=0;i<HORIZON;i++){out.push(m[idx]+(idx===0?" "+String(yr).slice(2):""));idx++;if(idx===12){idx=0;yr++}}return out}
+function path(rate,growth,capex){var c=opening(),o=[],f=rate;for(var i=0;i<HORIZON;i++){var n=f-(i===0?capex:0);c+=n;o.push({cash:c,net:n});f*=1+growth}return o}
+function controls(){return{rate:+$("ocf").value,growth:+$("growth").value/100,capex:+$("capex").value}}
+function scenarios(){var c=controls(),p=presets();return{base:path(c.rate,c.growth,c.capex),p10:path(Math.min(p.cons,c.rate),c.growth,c.capex),p90:path(Math.max(p.up,c.rate),c.growth,c.capex)}}
+
+/* ======================= svg ======================= */
+var NS="http://www.w3.org/2000/svg";
+function el(n,a){var e=document.createElementNS(NS,n);for(var q in a)e.setAttribute(q,a[q]);return e}
+function txt(x,y,s,anchor,size,fill){var t=el("text",{x:x,y:y,"text-anchor":anchor||"start","font-size":size||10.5,fill:fill||"#9db0b6","font-family":"inherit"});t.textContent=s;return t}
+function nice(v){if(v<=0)return 10;var m=Math.pow(10,Math.floor(Math.log(v)/Math.LN10));return Math.ceil(v/(m/2))*(m/2)}
+
+function drawMain(){
+  var host=$("chart-main");host.innerHTML="";
+  var act=cashSeries(scope),sc=scenarios();
+  var labels=MONTHS.concat(fcLabels());
+  var all=act.concat(sc.p10.map(function(p){return p.cash}),sc.p90.map(function(p){return p.cash}),[0]);
+  var W=760,H=300,L=52,R=54,T=18,B=30,pw=W-L-R,ph=H-T-B;
+  var top=nice(Math.max.apply(null,all)),lo=Math.min.apply(null,all),bot=lo<0?-nice(-lo):0,span=top-bot||1;
+  var n=labels.length,x=function(i){return L+pw*i/(n-1)},y=function(v){return T+ph-(v-bot)/span*ph};
+  var s=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img"});
+  for(var g=0;g<=4;g++){var val=bot+span*g/4;s.appendChild(el("line",{x1:L,x2:W-R,y1:y(val),y2:y(val),stroke:"#eef3f4"}));s.appendChild(txt(L-8,y(val)+3.5,k(val),"end"))}
+  var ti=MONTHS.length-1;
+  // band
+  var up=sc.p90.map(function(p,i){return x(ti+1+i).toFixed(1)+" "+y(p.cash).toFixed(1)}),dn=sc.p10.map(function(p,i){return x(ti+1+i).toFixed(1)+" "+y(p.cash).toFixed(1)}).reverse();
+  var a0=x(ti).toFixed(1)+" "+y(act[ti]).toFixed(1);
+  s.appendChild(el("path",{d:"M"+a0+" L"+up.join(" L")+" L"+dn.join(" L")+" Z",fill:"#7fc7e4","fill-opacity":.14}));
+  s.appendChild(el("path",{d:"M"+a0+" L"+up.join(" L"),fill:"none",stroke:"#7fc7e4","stroke-width":1,"stroke-dasharray":"3 3"}));
+  s.appendChild(el("path",{d:"M"+a0+" L"+dn.slice().reverse().join(" L"),fill:"none",stroke:"#7fc7e4","stroke-width":1,"stroke-dasharray":"3 3"}));
+  // today
+  s.appendChild(el("line",{x1:x(ti),x2:x(ti),y1:T,y2:T+ph,stroke:"#d5e1e4","stroke-dasharray":"4 4"}));
+  s.appendChild(txt(x(ti),T-6,"TODAY","middle",9.5,"#9db0b6"));
+  // actual
+  s.appendChild(el("path",{d:act.map(function(v,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)}).join(" "),fill:"none",stroke:"#16262e","stroke-width":2.1,"stroke-linejoin":"round"}));
+  // forecast center
+  var fc=[act[ti]].concat(sc.base.map(function(p){return p.cash}));
+  s.appendChild(el("path",{d:fc.map(function(v,i){return(i?"L":"M")+x(ti+i).toFixed(1)+" "+y(v).toFixed(1)}).join(" "),fill:"none",stroke:"#5fb4d8","stroke-width":2.6,"stroke-dasharray":"7 6","stroke-linejoin":"round"}));
+  s.appendChild(el("circle",{cx:x(ti),cy:y(act[ti]),r:5,fill:"#16262e"}));
+  // right labels
+  var last=sc.base.length-1;
+  s.appendChild(txt(W-R+8,y(sc.p90[last].cash)+3.5,"P90 "+k(sc.p90[last].cash)));
+  s.appendChild(txt(W-R+8,y(sc.base[last].cash)+3.5,k(sc.base[last].cash),"start",10.5,"#5fb4d8"));
+  s.appendChild(txt(W-R+8,y(sc.p10[last].cash)+3.5,"P10 "+k(sc.p10[last].cash)));
+  labels.forEach(function(m,i){s.appendChild(txt(x(i),H-10,m,"middle"))});
+  host.appendChild(s);
+}
+function drawAging(){
+  var host=$("chart-aging");host.innerHTML="";
+  var ag=scope.aging;
+  if(!ag){var ce=ORDER.filter(function(x){return DATA.entities[x].aging});$("aging-sub").textContent=current==="group"?(ce.length?"Bucket detail exists for "+ce.map(function(x){return DATA.entities[x].short}).join(", "):"No bucket detail loaded"):"No aging detail for this company file";
+    $("aging-flag").innerHTML="<strong>Receivables total "+money(scope.ar,2)+".</strong> "+(current==="group"?"A group split would require inventing numbers for files without aging detail; switch to a single entity to see its buckets.":"Total derived from the A/R movement on this file's cash flow statement. Sync again after running <code>get_aged_receivables</code> for bucket detail.");return}
+  $("aging-sub").textContent=scope.short+", at "+(DATA.asOf||"");
+  $("aging-flag").innerHTML=scope.arIc?"<strong>Buckets include "+money(scope.arIc)+"</strong> owed by sister entities.":"";
+  var keys=Object.keys(ag),W=420,H=190,L=44,R=12,T=12,B=28,pw=W-L-R,ph=H-T-B,mx=nice(Math.max.apply(null,keys.map(function(q){return ag[q]}).concat([1])));
+  var s=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img"});
+  for(var g=0;g<=3;g++){var v=mx*g/3,yy=T+ph-v/mx*ph;s.appendChild(el("line",{x1:L,x2:W-R,y1:yy,y2:yy,stroke:"#eef3f4"}));s.appendChild(txt(L-8,yy+3.5,k(v),"end"))}
+  var bw=pw/keys.length;
+  keys.forEach(function(q,i){var v=ag[q],cx=L+bw*i+bw/2,h=v/mx*ph;var r=el("rect",{x:cx-bw*.28,y:T+ph-h,width:bw*.56,height:Math.max(h,0),fill:(scope.agingHighlight&&q===scope.agingHighlight)?"#5fb4d8":"#16262e",rx:2});r.appendChild(el("title",{})).textContent=q+": "+money(v,2);s.appendChild(r);s.appendChild(txt(cx,H-9,q,"middle"))});
+  host.appendChild(s);
+}
+
+/* ======================= render ======================= */
+function pill(cls,t){return'<span class="pill '+cls+'"><i></i>'+t+'</span>'}
+function renderKpis(){
+  var cash=opening(),ytd=sum(scope.ocf),ni=sum(scope.ni),net=scope.ar-scope.arIc;
+  var items=[["Cash at end of "+MONTHS[MONTHS.length-1],money(cash),"Bank plus undeposited funds"],["Operating cash flow YTD",money(ytd),MONTHS[0]+" through "+MONTHS[MONTHS.length-1]],["Receivables",money(scope.ar),scope.arIc?money(net)+" from outside customers":"No intercompany balances"],["Payables",money(scope.ap),"Open supplier balances"]];
+  $("kpis").innerHTML=items.map(function(i){return'<div class="kpi"><p class="lbl">'+i[0]+'</p><p class="v'+(i[1].charAt(0)==="−"?" neg":"")+'">'+i[1]+'</p><p class="s">'+i[2]+'</p></div>'}).join("");
+  $("title").textContent=scope.label;
+}
+function renderMonthly(){
+  $("mon-head").innerHTML="<th>Month</th><th>Operating</th><th>Investing</th><th>Financing</th><th>Net</th><th>Cash at end</th>";
+  var cash=cashSeries(scope);
+  function c(v){return'<td'+(v<0?' class="neg"':'')+'>'+(v===0?'<span class="muted">—</span>':money(v,2))+'</td>'}
+  $("mon-body").innerHTML=MONTHS.map(function(m,i){var n=scope.ocf[i]+scope.icf[i]+scope.fcf[i];return"<tr><td>"+m+" 2026</td>"+c(scope.ocf[i])+c(scope.icf[i])+c(scope.fcf[i])+c(n)+"<td><strong>"+money(cash[i],2)+"</strong></td></tr>"}).join("");
+  var hn=(DATA.notes||[]).filter(function(n){return n.where==="history"});
+  $("flag-july").innerHTML=hn.length?hn.map(function(n){return n.text}).join("<br>"):"The base run rate uses the most recent month. Months carrying investing or financing movements are not extrapolated.";
+}
+function renderAccounts(){
+  $("acct-body").innerHTML=ORDER.map(function(x){var e=DATA.entities[x],cash=cashSeries(e)[MONTHS.length-1];return"<tr"+(x===current?' class="sel"':"")+"><td>"+e.short+"</td><td>"+money(cash,2)+"</td><td>"+money(e.ar,2)+"</td><td>"+money(e.ap,2)+"</td><td>"+money(e.inv,2)+"</td><td>"+money(e.ar+e.inv-e.ap,2)+"</td></tr>"}).join("");
+  var g=scopeOf("group"),gc=cashSeries(g)[MONTHS.length-1];
+  $("acct-foot").innerHTML="<tr><td>Group</td><td>"+money(gc,2)+"</td><td>"+money(g.ar,2)+"</td><td>"+money(g.ap,2)+"</td><td>"+money(g.inv,2)+"</td><td>"+money(g.ar+g.inv-g.ap,2)+"</td></tr><tr class='sub'><td>Intercompany removed</td><td>"+money(gc,2)+"</td><td>"+money(g.ar-g.arIc,2)+"</td><td>"+money(g.ap,2)+"</td><td>"+money(g.inv,2)+"</td><td>"+money(g.ar-g.arIc+g.inv-g.ap,2)+"</td></tr>";
+  var ce=ORDER.filter(function(x){return DATA.entities[x].customers})[0];
+  var cu=ce?DATA.entities[ce].customers:[];
+  $("cust-title").textContent="Open receivables"+(ce?", "+DATA.entities[ce].short:"");
+  $("acct-asof").textContent="Position at "+(DATA.asOf||DATA.fetched.replace("Fetched ",""));
+  var an=(DATA.notes||[]).filter(function(n){return n.where==="accounts"});
+  $("acct-notes").innerHTML=an.map(function(n){return'<div class="flag">'+n.text+'</div>'}).join("");
+  $("cust-body").innerHTML=cu.length?cu.map(function(r){var tot=r[1]+r[2]+r[3],ic=!!r[4];var st=ic?pill("neutral idle","Intercompany"):r[3]>0?pill("warn","61–90 days"):r[2]>0?pill("warn","31–60 days"):pill("ok","1–30 days");return"<tr><td>"+r[0]+"</td><td>"+(r[1]?money(r[1],2):'<span class="muted">—</span>')+"</td><td>"+(r[2]?money(r[2],2):'<span class="muted">—</span>')+"</td><td>"+(r[3]?money(r[3],2):'<span class="muted">—</span>')+"</td><td><strong>"+money(tot,2)+"</strong></td><td>"+st+"</td></tr>"}).join(""):'<tr><td colspan="6" class="muted">No customer-level aging loaded.</td></tr>';
+}
+function renderOutlook(){
+  var sc=scenarios(),o=opening(),last=HORIZON-1,end=sc.base[last].cash,trough=Math.min.apply(null,sc.base.map(function(p){return p.cash}));
+  var neg=-1;sc.base.forEach(function(p,i){if(neg<0&&p.cash<0)neg=i});
+  var rows=[["End of "+fcLabels()[last].replace(" 27"," 2027"),money(end),(end-o>=0?"+":"")+money(end-o)+" over six months"],["Lowest projected balance",money(trough),trough<0?"Falls below zero":"Stays positive throughout"],["P10 – P90 at horizon",money(sc.p10[last].cash)+" – "+money(sc.p90[last].cash),"Conservative to upside"],["Months of runway",neg<0?"None needed":String(neg+1),neg<0?"Cash grows in this scenario":"First negative in "+fcLabels()[neg]]];
+  $("outlook").innerHTML=rows.map(function(r,i){return'<div style="padding:'+(i?'14px':'2px')+' 0 14px;border-bottom:1px solid var(--rule)"><p class="lbl">'+r[0]+'</p><p style="font-size:24px;font-weight:600;letter-spacing:-.8px;margin:0;line-height:1.1'+(String(r[1]).charAt(0)==="−"?';color:var(--neg)':'')+'">'+r[1]+'</p><p style="margin:5px 0 0;font-size:12px;color:var(--secondary)">'+r[2]+'</p></div>'}).join("");
+  var lab=fcLabels();
+  $("fc-body").innerHTML=sc.base.map(function(p,i){return"<tr><td>"+lab[i]+"</td><td class='muted'>"+money(sc.p10[i].cash)+"</td><td><strong>"+money(p.cash)+"</strong></td><td class='muted'>"+money(sc.p90[i].cash)+"</td><td"+(p.net<0?' class="neg"':"")+">"+money(p.net)+"</td></tr>"}).join("");
+  var p=presets();
+  $("fc-basis").innerHTML="<strong>Scenario rates for "+scope.label+".</strong> Conservative "+money(p.cons,2)+" a month (August net income), base "+money(p.base,2)+" (August operating cash flow), upside "+money(p.up,2)+" (July–August average). No further capital spend, debt service, or financing is assumed beyond what you set.";
+  var c=controls();$("fc-sub").textContent="Actual through August · "+money(c.rate)+" per month, "+(c.growth*100).toFixed(0)+"% monthly change"+(c.capex?", "+money(c.capex)+" one-off":"");
+}
+function renderReport(){
+  var g=scopeOf("group"),cash=cashSeries(g),sc=scenarios(),last=HORIZON-1,n=MONTHS.length,m=MONTHS[n-1],pm=MONTHS[n-2];
+  var big=0;g.ocf.forEach(function(v,i){if(v>g.ocf[big])big=i});
+  var rn=(DATA.notes||[]).filter(function(x){return x.where==="report"});
+  $("report").innerHTML='<h2>Cash position and outlook</h2><div class="rmeta">'+DATA.group+' · prepared '+(DATA.asOf||"")+' · <span class="src"><i></i>'+DATA.source+'</span></div>'+
+  '<p>The group closed '+m+' with <strong>'+money(cash[n-1])+'</strong> in cash across '+ORDER.length+' company files'+(n>1?', compared with '+money(cash[n-2])+' at the end of '+pm:'')+'. Operating activity contributed '+money(g.ocf[n-1])+' in '+m+(g.icf[n-1]===0&&g.fcf[n-1]===0?' with no investing or financing movements':'')+'.</p>'+
+  '<h3>What happened</h3><p>The largest month of operating cash flow was '+MONTHS[big]+' at '+money(g.ocf[big])+'.'+(g.icf[big]||g.fcf[big]?' That month also carried '+(g.icf[big]?money(-g.icf[big])+' of investing outflow':'')+(g.icf[big]&&g.fcf[big]?' and ':'')+(g.fcf[big]?money(g.fcf[big])+' of financing':'')+'.':'')+' The forecast anchors on '+m+', the most recent month.</p>'+
+  '<h3>Receivables</h3><p>The group holds '+money(g.ar)+' of receivables.'+(g.arIc?' '+money(g.arIc)+' of that is owed between the entities themselves; outside customers owe '+money(g.ar-g.arIc)+'.':'')+' Payables stand at '+money(g.ap)+'.</p>'+
+  '<h3>Outlook</h3><p>On the base scenario the group ends '+fcLabels()[last]+' at <strong>'+money(sc.base[last].cash)+'</strong>, with a range of '+money(sc.p10[last].cash)+' to '+money(sc.p90[last].cash)+' between the conservative and upside cases.'+(Math.min.apply(null,sc.base.map(function(p){return p.cash}))>=0?' Cash stays positive throughout the horizon.':' Cash falls below zero within the horizon.')+'</p>'+
+  (rn.length?'<h3>Caveats</h3>'+rn.map(function(x){return'<p>'+x.text+'</p>'}).join(''):'')+
+  '<div class="rfoot"><span class="src"><i></i>'+DATA.source+' · '+DATA.group+'</span>'+(DATA.provenance?' · '+DATA.provenance:'')+' · '+DATA.fetched.replace("Fetched ","")+'</div>';
+}
+function syncLabels(){var c=controls();$("ocf-val").textContent=money(c.rate);$("growth-val").textContent=(c.growth*100).toFixed(0)+"%";$("capex-val").textContent=money(c.capex)}
+function refreshForecast(){syncLabels();drawMain();renderOutlook();renderReport()}
+function applyPreset(w){var p=presets();$("ocf").value=Math.round(p[w]);$("growth").value=0;$("capex").value=0;Array.prototype.forEach.call(document.querySelectorAll("#presets button"),function(b){b.setAttribute("aria-pressed",String(b.dataset.preset===w))});refreshForecast()}
+function buildSeg(){var seg=document.querySelector(".seg");seg.innerHTML='<button data-entity="group" aria-pressed="'+(current==="group")+'">Group</button>'+ORDER.map(function(x){return'<button data-entity="'+x+'" aria-pressed="'+(x===current)+'">'+DATA.entities[x].short+'</button>'}).join("");bindSeg()}
+function renderAll(){scope=scopeOf(current);$("meta-fetched").textContent=DATA.fetched;$("meta-src").textContent=DATA.source;$("nav-src").innerHTML="<i></i>"+DATA.group+" · "+ORDER.length+" company file"+(ORDER.length===1?"":"s");$("drawer-src").innerHTML="<i></i>"+DATA.group;document.title=DATA.group+" — Forecast";
+  var manual=DATA.mode==="manual";$("sync").style.display=manual?"none":"";$("ask-btn").style.display=manual?"none":"";
+  if(manual){setStatus("idle","Uploaded data")}else if($("status").textContent.trim()===""){setStatus("ok","Live data")}
+  buildSeg();renderKpis();renderMonthly();renderAccounts();drawAging();applyPreset("base")}
+
+/* ======================= MosoFin sync via Anthropic API + MCP ======================= */
+function setStatus(cls,t){$("status").className="pill "+cls;$("status").innerHTML="<i></i>"+t}
+function toast(t){var e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove("show")},3200)}
+function strip(t){var s=$("strip");if(!t){s.classList.remove("show");s.innerHTML="";return}s.innerHTML=t;s.classList.add("show")}
+
+function todayISO(){var d=new Date();return d.toISOString().slice(0,10)}
+function monthEnd(){var d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().slice(0,10)}
+
+async function callClaude(prompt,system,maxTokens){
+  var r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    model:"claude-sonnet-4-6",max_tokens:maxTokens||1000,system:system||"",
+    messages:[{role:"user",content:prompt}],
+    mcp_servers:[{type:"url",url:MCP_URL,name:"mosofin"}]})});
+  if(!r.ok)throw new Error("API "+r.status);
+  var d=await r.json();
+  if(d.error)throw new Error(d.error.message||"API error");
+  return{text:(d.content||[]).filter(function(b){return b.type==="text"}).map(function(b){return b.text}).join("\n"),calls:(d.content||[]).filter(function(b){return b.type==="mcp_tool_use"}).length};
+}
+
+var SYNC_SYSTEM=function(){return "You are a data extraction agent with MosoFin MCP tools. Follow the tool prerequisites exactly: call list_workspaces, then confirm the workspace named '"+DATA.group+"' with mode 'single' and its workspace_id, then get_agent_datasources for that workspace. For EVERY quickbooks datasource that is connected, call invoke_datasource_api_tool (datasource 'quickbooks', pass workspace_id and that row's data_source_id on every call) for tool 'get_cash_flow' with the given dates and summarize_column_by 'Month'. Respond with ONLY a compact JSON object, no prose, no markdown fences."};
+
+function syncPrompt(){
+  return"start_date 2026-01-01, end_date "+monthEnd()+". From each get_cash_flow result read the monthly columns (exclude the Total column). Build: {\"fetched_at\":\"<ISO>\",\"months\":[\"Jan\",...],\"entities\":[{\"name\":\"<display_name>\",\"ocf\":[per-month 'Net cash provided by operating activities'],\"icf\":[investing summary],\"fcf\":[financing summary],\"ni\":[Net Income row],\"ar\":<negative of the sum of the 'Accounts Receivable (A/R)' adjustment row across all months>,\"ap\":<sum of 'Accounts Payable (A/P)' row>,\"inv\":<negative of sum of 'Inventory Asset' row>}]}. Use 0 for blank cells. Round to 2 decimals. Output the JSON only.";
+}
+function shortName(n){var g=DATA.group.replace(/ (Group|Holdings|Inc\.?|LLC)$/i,"");var m=n.indexOf(g)===0?n.slice(g.length).trim():n;m=m.replace(/\b(LLC|Inc\.?|Ltd\.?|Corp\.?)\b/g,"").trim();return m.split(/\s+/)[0]||n}
+function applySync(j){
+  if(!j||!j.entities||!j.entities.length)throw new Error("No entities in response");
+  var months=j.months||MONTHS;MONTHS=months;DATA.months=months;if(j.year)DATA.year=j.year;
+  var next={},keys=[];
+  j.entities.forEach(function(e){var key=shortName(e.name).toLowerCase();keys.push(key);var old=DATA.entities[key]||{};
+    next[key]={label:e.name,short:shortName(e.name),ocf:e.ocf,icf:e.icf,fcf:e.fcf,ni:e.ni,ar:+e.ar||0,arIc:old.arIc||0,ap:+e.ap||0,inv:+e.inv||0,aging:old.aging||null,customers:old.customers||null}});
+  DATA.entities=next;ORDER=keys;
+  var d=new Date(j.fetched_at||Date.now());DATA.fetched="Fetched "+d.toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC"})+" UTC";
+  if(!next[current])current="group";
+}
+async function runSync(){
+  var btn=$("sync");btn.disabled=true;btn.innerHTML='<span class="spin"></span>Syncing';setStatus("busy","Syncing from QuickBooks");strip("");
+  try{
+    var res=await callClaude(syncPrompt(),SYNC_SYSTEM(),1600);
+    var clean=res.text.replace(/```json|```/g,"").trim();var start=clean.indexOf("{");if(start>0)clean=clean.slice(start);
+    var j=JSON.parse(clean);applySync(j);renderAll();
+    setStatus("ok","Live data");toast("Synced "+j.entities.length+" company files from QuickBooks");
+  }catch(err){
+    setStatus("warn","Sync failed");
+    var msg=String(err.message||err);
+    var isNet=/Failed to fetch|NetworkError|API 4|API 5/.test(msg);
+    strip("<strong>Sync did not complete.</strong> "+(isNet?"The MosoFin connector can only be reached when this dashboard runs inside Claude with the connector attached. The figures shown are the last successful read.":msg+" Figures shown are the last successful read."));
+  }finally{btn.disabled=false;btn.innerHTML='<span class="sq"></span>Sync from QuickBooks'}
+}
+
+/* ======================= assistant ======================= */
+var chatLog=[];
+function addMsg(cls,t){var d=document.createElement("div");d.className=cls;d.textContent=t;$("dbody").appendChild(d);$("dbody").scrollTop=1e6;return d}
+async function ask(q){
+  if(!q.trim())return;$("q").value="";var chips=$("chips");if(chips)chips.remove();
+  addMsg("msg-u",q);var a=addMsg("msg-a","");a.innerHTML='<span class="pill busy"><i></i>Reading QuickBooks</span>';
+  chatLog.push({role:"user",content:q});
+  try{
+    var r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
+      system:"You are a finance assistant for "+DATA.group+", a multi-entity QuickBooks group ("+ORDER.map(function(x){return DATA.entities[x].label}).join(", ")+") connected through MosoFin. Before reading data: list_workspaces, confirm '"+DATA.group+"' with mode 'single', get_agent_datasources, then invoke_datasource_api_tool with the right data_source_id. Answer only from returned data. Keep answers under 150 words, plain prose, no markdown headers. End with one 'Data sources' line.",
+      messages:chatLog,mcp_servers:[{type:"url",url:MCP_URL,name:"mosofin"}]})});
+    var d=await r.json();if(d.error)throw new Error(d.error.message);
+    var t=(d.content||[]).filter(function(b){return b.type==="text"}).map(function(b){return b.text}).join("\n").trim()||"No answer returned.";
+    a.textContent=t;chatLog.push({role:"assistant",content:t});
+  }catch(e){a.innerHTML='<span class="pill warn"><i></i>Couldn\'t reach the connector</span><div style="margin-top:8px;color:var(--secondary)">The assistant needs to run inside Claude with MosoFin attached. '+String(e.message||"")+'</div>';chatLog.pop()}
+}
+function openDrawer(){$("drawer").classList.add("open");$("scrim").classList.add("open");setTimeout(function(){$("q").focus()},50)}
+function closeDrawer(){$("drawer").classList.remove("open");$("scrim").classList.remove("open")}
+
+/* ======================= events ======================= */
+function bindSeg(){Array.prototype.forEach.call(document.querySelectorAll(".seg button"),function(b){b.addEventListener("click",function(){current=b.dataset.entity;Array.prototype.forEach.call(document.querySelectorAll(".seg button"),function(x){x.setAttribute("aria-pressed",String(x.dataset.entity===current))});renderAll()})})}
+Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){b.addEventListener("click",function(){Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(x){x.setAttribute("aria-current",String(x===b))});Array.prototype.forEach.call(document.querySelectorAll("[data-panel]"),function(p){p.hidden=p.dataset.panel!==b.dataset.tab});if(b.dataset.tab==="overview")drawMain();if(b.dataset.tab==="accounts")drawAging()})});
+Array.prototype.forEach.call(document.querySelectorAll("#presets button"),function(b){b.addEventListener("click",function(){applyPreset(b.dataset.preset)})});
+["ocf","growth","capex"].forEach(function(id){$(id).addEventListener("input",function(){Array.prototype.forEach.call(document.querySelectorAll("#presets button"),function(b){b.setAttribute("aria-pressed","false")});refreshForecast()})});
+$("sync").addEventListener("click",runSync);
+$("ask-btn").addEventListener("click",openDrawer);$("close").addEventListener("click",closeDrawer);$("scrim").addEventListener("click",closeDrawer);
+$("send").addEventListener("click",function(){ask($("q").value)});$("q").addEventListener("keydown",function(e){if(e.key==="Enter")ask($("q").value)});
+document.addEventListener("click",function(e){if(e.target.closest("#chips button"))ask(e.target.textContent)});
+document.addEventListener("keydown",function(e){if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();openDrawer()}if(e.key==="Escape")closeDrawer()});
+$("search").addEventListener("input",function(){var q=this.value.toLowerCase();Array.prototype.forEach.call(document.querySelectorAll("#cust-body tr"),function(r){r.style.display=r.firstChild.textContent.toLowerCase().indexOf(q)>-1?"":"none"})});
+window.addEventListener("resize",function(){drawMain();drawAging()});
+renderAll();
+</script>
+</body>
+</html>
