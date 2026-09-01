@@ -200,9 +200,27 @@ documents themselves — and do the accounting work on what the user provides.
 
 Then **Part B runs unchanged** on what the user supplied.
 
-**Ask for the whole input set up front, not drip-fed.** A person collecting exports
-would rather be given one list than be interrupted six times. Say what each item is for
-and which are strictly required.
+**Ask the user to upload the data, and name the formats.** A manual run does not mean
+retyping anything. Say plainly what to upload, in what form, and what each item is for —
+then read it from the files they provide.
+
+| Ask for | Upload as |
+|---|---|
+| Ledger detail, trial balance, transaction listings | **CSV** or **XLSX** export, or a pasted table |
+| Statements and third-party documents | **PDF** or **CSV**, or a clear photo / scan |
+| Invoices, bills, receipts, remittances | **PDF** or **image** — a single file or a batch |
+| Short facts — a date, a balance, a policy | typed straight into the chat |
+
+**Ask for the whole set up front, as a checklist, not drip-fed.** A person collecting
+exports would rather be given one list than be interrupted six times. Mark which items
+are strictly **required** and which merely improve the result, so they can decide how
+much to gather.
+
+**Confirm what actually arrived before starting the work.** Name each file, say what was
+read from it — period covered, row count, opening and closing balances — and list what
+is still outstanding. If a file is unreadable, covers the wrong period, or does not
+contain what its name suggests, **say so at once**. Never work around a bad input
+silently, and never guess at a column you cannot identify — ask.
 
 **If something cannot be supplied, say what the output will and will not be — before
 doing the work.** Never estimate a figure that was meant to come from the books, never

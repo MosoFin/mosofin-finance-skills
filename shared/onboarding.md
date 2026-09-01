@@ -71,12 +71,25 @@ balance, a statement, an export, the documents themselves. **The accounting logi
 edge cases and the output standards are identical**; only where the numbers come from
 changes.
 
-**What you will be asked for.** The skill asks for the whole input set up front rather
-than interrupting you six times: typically a trial balance or the relevant ledger
-detail, a statement or export for whatever is being reconciled, the period, and the
-handful of facts a connection would otherwise have told it — your base currency, fiscal
-calendar, region and time zone. It says which items are strictly required and what each
-one is for.
+**You upload the data — you do not retype it.** The skill asks for the whole set up
+front, as a checklist, rather than interrupting you six times, and tells you which items
+are strictly required and what each is for:
+
+| What it asks for | Upload as |
+|---|---|
+| Ledger detail, trial balance, transaction listings | CSV or XLSX export, or a pasted table |
+| Statements and third-party documents | PDF or CSV, or a clear photo / scan |
+| Invoices, bills, receipts, remittances | PDF or image — one file or a batch |
+| Short facts — a date, a balance, a policy | typed straight into the chat |
+
+It also asks for the handful of facts a connection would otherwise have told it: your
+base currency, fiscal calendar, region and time zone.
+
+**It confirms what arrived before starting.** Each file is named back to you with what
+was read from it — period covered, row count, opening and closing balances — and
+anything still outstanding is listed. A file that is unreadable, covers the wrong
+period, or does not contain what its name suggests is flagged at once rather than
+worked around.
 
 **If you cannot supply something**, it tells you what the output will and will not be
 *before* doing the work. It will not estimate a figure that was meant to come from your

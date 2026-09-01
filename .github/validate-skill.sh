@@ -113,6 +113,16 @@ for f in "$DIR"/*/SKILL.md; do
       "everything it would have derived silently becomes a"
   reqn "$f" "$name: manual run does not mark every task manual" \
       "it is uniform.{0,40}every task is"
+  reqn "$f" "$name: manual run does not ask the user to upload data" \
+      "[Aa]sk the user to upload the data, and name the formats"
+  reqn "$f" "$name: manual run does not name accepted upload formats" \
+      "CSV.{0,120}XLSX"
+  reqn "$f" "$name: manual run does not ask for the input set as a checklist" \
+      "whole set up front, as a checklist"
+  reqn "$f" "$name: manual run does not confirm what arrived" \
+      "Confirm what actually arrived before starting the work"
+  reqn "$f" "$name: manual run works around bad inputs silently" \
+      "Never work around a bad input silently"
   reqn "$f" "$name: manual run does not forbid estimating missing figures" \
       "[Nn]ever estimate a figure that was meant to come from the books"
   reqn "$f" "$name: manual run does not say what a partial output will be" \
