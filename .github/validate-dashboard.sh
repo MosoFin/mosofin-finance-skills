@@ -40,6 +40,23 @@ for f in "$DIR"/*/SKILL.md; do
   has "$d/assets"                         "$name: missing assets/"
   has "$d/scripts"                        "$name: missing scripts/"
 
+  # 2b. every bundled path named in SKILL.md must actually be present.
+  #     Catches a file dropped by .gitignore or left out of the package.
+  missing=$(python3 - "$f" "$d" <<'PYEOF'
+import re, sys, os
+skill, root = sys.argv[1], sys.argv[2]
+text = open(skill).read()
+paths = set(re.findall(r'`((?:references|assets|scripts)/[A-Za-z0-9_.\-]+)`', text))
+gone = [p for p in sorted(paths) if not os.path.exists(os.path.join(root, p))]
+print(' '.join(gone))
+PYEOF
+)
+  if [ -n "$missing" ]; then
+    for m in $missing; do
+      echo "  FAIL  $name: SKILL.md references $m, which is not in the bundle"; fail=$((fail+1))
+    done
+  fi
+
   # 3. the user chooses the data path, and there is a real manual path
   reqn "$f" "$name: does not ask which data path to use" \
       "[Uu]se your MosoFin connection to read the books, or supply the data yourself"

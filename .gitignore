@@ -2,6 +2,7 @@
 *.zip
 node_modules/
 
-# local-only — planning docs and working scripts, never published
-docs/
-scripts/
+# local-only — planning docs and working scripts, never published.
+# Anchored to the repo root: a skill's own scripts/ and docs/ must still ship.
+/docs/
+/scripts/
