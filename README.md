@@ -149,6 +149,17 @@ Each dashboard skill carries its own `references/` — the UI spec, both data pa
 method — and is checked by [`.github/validate-dashboard.sh`](.github/validate-dashboard.sh)
 against the rules it sets for itself, not against the analysis-skill protocol.
 
+**Install one dashboard without cloning the repo.** Each is self-contained, so you can pull
+just that folder:
+
+```bash
+curl -sL https://github.com/MosoFin/mosofin-finance-skills/archive/refs/heads/main.tar.gz | tar -xz -C ~/.claude/skills --strip-components=2 mosofin-finance-skills-main/dashboards/multi-entity-forecast-dashboard
+```
+
+Python 3 and nothing else — the generator is standard library only. See
+[`dashboards/README.md`](dashboards/README.md) for pinning a release, the `git sparse-checkout`
+alternative, and a one-line check that the copy works.
+
 ---
 
 ## Validating

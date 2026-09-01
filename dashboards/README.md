@@ -36,7 +36,7 @@ with both BSD tar (macOS) and GNU tar (Linux).
 changes to match, so both halves of the path move together:
 
 ```bash
-curl -sL https://github.com/MosoFin/mosofin-finance-skills/archive/refs/tags/v0.2.1.tar.gz | tar -xz -C ~/.claude/skills --strip-components=2 mosofin-finance-skills-0.2.1/dashboards/multi-entity-forecast-dashboard
+curl -sL https://github.com/MosoFin/mosofin-finance-skills/archive/refs/tags/v0.3.0.tar.gz | tar -xz -C ~/.claude/skills --strip-components=2 mosofin-finance-skills-0.3.0/dashboards/multi-entity-forecast-dashboard
 ```
 
 ### If you would rather use git
