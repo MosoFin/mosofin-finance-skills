@@ -71,6 +71,17 @@ balance, a statement, an export, the documents themselves. **The accounting logi
 edge cases and the output standards are identical**; only where the numbers come from
 changes.
 
+**What you will be asked for.** The skill asks for the whole input set up front rather
+than interrupting you six times: typically a trial balance or the relevant ledger
+detail, a statement or export for whatever is being reconciled, the period, and the
+handful of facts a connection would otherwise have told it — your base currency, fiscal
+calendar, region and time zone. It says which items are strictly required and what each
+one is for.
+
+**If you cannot supply something**, it tells you what the output will and will not be
+*before* doing the work. It will not estimate a figure that was meant to come from your
+books, and it will not present a partial result as complete.
+
 The output says so explicitly: the coverage sheet records that the gateway was absent
 rather than that checks passed, so you can always tell which figures came from your
 books and which you supplied by hand. You will be told once that connecting Mosofin

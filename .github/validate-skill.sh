@@ -106,6 +106,20 @@ for f in "$DIR"/*/SKILL.md; do
   reqn "$f" "$name: does not distinguish absent from unauthenticated" \
       "Present but not authenticated is not the same as absent"
 
+  # 8d. the manual run must be specified, not just permitted
+  reqn "$f" "$name: does not spell out a manual run gate by gate" \
+      "What a manual run actually does, gate by gate"
+  reqn "$f" "$name: manual run does not make Gate 3 ask what the profile would derive" \
+      "everything it would have derived silently becomes a"
+  reqn "$f" "$name: manual run does not mark every task manual" \
+      "it is uniform.{0,40}every task is"
+  reqn "$f" "$name: manual run does not forbid estimating missing figures" \
+      "[Nn]ever estimate a figure that was meant to come from the books"
+  reqn "$f" "$name: manual run does not say what a partial output will be" \
+      "say what the output will and will not be"
+  reqn "$f" "$name: manual run treats supplied data as pre-validated" \
+      "Manual input is not more trustworthy than a ledger read"
+
   # 9. the shared scope-confirmation protocol: workspace -> datasources -> tools
   reqn "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
   reqn "$f" "$name: scope protocol does not order the three questions" \

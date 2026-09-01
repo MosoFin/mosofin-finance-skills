@@ -193,6 +193,30 @@ documents themselves — and do the accounting work on what the user provides.
   to [docs.mosofin.com](https://docs.mosofin.com). Do not raise it again, and never
   withhold work to press the point
 
+#### What a manual run actually does, gate by gate
+
+| Gate | In a manual run |
+|---|---|
+| **Gate 0** — workspace | **Skipped.** There is no workspace to confirm. |
+| **Gate 1** — data sources | **Skipped as a discovery step.** Still ask *which entity or company this work is for*, by name, so every output can be labelled — but record it as **user-asserted**, not confirmed against a connection. |
+| **Gate 2** — capability map | **Skipped.** The map is not empty, it is uniform: **every task is `[manual]`.** |
+| **Gate 3** — profile, then interview | **Runs, and grows.** The profile half cannot run — there is no company-profile tool — so everything it would have derived silently becomes a **question**: base currency, fiscal calendar, country or region, time zone. Then the interview runs in full, and **every row of the Inputs table that would have been `[auto]` becomes something to ask for.** |
+
+Then **Part B runs unchanged** on what the user supplied.
+
+**Ask for the whole input set up front, not drip-fed.** A person collecting exports
+would rather be given one list than be interrupted six times. Say what each item is for
+and which are strictly required.
+
+**If something cannot be supplied, say what the output will and will not be — before
+doing the work.** Never estimate a figure that was meant to come from the books, never
+fill a gap with a plausible number, and never present a partial result as complete. An
+honest partial answer, clearly labelled, is the correct outcome.
+
+**Everything the user provides is evidence like any other.** Reconcile it, check it,
+and challenge it where it does not tie. Manual input is not more trustworthy than a
+ledger read — it is less, because nothing validated it on the way in.
+
 **Present but not authenticated is not the same as absent.** If the tools are there and
 a call returns a `reconnect_url` or an auth error, surface it and let the user choose —
 reconnect, or continue manually. Do not silently fall back.
