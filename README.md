@@ -47,11 +47,11 @@ If a connection will not authenticate, see
 [Common issues](https://docs.mosofin.com/source-and-destination/destinations/claude/common-issues).
 
 **3. Install the skills.** Either as a plugin, from the MosoFin marketplace in
-[mosofin/mosofin-plugins](https://github.com/mosofin/mosofin-plugins) — this installs
+[MosoFin/mosofin-mcp-plugin](https://github.com/MosoFin/mosofin-mcp-plugin) — this installs
 all ten and keeps them updatable:
 
 ```text
-/plugin marketplace add mosofin/mosofin-plugins
+/plugin marketplace add mosofin/mosofin-mcp-plugin
 /plugin install mosofin-finance@financehub
 ```
 
@@ -201,7 +201,7 @@ Related repos:
 
 | | |
 |---|---|
-| [mosofin/mosofin-plugins](https://github.com/mosofin/mosofin-plugins) | The `financehub` marketplace that publishes these skills as the `mosofin-finance` plugin, and the `mosofin` plugin that provides the MCP connection itself |
+| [MosoFin/mosofin-mcp-plugin](https://github.com/MosoFin/mosofin-mcp-plugin) | The `financehub` marketplace that publishes these skills as the `mosofin-finance` plugin, and the `mosofin` plugin that provides the MCP connection itself |
 
 ---
 
