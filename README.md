@@ -146,6 +146,21 @@ live data, the output says so in the filename and on the first page.
 | `vendor-statement-reconciliation` | 59% | Tie vendor statements to the AP sub-ledger |
 | `accruals-and-deferrals` | 56% | Period-end accruals and deferrals, with reversals |
 
+**Wave 3** — payroll, entry review, forecasting and the long-lived assets:
+
+| Skill | Automated | What it's for |
+|---|---:|---|
+| `payroll-journal-entry-builder` | 72% | Payroll entries with gross-to-net, employer costs and accruals |
+| `payroll-clearing-reconciliation` | 71% | Itemise what is left in the payroll clearing accounts |
+| `credit-memo-and-refund-handler` | 69% | Credit memos and refunds with the offsetting entry |
+| `budget-vs-actual-analysis` | 69% | Variance report, favourable/unfavourable, with drivers |
+| `journal-entry-review` | 67% | Risk-score a journal entry population for anomalies |
+| `recurring-transaction-builder` | 64% | Design a recurring schedule, then audit whether it ran |
+| `payroll-reconciliation` | 61% | Tie the payroll register to GL, bank and filings |
+| `inventory-to-gl-reconciliation` | 59% | Reconcile inventory to the GL; shrinkage and cleanup |
+| `cash-flow-forecast-13-week` | 58% | Weekly direct cash forecast with covenant alerts |
+| `fixed-asset-register-and-depreciation` | 57% | FA register, depreciation, capitalisation and disposals |
+
 **Automated %** is the measured share of `[auto]` versus `[manual]` steps in each skill —
 computed from the files, not estimated. **It is not a quality score.** A low percentage
 usually means the work genuinely needs evidence from outside the accounting system, and
