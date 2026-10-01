@@ -116,6 +116,8 @@ live data, the output says so in the filename and on the first page.
 
 ## The skills
 
+**Wave 1** — the everyday AP, AR and close work:
+
 | Skill | Automated | What it's for |
 |---|---:|---|
 | `journal-entry-builder` | 79% | Build and validate any journal entry against your real chart |
@@ -128,6 +130,21 @@ live data, the output says so in the filename and on the first page.
 | `month-end-close-checklist` | 61% | Run the close; scopes itself from your live chart |
 | `financial-statement-builder` | 50% | Produce the statement set with its tie-outs |
 | `ar-aging-and-collections` | 46% | Age receivables and prioritise collection |
+
+**Wave 2** — the close cycle and the sub-ledgers either side of it:
+
+| Skill | Automated | What it's for |
+|---|---:|---|
+| `prepaid-amortization-schedule` | 70% | Build, maintain and audit the prepaid schedule |
+| `closing-entries-and-trial-balance` | 69% | Close the period and produce the post-closing TB |
+| `ap-accrual-cutoff` | 67% | Goods and services received but not yet invoiced |
+| `customer-invoicing` | 66% | Generate invoices with their AR, revenue and tax entries |
+| `balance-sheet-reconciliations` | 63% | Tie each balance sheet account to its support |
+| `cash-application` | 63% | Apply customer payments; short pays, overpays, FX |
+| `ap-aging-and-payment-runs` | 62% | Age payables and propose a prioritised payment run |
+| `credit-card-reconciliation` | 59% | Reconcile the card statement with receipt matching |
+| `vendor-statement-reconciliation` | 59% | Tie vendor statements to the AP sub-ledger |
+| `accruals-and-deferrals` | 56% | Period-end accruals and deferrals, with reversals |
 
 **Automated %** is the measured share of `[auto]` versus `[manual]` steps in each skill —
 computed from the files, not estimated. **It is not a quality score.** A low percentage
