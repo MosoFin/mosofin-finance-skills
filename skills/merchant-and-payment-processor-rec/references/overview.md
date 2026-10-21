@@ -14,9 +14,10 @@ never happen on the same day.
 This skill is **jurisdiction-agnostic** and applies the same decomposition logic to any processor's export
 format.
 
-It is **workspace-scoped**: the general ledger side — clearing balance, revenue, fees, refunds, chargebacks
-and recorded deposits — comes from tool calls against a company file connected to your Mosofin workspace in
-this conversation. **The processor side may or may not be connected**, which decides how much of this
+**Where the numbers come from:** when Mosofin is connected and the user agrees, the general ledger side —
+clearing balance, revenue, fees, refunds, chargebacks and recorded deposits — comes from tool calls against a
+company file in the confirmed workspace. Otherwise it comes from the GL detail or trial balance the user
+uploads. **The processor side may or may not be connected**, which decides how much of this
 reconciliation is possible; see Gate 1.
 
 ## Two sides, and one error worth the whole skill

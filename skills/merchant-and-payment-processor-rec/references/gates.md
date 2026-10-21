@@ -1,6 +1,14 @@
-<!-- merchant-and-payment-processor-rec · gates.md · read for: Step 2 — confirming scope and capabilities on the Mosofin path. Edit here, not in SKILL.md. -->
+<!-- merchant-and-payment-processor-rec · gates.md · read for: Stage 2 — confirming scope and capabilities on the Mosofin path. Edit here, not in SKILL.md. -->
 
-# PART A — Prerequisites: confirm scope, discover the capability map
+# Gates 0–3 — confirming scope on the Mosofin path
+
+## Contents
+
+- Gate 0 — Confirm the workspace
+- Gate 1 — Discover live datasources and settle the entity scenario
+- Gate 2 — Discover enabled tools → build the capability map
+- Gate 3 — Profile the entity, then interview the user
+
 
 Run Gates 0 → 1 → 2 → 3 in this order, before reconciling anything. This ordering is the contract. Do not
 skip a gate because a previous conversation covered it — connections, permissions, and company files
@@ -87,26 +95,27 @@ Call the platform's company-profile tool (on QuickBooks, `get_company_info`) for
 **Derive silently** what the profile answers: legal name, **functional currency** — which matters for the
 multi-currency step — fiscal calendar, **country**, which bears on tax treatment.
 
-**Ask the user** what actually changes the work — the original Inputs table, **minus the two the connected
+**Stage 1 has already asked most of this. Confirm those answers in one line; do not ask them again.**
+Then **ask the user** only what Stage 1 did not cover — the rows below not marked as answered. What actually changes the work — the original Inputs table, **minus the two the connected
 books now answer**:
 
 | What to confirm | Required? | Notes |
 |---|---|---|
-| **Processor activity export** — transaction and/or settlement level | **Required — [gated]** | **`[auto]` if the processor is connected.** |
-| **Processor settlement / payout records** | **Required — [gated]** | Same. |
-| **Period being reconciled** | **Required** | |
-| **Bank statement for the period** | **Required — [manual]**, always | **Not on this surface.** The ledger's deposits are readable; the bank's are not. |
+| **Processor activity export** — transaction and/or settlement level | **Required — [gated]** | **Answered in Stage 1 — confirm, don't re-ask.** **`[auto]` if the processor is connected.** |
+| **Processor settlement / payout records** | **Required — [gated]** | **Answered in Stage 1 — confirm, don't re-ask.** Same. |
+| **Period being reconciled** | **Required** | **Answered in Stage 1 — confirm, don't re-ask.**  |
+| **Bank statement for the period** | **Required — [manual]**, always | **Answered in Stage 1 — confirm, don't re-ask.** **Not on this surface.** The ledger's deposits are readable; the bank's are not. |
 | ~~GL balances~~ — cash, revenue, fees, refunds, chargebacks, clearing | **Now [auto]** | Confirm **which account is the clearing account**. |
 | ~~Chart of accounts~~ | **Now [auto]** | |
 | **Tax jurisdiction** | Recommended — **[gated]** | **Country `[auto]`; recoverability on fees is `[manual]`.** |
 | **Multi-currency / multi-entity setup** | Recommended — **[gated]** | **Currency `[auto]`; the settlement currency and the processor's rate are `[manual]`.** |
-| **Posting approach** — per-transaction or periodic aggregate | **Required — Mosofin addition** | **The original offers both; the reconciliation differs.** Ask which is in use. |
-| **Whether a reserve or hold applies** | Recommended — **[manual]** | It is the entity's asset; see the edge cases. |
+| **Posting approach** — per-transaction or periodic aggregate | **Required — Mosofin addition** | **Answered in Stage 1 — confirm, don't re-ask.** **The original offers both; the reconciliation differs.** Ask which is in use. |
+| **Whether a reserve or hold applies** | Recommended — **[manual]** | **Answered in Stage 1 — confirm, don't re-ask.** It is the entity's asset; see the edge cases. |
 | **Confirm scope** | **Required** | Read back in-scope company files and processors by `display_name`, and the period. |
 | **Confirm any profile contradiction** | **Required if one appears** | e.g. no clearing account for a processor clearly in use. |
 | **Confirm manual evidence** | **Required** | The bank statement, the contract and any export are `[manual]`. |
 
-Ask as **one short batch**. Propose defaults where reasonable — but **never** default a fee rate, a
+Ask what remains as **one short batch**. Propose defaults where reasonable — but **never** default a fee rate, a
 settlement currency, or a tax treatment.
 
 **On later runs**, read stored preferences first (Step 10), confirm in one line, and ask only what changed.

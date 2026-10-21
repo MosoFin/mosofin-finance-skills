@@ -1,4 +1,4 @@
-<!-- merchant-and-payment-processor-rec · edge-cases.md · read for: Step 3 (the net-revenue test) and whenever something looks unusual. Edit here, not in SKILL.md. -->
+<!-- merchant-and-payment-processor-rec · edge-cases.md · read for: Stage 3 (the net-revenue test) and whenever something looks unusual. Edit here, not in SKILL.md. -->
 
 ## Edge Cases
 
@@ -78,6 +78,6 @@ and the account map; recompute.
 reconcile against another entity's clearing account.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the task as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
 
 ---

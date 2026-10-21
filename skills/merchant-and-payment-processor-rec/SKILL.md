@@ -1,6 +1,6 @@
 ---
 name: merchant-and-payment-processor-rec
-description: "Use this skill whenever the user wants to reconcile a payment processor (Stripe, Square, PayPal, Braintree, Adyen, Shopify Payments, etc.) to the GL using their Mosofin workspace. Triggers include: 'reconcile Stripe to GL', 'process Square settlements', 'PayPal monthly rec', 'merchant processor reconciliation', 'why doesn't Stripe match revenue', 'reconcile online payments', or uploading a processor export. Workspace-scoped: it confirms the workspace, discovers which company files and processors are connected and which read-only tools are enabled, then rolls forward the clearing account, ages unsettled balances, and tests the classic error — revenue recorded net of processor fees. Do NOT use for bank reconciliation alone — use bank-reconciliation. Do NOT use for cash application — use cash-application. Outputs a processor-to-GL reconciliation with gross sales, fees, refunds, chargebacks, the posting JEs, and a coverage sheet."
+description: "Reconciles a payment processor — Stripe, Square, PayPal, Braintree, Adyen, Shopify Payments — to the general ledger: gross sales, fees, refunds, chargebacks and payouts, with the clearing account rolled forward and aged. Tests the most common error, revenue recorded net of processor fees. Reads the books through a connected Mosofin workspace when the user agrees, or works from uploaded exports — processor payout and transaction CSVs, GL detail or a trial balance. Use when the user asks to reconcile Stripe or Square to the books, process processor settlements, explain why payouts do not match revenue, check merchant fees, or uploads a processor export. Do not use for bank reconciliation alone (use bank-reconciliation) or for applying customer payments (use cash-application). Read-only: produces a reconciliation, proposed entries and a coverage sheet, and posts nothing."
 ---
 
 # Payment processor ↔ books reconciliation
@@ -17,7 +17,7 @@ the same. Background: [`references/overview.md`](references/overview.md).
 ## Rules that never bend
 
 - **Asks before using Mosofin.** A connected account is not permission to read it.
-- **Reads nothing until Step 1 is answered** and you have confirmed the read-back.
+- **Reads nothing until Stage 1 is answered** and you have confirmed the read-back.
 - **Never writes, updates or deletes anything, in any system.** Every entry it produces is a
   proposal for a person to post.
 - **Never estimates a figure** that should come from your books or the processor. A gap is
@@ -28,7 +28,9 @@ the first tool call.**
 
 ---
 
-## Step 1 — Intake: ask these first, in one message
+## Stage 1 — Intake: ask these first, in one message
+
+*Stages 1–6 are this card's. "Steps 0–10" always mean the steps in `references/method.md`.*
 
 Before reading any data, collect the basics in **one short batch**, not one question at a time.
 Ask only what you cannot already see.
@@ -72,13 +74,13 @@ straight away.
 
 ---
 
-## Step 2 — Confirm scope and capabilities *(Mosofin path only)*
+## Stage 2 — Confirm scope and capabilities *(Mosofin path only)*
 
 Run Gates 0–3 in [`references/gates.md`](references/gates.md). They confirm the workspace and the
 company file, check which read tools are enabled, and read the company profile, so Step 1's
-answers do not need asking twice. On the upload path, go straight to Step 3.
+answers do not need asking twice. On the upload path, go straight to Stage 3.
 
-## Step 3 — Read both sides, and test for net revenue
+## Stage 3 — Read both sides, and test for net revenue
 
 Pull the GL side and the processor side, then break each payout into gross, fees, refunds and
 chargebacks: [`references/method.md`](references/method.md) Steps 0–3.
@@ -86,20 +88,20 @@ chargebacks: [`references/method.md`](references/method.md) Steps 0–3.
 **Always run the net-revenue test.** It is the most valuable check in this skill, and it lives
 in [`references/edge-cases.md`](references/edge-cases.md) under *Revenue recorded net of fees*.
 
-## Step 4 — Roll forward the clearing account and tie payouts
+## Stage 4 — Roll forward the clearing account and tie payouts
 
 Clearing roll-forward and ageing, payouts against recorded deposits, then currency and tax:
 [`references/method.md`](references/method.md) Steps 4–7. Check
 [`references/edge-cases.md`](references/edge-cases.md) for reserves, chargebacks, payout freezes
 and multi-entity accounts.
 
-## Step 5 — Propose entries and present the result
+## Stage 5 — Propose entries and present the result
 
 Construct the correcting entries as **proposals**, then build the output and coverage sheet:
 [`references/method.md`](references/method.md) Steps 8–9. Before presenting, check it against
 [`references/output.md`](references/output.md).
 
-## Step 6 — Offer to save *(optional)*
+## Stage 6 — Offer to save *(optional)*
 
 Only after the results have been shown, and only on an explicit yes:
 [`references/method.md`](references/method.md) Step 10.
@@ -111,9 +113,9 @@ Only after the results have been shown, and only on an explicit yes:
 | File | Read when |
 |---|---|
 | [`references/mosofin-protocol.md`](references/mosofin-protocol.md) | Before the first tool call |
-| [`references/gates.md`](references/gates.md) | Step 2, Mosofin path |
-| [`references/method.md`](references/method.md) | Steps 3–6 |
-| [`references/edge-cases.md`](references/edge-cases.md) | Step 3, and whenever something looks unusual |
+| [`references/gates.md`](references/gates.md) | Stage 2, Mosofin path |
+| [`references/method.md`](references/method.md) | Stages 3–6 |
+| [`references/edge-cases.md`](references/edge-cases.md) | Stage 3, and whenever something looks unusual |
 | [`references/output.md`](references/output.md) | Before presenting |
 | [`references/overview.md`](references/overview.md) | Background, or when a user asks why |
 | [`references/tools-and-glossary.md`](references/tools-and-glossary.md) | When you need a tool name or a term |

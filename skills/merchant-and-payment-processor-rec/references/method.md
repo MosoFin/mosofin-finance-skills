@@ -1,6 +1,22 @@
-<!-- merchant-and-payment-processor-rec · method.md · read for: Steps 3–6 — the reconciliation itself. Edit here, not in SKILL.md. -->
+<!-- merchant-and-payment-processor-rec · method.md · read for: Stages 3–6 — the reconciliation itself. Edit here, not in SKILL.md. -->
 
 # PART B — The domain work
+
+## Contents
+
+- Step 0 — Fetch the evidence (grounding) — Mosofin addition
+- Step 1 — Understand the processor's data structure
+- Step 2 — Decompose the gross-to-net flow
+- Step 3 — Identify the relevant timing of each component
+- Step 4 — Reconcile processor clearing account
+- Step 5 — Tie payouts to bank deposits
+- Step 6 — Handle multi-currency
+- Step 7 — Tax handling
+- Step 8 — Construct the JEs
+- Step 9 — Output
+- Step 10 — Evolve the skill (Mosofin-specific, final step)
+- Both entity scenarios
+
 
 Every step below is the original procedure, unchanged in count, order, or substance, with plain-language
 wording, an `[auto]` / `[gated]` / `[manual]` verdict, and the typical evidence tool added.
@@ -38,11 +54,46 @@ message.**
 
 Handle the envelopes:
 
-- `approval_required` → ask the user in chat, then re-invoke the same tool with `approved=true`.
+- `approval_required` → **reads only:** if the tool reads, ask the user in chat, then re-invoke the same
+  tool with `approved=true`. **If it would write, never re-invoke** — record it as refused and stay on the
+  read path; see the hard stop in `mosofin-protocol.md`.
 - `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → convert that task to **[manual]** and record the gap.
 - `UNKNOWN_TOOL` → read the valid names from the error; do not guess.
 - Dead connection → surface the `reconnect_url`.
+
+### Reading an upload (the manual path)
+
+When the processor side — or the books — arrive as files instead of tool reads, turn each file into the
+same evidence before Step 1. **Do not guess at a column you cannot identify; ask.**
+
+**Stripe's payout reconciliation report** documents these columns
+([Stripe docs](https://docs.stripe.com/reports/report-types/payout-reconciliation)):
+
+| Column | What it is | Use it for |
+|---|---|---|
+| `gross` | Gross amount of the transaction | Gross sales, refunds and chargebacks, split by `reporting_category` |
+| `fee` | Fees paid for this transaction | The processor fee total — the number the net-revenue test needs |
+| `net` | Net amount of the transaction | What reached the payout |
+| `reporting_category` | Stripe's grouping of balance transactions | Separating charges, refunds, disputes and fees |
+| `automatic_payout_id` | The automatic payout this transaction settled in | Rebuilding each payout from its transactions |
+| `automatic_payout_effective_at` | When the payout is expected in the bank | Tying payouts to the deposits in the books |
+| `currency` | ISO code for `gross`, `fee` and `net` | Never summing two currencies together |
+| `balance_transaction_id`, `created` | Identifier and timestamp | Tracing and period cut-off |
+
+Stripe states amounts in **major units** — dollars for USD — so no division by 100 is needed. On a manual
+payout schedule `automatic_payout_id` is empty; group by date range instead and say so.
+
+**Other processors** (Square, PayPal and the rest): find the equivalent gross, fee, net, type, payout and
+date columns, show the user the mapping, and **confirm it before using it.**
+
+**Before trusting any upload, check and report:**
+
+- **gross − fee = net**, in total and for each payout. A break means a column is mapped wrongly or rows are
+  missing.
+- The file covers **exactly the Stage 1 period** — no rows outside it, no missing days at either end.
+- One currency per total. Split anything that mixes them.
+- The row count and the gross, fee and net totals, stated back to the user.
 
 Check the **`mock` flag** **on both sides**. `mock: true` on the processor side means **the reconciliation
 is against fixture activity** and proves nothing.

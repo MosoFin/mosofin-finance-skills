@@ -1,4 +1,4 @@
-<!-- merchant-and-payment-processor-rec · output.md · read for: Step 5 — before presenting results. Edit here, not in SKILL.md. -->
+<!-- merchant-and-payment-processor-rec · output.md · read for: Stage 5 — before presenting results. Edit here, not in SKILL.md. -->
 
 ## Output Quality Standards
 

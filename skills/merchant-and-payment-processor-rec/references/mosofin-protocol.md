@@ -2,6 +2,17 @@
 
 # Mosofin protocol — the full rules
 
+## Contents
+
+- Before you start — this skill works with or without Mosofin
+- Strict rule — this skill never changes your data
+- Onboarding — required whenever Mosofin is connected
+- First — ask whether to use Mosofin for this run
+- Confirming scope — workspace, then data sources, then tools
+- Write tools — the Gate 2 guardrail
+- Write tools are out of scope — always
+
+
 SKILL.md states these rules in one line each. This is their complete wording, and it wins
 wherever the two seem to differ.
 
@@ -55,7 +66,7 @@ Before any skill reads anything, the workspace and the data sources in it must b
 confirmed with you. It is the same sequence for every Mosofin skill, so it is kept in
 one place rather than repeated in each:
 
-- in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
+- in this repo: [`shared/onboarding.md`](../../../shared/onboarding.md)
 - installed on its own, or you would rather read the product docs:
   [docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)
 
