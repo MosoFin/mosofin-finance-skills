@@ -457,7 +457,9 @@ Typical opening batch, per in-scope entity:
 
 Handle the envelopes:
 
-- `approval_required` → ask the user in chat, then re-invoke the same tool with `approved=true`.
+- `approval_required` → **reads only:** if the tool reads, ask the user in chat, then re-invoke the same
+  tool with `approved=true`. **If it would write, never re-invoke** — record it as refused and stay on the
+  read path; see the hard stop in Gate 2.
 - `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → convert that task to **[manual]** and record the gap. **If it is the COA read,
   say explicitly which fallback is now in use.**
@@ -930,7 +932,7 @@ correction is a decision; history is only practice. **Say that the two disagree.
 apply one entity's account numbers to another.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the task as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
 
 ---
 

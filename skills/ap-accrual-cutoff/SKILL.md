@@ -434,7 +434,7 @@ Typical opening batch, per in-scope entity:
 Handle the envelopes:
 
 - `approval_required` → ask the user in chat, then re-invoke the same tool with
-  `approved=true`.
+  `approved=true` (**reads only — never for a write**).
 - `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → convert that task to **[manual]** and record the gap.
 - `UNKNOWN_TOOL` → read the valid names from the error; do not guess.
@@ -861,7 +861,7 @@ stored recurring vendor against actual recent bills before accruing it.
 Flag it. Never apply it to a different entity; never drop it silently.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the task as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
 
 ---
 

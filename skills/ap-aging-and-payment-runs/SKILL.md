@@ -459,7 +459,7 @@ Typical opening batch, per in-scope entity:
 Handle the envelopes:
 
 - `approval_required` → ask the user in chat, then re-invoke the same tool with
-  `approved=true`.
+  `approved=true` (**reads only — never for a write**).
 - `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → reconstruct if bill-level data is available (labelled as such),
   otherwise convert to **[manual]** and record the gap.
@@ -867,7 +867,7 @@ bucket, a priority, and possibly a payment.
 Flag it. Never apply it to a different entity; never drop it silently.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the task as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
 
 ---
 

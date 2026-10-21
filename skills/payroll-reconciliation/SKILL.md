@@ -461,7 +461,9 @@ Typical opening batch, per in-scope entity:
 
 Handle the envelopes:
 
-- `approval_required` → ask the user in chat, then re-invoke the same tool with `approved=true`.
+- `approval_required` → **reads only:** if the tool reads, ask the user in chat, then re-invoke the same
+  tool with `approved=true`. **If it would write, never re-invoke** — record it as refused and stay on the
+  read path; see the hard stop in Gate 2.
 - `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → convert that reconciliation to **[manual]** and record the gap.
 - `UNKNOWN_TOOL` → read the valid names from the error; do not guess.
@@ -849,7 +851,7 @@ change annually.** Store them with effective dates and re-confirm.
 apply one entity's due dates or wage bases to another.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the reconciliation as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the reconciliation as `[gated]` in the coverage sheet.
 
 ---
 

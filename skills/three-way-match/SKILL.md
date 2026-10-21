@@ -387,7 +387,7 @@ Interview for:
 ## How to read the verdicts
 
 - **`[auto]`** — Mosofin can do this from live reads, unattended.
-- **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` and the `data_source_id`.
+- **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` (**reads only — never for a write**) and the `data_source_id`.
 - **`[manual]`** — not on this surface, or not a machine's judgment. **The step stays. The user performs it.**
 
 **Everything here is a recommendation.** The gateway is read-only. **Mosofin pays nothing, holds nothing and releases nothing** — a human acts on the Pay / Hold / Reject conclusion.

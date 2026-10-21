@@ -130,6 +130,24 @@ for f in "$DIR"/*/SKILL.md; do
   reqn "$f" "$name: manual run treats supplied data as pre-validated" \
       "Manual input is not more trustworthy than a ledger read"
 
+  # 8e. every approved=true instruction, anywhere in the skill, is limited to reads.
+  #     The policy-table row was checked before; Step 0's envelope list carried the
+  #     same instruction unqualified in 23 skills. Shared blocks are already enforced.
+  bad=$(awk '
+    /<!-- shared:.* start -->/ {skip=1}
+    /<!-- shared:.* end -->/   {skip=0; next}
+    skip {next}
+    {buf[NR]=$0}
+    END{
+      for(i=1;i<=NR;i++) if(i in buf && buf[i] ~ /approved=true/){
+        w=buf[i-2] " " buf[i-1] " " buf[i] " " buf[i+1] " " buf[i+2]
+        if (w !~ /[Rr]eads only|never re-invoke a write|[Dd]o not re-invoke/) print i
+      }
+    }' "$f")
+  if [ -n "$bad" ]; then
+    echo "  FAIL  $name: approved=true without a reads-only limit (line $(echo $bad | tr ' ' ','))"; fail=$((fail+1))
+  fi
+
   # 9. the shared scope-confirmation protocol: workspace -> datasources -> tools
   reqn "$f" "$name: missing the scope-confirmation protocol" "Confirming scope"
   reqn "$f" "$name: scope protocol does not order the three questions" \

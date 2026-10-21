@@ -386,7 +386,8 @@ Interview only for what is genuinely still open. For this skill that is a short 
 Every task below is tagged. This is the point of the conversion, so the tags are used strictly and never omitted to make a step look better than it is.
 
 - **`[auto]`** — Mosofin can do this from live reads, unattended, with no further permission.
-- **`[gated]`** — Mosofin can do this, but the gateway will ask first. Expect `approval_required`; explain, get consent, re-invoke with `approved=true` and the `data_source_id`.
+- **`[gated]`** — Mosofin can do this, but the gateway will ask first. Expect `approval_required`; explain, get consent, re-invoke with `approved=true` and the `data_source_id` —
+  **reads only; never re-invoke a write**, see the hard stop in Gate 2.
 - **`[manual]`** — Mosofin cannot do this at all. The evidence is not on this surface, or the judgment is not a machine's to make. The step is still here, still required, and the user performs it.
 
 A step with three sub-parts may carry three different verdicts. That is normal and is shown rather than averaged into one.

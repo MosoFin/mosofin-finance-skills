@@ -444,7 +444,7 @@ Typical opening batch, per in-scope entity:
 Handle the envelopes you get back:
 
 - `approval_required` → ask the user in chat, then re-invoke the same tool with
-  `approved=true`.
+  `approved=true` (**reads only — never for a write**).
 - `entity_required` → more than one company file is live and you passed none. Ask by
   `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → convert that task to **[manual]** and record the gap.
@@ -957,7 +957,7 @@ user to name the account, and record the answer as a preference in Step 9.
 Flag it. Never apply it to a different entity, never drop it silently.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke the same
-tool with `approved=true` after an explicit yes, and record the task as `[gated]` rather than
+tool with `approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` rather than
 `[auto]` in the coverage sheet.
 
 ---

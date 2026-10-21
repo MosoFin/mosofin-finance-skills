@@ -449,7 +449,9 @@ Typical opening batch, per in-scope entity:
 
 Handle the envelopes:
 
-- `approval_required` → ask the user in chat, then re-invoke the same tool with `approved=true`.
+- `approval_required` → **reads only:** if the tool reads, ask the user in chat, then re-invoke the same
+  tool with `approved=true`. **If it would write, never re-invoke** — record it as refused and stay on the
+  read path; see the hard stop in Gate 2.
 - `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 - `tool_policy_disabled` → convert that check to **[manual]** and record the gap — **the task stays on the
   checklist**, only its status verification is lost.
@@ -934,7 +936,7 @@ month closing that is not.**
 still exist and simply cannot be verified.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the task as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
 
 ---
 

@@ -666,7 +666,7 @@ description wins.
 payment-application, or write-off capability.** None is exposed; do not look for one.
 
 Envelope handling: `approval_required` → ask in chat, re-invoke the same tool with
-`approved=true`. `entity_required` → ask by `display_name`, then pass that `data_source_id`.
+`approved=true` (**reads only — never for a write**). `entity_required` → ask by `display_name`, then pass that `data_source_id`.
 `tool_policy_disabled` → convert to `[manual]` and record the gap. Dead connection → surface
 the `reconnect_url`.
 
@@ -800,7 +800,7 @@ resolved will otherwise suppress legitimate collections forever. Re-confirm stan
 each run.
 
 **A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` after an explicit yes, and record the task as `[gated]` in the coverage sheet.
+`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
 
 ---
 

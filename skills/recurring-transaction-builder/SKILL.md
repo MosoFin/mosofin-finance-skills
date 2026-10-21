@@ -392,7 +392,7 @@ This skill uses three, with one distinction worth drawing:
 - **`[auto]`** — Mosofin does this unattended. **Two sub-kinds**, and Sheet 5 distinguishes them:
   - **`[auto: computed]`** — pure calculation from what the user supplied. Needs no ledger. Works even with no datasource connected.
   - **`[auto: read]`** — requires a live read of the workspace. Unavailable without a connection.
-- **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` and the `data_source_id`.
+- **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` (**reads only — never for a write**) and the `data_source_id`.
 - **`[manual]`** — not on this surface, or not a machine's to do. **The step stays. The user performs it.**
 
 **Nothing here is posted, created or scheduled.** Every occurrence is a proposal for a human to load.
