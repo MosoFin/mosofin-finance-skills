@@ -517,7 +517,8 @@ Book balance (GL ending balance)
   worth pursuing.
 - **Interest and credits not recorded / fees and debits not recorded** — **[manual]** to identify
   without the statement, since by definition they are not in the books. This is the same blind
-  spot described in `bank-fee-and-interest-analysis`.
+  spot a dedicated bank-fee and interest review has: the books cannot show what only the
+  statement knows.
 - **Errors on books** — **[auto]** and the strongest automated contribution here: duplicates,
   wrong amounts, wrong dates, wrong accounts, all detectable in the ledger alone.
 
@@ -665,7 +666,8 @@ classification all read `manual` with the gap "bank statement not supplied", and
 says the reconciliation was not completed**. That is the correct, expected output — not a defect,
 and not something to disguise with a book-side total.
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+If creating xlsx, use the host's spreadsheet skill when one is available (on Claude.ai it lives at
+`/mnt/skills/public/xlsx/SKILL.md`); where there is none, deliver one CSV per file instead.
 
 **File naming — Mosofin addition** (the original left it unstated, and multi-account, multi-entity
 output needs it): `Bank_Rec_[AccountName]_[YYYY-MM].xlsx`, and in a multi-entity run
@@ -688,6 +690,9 @@ estimating.
 - **Outstanding checks older than 90 days escalated** — a cheque uncashed for a quarter may be
   lost, may be a duplicate payment about to be made, and in many jurisdictions eventually becomes
   unclaimed property
+- **Those two ages are bookkeeping practice, not a published standard.** Adjust them to the
+  entity's bank cutoffs and its state's unclaimed-property rules, and record the chosen ages as a
+  preference in Step 7
 - **Adjusted balances tie to the cent** — not to materiality. A bridge that nearly balances has an
   unidentified item in it
 
@@ -827,8 +832,8 @@ appearing unmatched may be months old. Say the bridge starts unqualified and rec
 establishing a baseline.
 
 **A foreign-currency account carried in the base currency** — the bridge will never balance if one
-side is converted and the other is not. Reconcile in the account's own currency, then translate;
-see `multicurrency-fx-revaluation`.
+side is converted and the other is not. Reconcile in the account's own currency, then translate.
+The translation itself is an FX revaluation task, separate from this reconciliation.
 
 **A transfer between the entity's own accounts recorded once** — appears as an unexplained debit on
 one account and an unexplained credit on another. Always check transfers on both accounts before
