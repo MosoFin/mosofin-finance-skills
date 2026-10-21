@@ -16,6 +16,7 @@
 SKILL.md states these rules in one line each. This is their complete wording, and it wins
 wherever the two seem to differ.
 
+<!-- shared:onboarding-inline start -->
 ## Before you start — this skill works with or without Mosofin
 
 **With Mosofin connected**, the skill reads your live accounting data through the
@@ -87,7 +88,9 @@ this particular request — so the run is shaped around your books rather than a
 template.
 
 ---
+<!-- shared:onboarding-inline end -->
 
+<!-- shared:scope-protocol start -->
 ### First — ask whether to use Mosofin for this run
 
 Two things decide how this skill runs, and they are settled **before Gate 0**.
@@ -208,9 +211,11 @@ and retry.
 
 **This map is built fresh every run** and held only for this run. It is written out in
 the coverage sheet, never written back into this file.
+<!-- shared:scope-protocol end -->
 
 ## Write tools — the Gate 2 guardrail
 
+<!-- shared:write-guardrail start -->
 ### Write tools are out of scope — always
 
 `get_datasource_tools` describes what the connection *could* do. This skill uses only
@@ -248,3 +253,4 @@ skill's behalf. Do not defer it to a later step in the hope it becomes permitted
 
 **There is no path through this skill that ends in changed data.** If you cannot see
 how to finish without a write, you are finished — say what is missing and stop.
+<!-- shared:write-guardrail end -->

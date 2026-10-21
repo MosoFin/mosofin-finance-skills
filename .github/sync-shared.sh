@@ -12,6 +12,10 @@
 # The onboarding steps are NOT injected: they live once at shared/onboarding.md and
 # every skill links to it. Only the inline half and the write guardrail are copied
 # into each SKILL.md, because that text must be impossible to miss.
+#
+# Card-format skills (a short SKILL.md plus references/) carry the blocks in
+# references/mosofin-protocol.md instead, which the card tells the agent to read
+# before the first tool call. Relative links gain one ../ to match the depth.
 #   .github/sync-shared.sh --check    verify they match; non-zero if any drifted
 #
 # Edit .github/shared/*.md, run this, commit. Never hand-edit a block inside a
@@ -31,18 +35,22 @@ dir="${dir:-skills}"
 [ -d "$dir" ] || { echo "no such directory: $dir" >&2; exit 2; }
 rc=0; changed=0; checked=0
 
-for f in "$dir"/*/SKILL.md; do
-  [ -f "$f" ] || continue
-  name=$(basename "$(dirname "$f")")
+for card in "$dir"/*/SKILL.md; do
+  [ -f "$card" ] || continue
+  name=$(basename "$(dirname "$card")")
   checked=$((checked+1))
+  f="$card"; up=""
+  if [ -f "$(dirname "$card")/references/mosofin-protocol.md" ]; then
+    f="$(dirname "$card")/references/mosofin-protocol.md"; up="../"
+  fi
   for block in onboarding-inline scope-protocol write-guardrail; do
     src=".github/shared/$block.md"
     if [ ! -f "$src" ]; then echo "  FAIL  missing $src"; rc=1; continue; fi
     if ! grep -q "<!-- shared:$block start -->" "$f" || ! grep -q "<!-- shared:$block end -->" "$f"; then
       echo "  FAIL  $name: missing <!-- shared:$block --> markers"; rc=1; continue
     fi
-    awk -v s="$src" -v b="$block" '
-      $0 == "<!-- shared:" b " start -->" { print; while ((getline l < s) > 0) print l; close(s); skip=1; next }
+    awk -v s="$src" -v b="$block" -v up="$up" '
+      $0 == "<!-- shared:" b " start -->" { print; while ((getline l < s) > 0) { gsub(/\]\(\.\.\//, "](" up "../", l); print l }; close(s); skip=1; next }
       $0 == "<!-- shared:" b " end -->"   { skip=0 }
       !skip { print }
     ' "$f" > "$f.sync"

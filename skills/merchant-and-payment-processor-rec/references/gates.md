@@ -4,10 +4,24 @@
 
 ## Contents
 
-- Gate 0 — Confirm the workspace
-- Gate 1 — Discover live datasources and settle the entity scenario
-- Gate 2 — Discover enabled tools → build the capability map
-- Gate 3 — Profile the entity, then interview the user
+- ONBOARDING — Confirm the workspace and its data sources
+  - Gate 0 — Confirm the workspace
+  - Gate 1 — Discover live datasources and settle the entity scenario
+- PART A — Explore the confirmed sources, and personalise this run
+  - Gate 2 — Discover enabled tools → build the capability map
+  - Gate 3 — Profile the entity, then interview the user
+
+# ONBOARDING — Confirm the workspace and its data sources
+
+**Required for every skill, every run — whenever Mosofin is connected.** Gates 0 and 1
+settle *which books this is about*: the workspace, and the data sources inside it.
+**Part A then explores what those confirmed sources can actually do** and personalises
+the run around them. Nothing is read before Gate 0 is answered.
+
+**If the Mosofin tools are not present at all, skip this part.** There is nothing to
+onboard: say so once, then run the skill manually on data the user supplies — the
+upload checklist in Stage 1 of `SKILL.md`. The precondition check is in
+[`mosofin-protocol.md`](mosofin-protocol.md).
 
 
 Run Gates 0 → 1 → 2 → 3 in this order, before reconciling anything. This ordering is the contract. Do not
@@ -58,6 +72,13 @@ Settle the entity scenario:
   the cross-entity step.
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
+
+# PART A — Explore the confirmed sources, and personalise this run
+
+The workspace and its data sources are settled. This part finds out **what they
+expose and which of it serves this request** — the tool catalogue in Gate 2, then
+what is already known about this entity plus whatever still has to be asked in
+Gate 3. The result is a run shaped around these books, not a generic template.
 
 ## Gate 2 — Discover enabled tools → build the capability map
 
