@@ -161,7 +161,7 @@ live data, the output says so in the filename and on the first page.
 | `cash-flow-forecast-13-week` | 58% | Weekly direct cash forecast with covenant alerts |
 | `fixed-asset-register-and-depreciation` | 57% | FA register, depreciation, capitalisation and disposals |
 
-**Wave 4** — payment processors, and the first skill in the lightweight card format:
+**Wave 4** — payment processors, and the lightweight card format (also applied to `bank-reconciliation` in Wave 1):
 
 | Skill | Automated | What it's for |
 |---|---:|---|
