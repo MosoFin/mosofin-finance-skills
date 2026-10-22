@@ -1,724 +1,137 @@
 ---
 name: three-way-match
-description: "Use this skill whenever the user wants to perform a three-way match between purchase orders, goods receipts and vendor invoices against a connected Mosofin workspace. Triggers include: 'three-way match these documents', 'verify the invoice against the PO and receipt', 'match PO to receipt to invoice', 'PO matching', 'GRN matching', 'run the match across all open invoices', uploading a PO + receipt + invoice trio, or any AP control task involving PO-to-invoice verification. Do NOT use for invoice extraction alone — use invoice-data-extractor. Do NOT use for duplicate detection — use duplicate-invoice-detection. Where the workspace holds purchase orders and item receipts, this runs across the full population every period rather than document by document. Outputs a match result with line-by-line comparison and exception list. Proposes only — Mosofin pays nothing and releases nothing."
+description: "Matches a vendor invoice to its purchase order and goods receipt before payment: header checks, then every line for quantity, price and item, your tolerance applied, fifteen exception tests from price creep to an unapproved order, and a Pay, Hold or Reject recommendation with the matched and disputed amounts. Counts the legs it actually has and says plainly whether it ran a three-way or a two-way match. Reads bills and purchase orders through a connected Mosofin workspace when the user agrees, or works from uploaded POs, delivery records and invoices. Use when the user asks whether an invoice should be paid, wants to match invoices to purchase orders or receipts, mentions overbilling, short shipments, duplicate invoices, received-not-invoiced or goods received not invoiced (GRNI), or uploads a PO, receipt or invoice. Do not use for finding duplicate payments alone (use duplicate-invoice-detection) or for reconciling a vendor statement (use vendor-statement-reconciliation). Read-only: recommends, posts nothing, pays nothing."
 ---
 
-<!-- shared:onboarding-inline start -->
-## Before you start — this skill works with or without Mosofin
+# Three-way match: order, receipt, invoice
 
-**With Mosofin connected**, the skill reads your live accounting data through the
-gateway: the figures come from your own books, it validates against the real chart of
-accounts, and most steps run automatically.
+Checks that three documents agree before money goes out: the **purchase order** (what you agreed
+to buy), the **goods receipt** (what arrived, and in what condition) and the **vendor invoice**
+(what the supplier wants paid). It compares them header first, then line by line, applies your
+tolerance, runs fifteen exception tests, and recommends **Pay, Hold or Reject** with the matched
+and disputed amounts. A person acts on the recommendation.
 
-**Without it, the skill still works.** No subscription, no connector, or a skill copied
-on its own — you are not blocked and you are not asked to buy anything first. The
-Mosofin gates are skipped and you are asked for what each step needs instead: a trial
-balance, a statement, an export, the documents themselves. **The accounting logic, the
-edge cases and the output standards are identical** — only where the numbers come from
-changes, and the output always says which is which.
+**Works with or without Mosofin.** With Mosofin connected it reads the bills, and the purchase
+orders where the system holds them. **No accounting system reliably holds the goods receipt**, so
+it checks at Gate 2 which legs exist and asks for the rest. **If it has invoices and orders but no
+receipts, it runs a two-way match and says so** in the summary and the file name; the five tests
+that need the receipt are listed as not run, never as passed.
+Background: [`references/overview.md`](references/overview.md).
 
-**You choose, and you are asked.** Where a connection exists, the skill asks at the
-start whether to use it for this run or whether you would rather supply the data
-yourself — **a connected gateway is not taken as consent to read your books.** Say no
-and it runs manually without asking again.
+## Rules that never bend
 
-### Strict rule — this skill never changes your data
+- **Asks before using Mosofin.** A connected account is not permission to read it.
+- **Reads nothing until Stage 1 is answered** and you have confirmed the read-back.
+- **Never pays, holds or releases money, and never changes data in any system.** Every
+  recommendation is for a person to act on.
+- **Never invents a tolerance.** With none given, it expects an exact match and flags every
+  variance; how much overbilling is acceptable is the business's decision.
+- **Never lets an absent test read as a pass, and never concludes fraud.** It names which match it
+  ran and which tests did not; patterns are reported with counts and amounts, people conclude.
 
-**This skill will never write, update or delete existing data in any data source.**
-Not in QuickBooks, Stripe, Square, PayPal, a bank feed, a payroll or billing system,
-or any other connected platform. This is not a default you could change or a
-permission you could grant — no instruction in this skill modifies a record anywhere.
-
-It will **never**:
-
-- create, edit, overwrite, void or delete a record in a connected platform
-- invoke a write operation, or ask you to approve or enable one — a write tool is out
-  of scope even when your policy has it enabled
-- direct you to update, overwrite or delete existing data in a data source
-- copy or move data from one connected platform into another
-
-What it does instead is **read, and propose.** Every entry, schedule, reconciliation
-and document it produces is a **draft for you to review.** Where it finds a problem —
-a duplicate, a mismatch, a stale balance — it describes the problem and proposes a
-correcting entry as a draft. It does not tell you to delete or overwrite the original,
-and it never acts on one itself.
-
-Whether anything reaches your books is a decision you make outside this skill, in your
-own system, by your own hand. **If you act on none of it, nothing in your data has
-changed.**
-
-### Onboarding — required whenever Mosofin is connected
-
-**If the Mosofin gateway is connected, onboarding is not optional and not per-skill.**
-Before any skill reads anything, the workspace and the data sources in it must be
-confirmed with you. It is the same sequence for every Mosofin skill, so it is kept in
-one place rather than repeated in each:
-
-- in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
-- installed on its own, or you would rather read the product docs:
-  [docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)
-
-**Already onboarded this workspace?** Then you have answered it once and will not be
-asked again from scratch — but **the confirmation itself still happens every run.**
-Gate 0 reads your workspace back and waits for an explicit yes; Gate 1 settles which
-company file. Those are not skippable, and no data is read before them.
-
-**No Mosofin connector? The skill still works.** If the gateway is not present at all,
-there is nothing to onboard: the gates are skipped, every step becomes `[manual]`, and
-you are asked for what each step needs — a trial balance, a statement, an export.
-**The accounting work is unchanged**; only the data source is. You will be told this
-once, and you will not be asked to install anything before being helped.
-
-What follows in **Part A** is not more onboarding. It is this skill exploring what your
-confirmed workspace and data sources can actually do — which tools exist, which serve
-this particular request — so the run is shaped around your books rather than a generic
-template.
-
----
-<!-- shared:onboarding-inline end -->
-# Three-Way Match — Mosofin Seed
-
-Performs a three-way match between a purchase order (PO), a goods receipt note (GRN) or proof of delivery, and a vendor invoice. Identifies pricing, quantity and authorisation exceptions **before payment.**
-
-This is a **seed skill**, written to be rewritten the first time it runs against a real workspace.
+Full wording: [`references/mosofin-protocol.md`](references/mosofin-protocol.md). **Read it before
+the first tool call.**
 
 ---
 
-## Everything depends on which legs the system actually holds
+## Stage 1 — Intake: ask these first, in one message
 
-The match has three legs, and a connected accounting system holds them to very different degrees:
+*Stages 1–6 are this card's. "Steps 1–6" always mean the steps in `references/method.md`.*
 
-| Leg | Typically in the accounting system? | Verdict |
+Before reading any data, collect what the books cannot tell you, in **one short batch**, not one
+question at a time. Ask only what you cannot already see.
+
+| # | Ask | Why it matters | If unanswered |
+|---|---|---|---|
+| **A** | *Use your Mosofin connection for this, or upload the documents yourself?* | Decides the path | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
+| **B** | *What tolerance applies: price %, quantity %, and a total-amount limit?* | Decides what is a match and what is an exception | **Default to exact match and flag every variance.** Say that you did. |
+| **C** | *Who may approve a purchase order, and up to what amount?* | Exceptions 11 and 12 (unapproved, or approved beyond authority) cannot run without it | Run the other thirteen tests and list 11 and 12 as not run. **Persist the matrix** once given; it changes rarely. |
+| **D** | *Are services purchase orders in scope, and what stands in for a goods receipt on them?* | A services PO with no receipt is a two-way match **by design**; a goods PO with no receipt is two-way **by omission**. They look the same in the output and are not | Treat as goods unless told otherwise, and say so. |
+| **E** | *Any orders or invoices in a foreign currency, and what rate policy applies?* | A price variance that is really an FX movement is the classic false exception | Flag every cross-currency pair and separate the FX movement before raising exception 1. |
+| **F** | *Who owns exception resolution?* | Every exception row needs an owner | Leave the owner column open and say so in the summary. |
+
+**Then, depending on the answer to A:**
+
+**Mosofin path — confirm, don't ask.**
+- Read back the workspace and the company file **by name** and wait for an explicit yes
+  (Gates 0–1 in [`references/gates.md`](references/gates.md)).
+- At Gate 2, answer the **three capability questions** from the live tool catalogue: does it
+  expose purchase orders, with line detail? item receipts, with quantities? approval status and
+  the approver? **Then say which match this will be** — three-way, two-way by design, or two-way
+  by omission — before promising anything.
+- Ask for whatever leg the system does not hold, usually the goods receipts.
+
+**Upload path — hand over one checklist.**
+
+| Upload | Needed? | Format |
 |---|---|---|
-| **Vendor invoice** | **Almost always** — it is a bill in the AP ledger | **`[auto]`** |
-| **Purchase order** | **Often, but not universally.** Many systems support POs; many businesses do not use them. | **`[auto]` if present** — check |
-| **Goods receipt** | **Frequently not.** Receiving is a warehouse function, and the GRN commonly lives in an inventory or WMS system, on paper, or nowhere. | **Often `[manual]`** |
+| **Purchase order(s)** | Required | PDF, XLSX, CSV, or pasted |
+| **Goods receipt, proof of delivery, or signed service confirmation** | **Required for goods.** Without it the match is two-way and the output says so | PDF, XLSX, CSV, or pasted |
+| **Vendor invoice(s)** | Required | PDF, XLSX, CSV, or pasted |
+| Tolerance policy (B) and approval matrix (C) | Recommended | Type it in the chat |
+| Vendor master, for payment-terms checks | Optional | CSV or pasted |
 
-**So the first question is not how to match. It is how many legs exist.**
+**Read back before starting, then wait for a yes:**
 
-> **If the workspace holds only invoices, this is not a three-way match. It is an invoice review.**
->
-> **If it holds invoices and POs but no receipts, it is a two-way match.**
+> *Matching **September's open invoices** for **Northbrook Trading** against purchase orders and
+> goods receipts, with the invoices and orders from **your Mosofin connection** and the receipts
+> **you uploaded**. **2% price tolerance, exact on quantity**, approval matrix as supplied. This
+> will be a **three-way match**. Shall I go ahead?*
 
-**Say which one is being performed**, in the output and in the file name. Presenting a two-leg exercise as a three-way match misrepresents the control that was operated — and the missing leg is usually the receipt, which is the leg that proves the goods actually arrived. **The strongest exceptions in Step 4 — *item billed not received*, *quantity overbilling*, *short-shipment billed in full* — all require it.** Without receipts, those tests do not run, and their absence from the exception list must not read as their having passed.
-
-**Check at Gate 2**, and check what the PO and receipt records actually carry — a system may hold POs with no line detail, or receipts with no quantities, either of which limits the match to header level.
-
-### The change of shape where the legs do exist
-
-The original is written **document by document**: *"uploading a PO + receipt + invoice trio."* That is how manual three-way matching works, because a person can only look at one trio at a time.
-
-**A connected workspace changes the unit of work.** Every open invoice, every PO, every receipt is readable together, so the match runs across **the whole population, every period**, unattended.
-
-That converts a per-invoice clerical check into **a standing control** — and it is precisely one of the ledger-evidenced controls that a SOX controls review can test at full population rather than by sample. **The exceptions found are the same; the coverage is not.**
-
-### Three near-substitutes
-
-**1. A PO number written on an invoice is not a match.** Vendors put PO references on their invoices as a courtesy, and AP staff frequently treat the presence of one as evidence the invoice is authorised. **It is a reference, not a verification** — the whole point of the match is to check that what the reference points to actually agrees.
-
-**2. An item receipt posted in the accounting system is not a goods receipt.** Where someone posts a receipt to close out a PO — often at month end, often in bulk, often to make the PO stop appearing on a report — **the record is a bookkeeping action, not evidence that anybody inspected anything.** `[auto]` can spot the signature: receipts posted in batches, all on one date, all exactly matching the PO quantity, frequently by the same user who entered the invoice. That last combination is a segregation-of-duties finding as well as a match one.
-
-**3. Matched is not approved.** A perfectly matching invoice from an unapproved PO is still unauthorised spending. Exceptions 11 and 12 in Step 4 are about authority, not arithmetic, and they are the ones a clean match will not surface.
+On the upload path, name each file you received and say what was read from it — document count,
+line count, totals, period. Flag anything unreadable, or any trio whose headers already disagree
+(different vendor, currency or entity), straight away.
 
 ---
 
-# ONBOARDING — Confirm the workspace and its data sources
+## Stage 2 — Confirm scope and capabilities *(Mosofin path only)*
 
-**Required for every skill, every run — whenever Mosofin is connected.** Gates 0 and 1
-settle *which books this is about*: the workspace, and the data sources inside it.
-**Part A then explores what those confirmed sources can actually do** and personalises
-the run around them. Nothing is read before Gate 0 is answered.
+Run Gates 0–3 in [`references/gates.md`](references/gates.md). They confirm the workspace and the
+company file, answer the three capability questions, read the company profile, and interview only
+for what Stage 1 did not cover. On the upload path, go straight to Stage 3.
 
-**If the Mosofin tools are not present at all, skip this part.** There is nothing to
-onboard: say so once, then run the skill manually on data the user supplies. See the
-precondition check below.
+## Stage 3 — Extract, then match headers and lines
 
-<!-- shared:scope-protocol start -->
-### First — ask whether to use Mosofin for this run
+Pull the whole open population in one batch, extract the fields from each document, confirm the
+four header checks, then match every invoice line to its PO line and receipt lines by line number,
+then SKU, then description, recording the basis per line:
+[`references/method.md`](references/method.md) Steps 1–2. An unmatched line is a status, never
+forced.
 
-Two things decide how this skill runs, and they are settled **before Gate 0**.
+## Stage 4 — Apply tolerances and run the fifteen tests
 
-**1. Are the Mosofin tools present at all?** — `list_workspaces` and the rest of the
-gateway. Check before doing anything else.
+Tolerance per line, then the exception tests the available legs allow, with severities, and the
+population patterns that only a full run shows (variances always just inside tolerance, bulk
+receipts, one name across several stages, received-not-billed as an accrual):
+[`references/method.md`](references/method.md) Steps 3–4. Check
+[`references/edge-cases.md`](references/edge-cases.md) for progress billings, blanket POs,
+substitutions, price clauses, FX, tax, and receipts dated before their PO.
 
-**2. If they are present, ask the user. Once, in these terms:**
+## Stage 5 — Propose a resolution and present the result
 
-> Do you want me to use your Mosofin connection for this — reading the figures straight
-> from your books — or would you rather provide the data yourself?
+Pay, Hold, Reject, request a credit, override with a documented reason and authority, or pay the
+matched portion and dispute the rest — proposed, never decided. Then the six sheets:
+[`references/method.md`](references/method.md) Steps 5–6. Before presenting, check the coverage
+and provenance sheet in [`references/output.md`](references/output.md): which legs were available,
+which tests ran, which did not and why. Ask whether the user wants the workpaper as an Excel file
+before creating one.
 
-**Wait for the answer.** A connected gateway is **not** consent to read from it, and
-this skill does not open with a data read. Never assume, never auto-pick.
+## Stage 6 — Offer to save *(optional)*
 
-- **Use Mosofin** → onboarding is required. Run Gates 0-1 to confirm the workspace and
-  its data sources, then Part A explores what those sources expose.
-- **Provide the data myself** → **skip Gates 0-2 entirely** and run manually, exactly as
-  though no connector were present. **Do not ask again during the run.** Raise it once
-  more only if the user asks for something their supplied data cannot answer, and then
-  as an offer, not a demand.
+Only after the results have been shown, and only on an explicit yes:
+[`references/method.md`](references/method.md), *Seed to evolved*. Persist which legs the system
+holds, the tolerance, the approval matrix, known price clauses, resolved exceptions and the
+override log — never the capability map itself, which Gate 2 reads fresh each run.
 
-**If the tools are not present, do not ask** — there is nothing to choose. The skill was
-copied on its own, the connector was never added, or there is no subscription.
-**Do not make connecting a condition of helping.** Say once, plainly, that Mosofin is
-not connected and this run will be manual, then **carry on with the skill's normal
-workflow**: ask for what each step needs — a trial balance, a statement, an export, the
-documents themselves — and do the accounting work on what the user provides.
+---
 
-**In manual mode**, whether chosen or unavoidable:
+## Files
 
-- every step is `[manual]`; there are no `[auto]` verdicts to claim, and none may be
-  implied
-- the coverage sheet records **why** it was manual — gateway absent, or the user chose
-  to supply the data — not that checks passed
-- the accounting logic, edge cases and output standards are **unchanged**. That is the
-  part of this skill that never depended on a connection
-- mention **once** that connecting Mosofin would automate the manual steps, with a link
-  to [docs.mosofin.com](https://docs.mosofin.com). Do not raise it again, and never
-  withhold work to press the point
-
-#### What a manual run actually does, gate by gate
-
-| Gate | In a manual run |
+| File | Read when |
 |---|---|
-| **Gate 0** — workspace | **Skipped.** There is no workspace to confirm. |
-| **Gate 1** — data sources | **Skipped as a discovery step.** Still ask *which entity or company this work is for*, by name, so every output can be labelled — but record it as **user-asserted**, not confirmed against a connection. |
-| **Gate 2** — capability map | **Skipped.** The map is not empty, it is uniform: **every task is `[manual]`.** |
-| **Gate 3** — profile, then interview | **Runs, and grows.** The profile half cannot run — there is no company-profile tool — so everything it would have derived silently becomes a **question**: base currency, fiscal calendar, country or region, time zone. Then the interview runs in full, and **every row of the Inputs table that would have been `[auto]` becomes something to ask for.** |
-
-Then **Part B runs unchanged** on what the user supplied.
-
-**Ask the user to upload the data, and name the formats.** A manual run does not mean
-retyping anything. Say plainly what to upload, in what form, and what each item is for —
-then read it from the files they provide.
-
-| Ask for | Upload as |
-|---|---|
-| Ledger detail, trial balance, transaction listings | **CSV** or **XLSX** export, or a pasted table |
-| Statements and third-party documents | **PDF** or **CSV**, or a clear photo / scan |
-| Invoices, bills, receipts, remittances | **PDF** or **image** — a single file or a batch |
-| Short facts — a date, a balance, a policy | typed straight into the chat |
-
-**Ask for the whole set up front, as a checklist, not drip-fed.** A person collecting
-exports would rather be given one list than be interrupted six times. Mark which items
-are strictly **required** and which merely improve the result, so they can decide how
-much to gather.
-
-**Confirm what actually arrived before starting the work.** Name each file, say what was
-read from it — period covered, row count, opening and closing balances — and list what
-is still outstanding. If a file is unreadable, covers the wrong period, or does not
-contain what its name suggests, **say so at once**. Never work around a bad input
-silently, and never guess at a column you cannot identify — ask.
-
-**If something cannot be supplied, say what the output will and will not be — before
-doing the work.** Never estimate a figure that was meant to come from the books, never
-fill a gap with a plausible number, and never present a partial result as complete. An
-honest partial answer, clearly labelled, is the correct outcome.
-
-**Everything the user provides is evidence like any other.** Reconcile it, check it,
-and challenge it where it does not tie. Manual input is not more trustworthy than a
-ledger read — it is less, because nothing validated it on the way in.
-
-**Present but not authenticated is not the same as absent.** If the tools are there and
-a call returns a `reconnect_url` or an auth error, surface it and let the user choose —
-reconnect, or continue manually. Do not silently fall back.
-
-### Confirming scope — workspace, then data sources, then tools
-
-**Nothing is read until scope is confirmed, and scope is confirmed in this order.**
-Each step depends on the answer to the one before it, so none of them may be skipped,
-merged, or guessed at.
-
-| # | Question to the user | How it is settled |
-|---|---|---|
-| 1 | **Which workspace?** | `list_workspaces` with **no arguments**. Read the workspace back **by name** and wait for an explicit yes. On `selection_required`, ask whether this is single- or multi-workspace, then which **by name**, then call again with `workspace_ids=[…]` and `mode="single"`/`"multi"`. |
-| 2 | **Which data sources, in that workspace?** | `get_agent_datasources` with the confirmed `workspace_id`. `connected: true` is in scope; `connected: false` is **excluded and named as excluded**, with any `reconnect_url` surfaced. Then settle the entity scenario — single-entity: which company; multi-entity: which set — always by `display_name`. |
-| 3 | **Which tools do those sources actually expose?** | `get_datasource_tools` per in-scope datasource, **and per company file when several are live — permissions are per company.** This is discovery, not a question: read what is there before promising anything. |
-
-**Never auto-pick.** Not the workspace, not the company file, not the entity scenario.
-**Silence is not a yes**, and an answer to one question is not an answer to the next.
-
-**Names, never internal ids.** Name the workspace and refer to companies by
-`display_name`. Never print an internal numeric tenant id, and never show a raw
-`data_source_id` — pass the opaque handle, show the name.
-
-**Only then does the work begin.** Once the workspace, the data sources and their tools
-are confirmed, resolve every task against what was actually found: what is available
-now decides which steps are `[auto]`, which are `[gated]` and which fall to `[manual]`.
-Where the confirmed tools cannot answer the request, say so and ask — do not substitute
-an assumption for a capability.
-
-**The catalogue is authoritative.** Take exact `tool_name` values from the Gate 2
-listing — names are not uniformly styled, some underscored, some hyphenated.
-**Do not invent a tool name.** On `UNKNOWN_TOOL`, read the valid names from the error
-and retry.
-**Never call a tool whose `effective_policy` is `disabled`.**
-
-**This map is built fresh every run** and held only for this run. It is written out in
-the coverage sheet, never written back into this file.
-<!-- shared:scope-protocol end -->
-
-## Gate 0 — Confirm the workspace before anything else
-
-1. Call `list_workspaces` with no arguments.
-2. If the status is `confirmed`, there is one workspace. **Read its name back and wait for an explicit yes.**
-3. If the status is `selection_required`, ask: **"Is this a single-workspace task or a multi-workspace one?"**
-   - Single: ask which one by name, then `list_workspaces(workspace_ids=[<ws_...>], mode="single")`.
-   - Multi: ask which ones, then `list_workspaces(workspace_ids=[<ws_...>, ...], mode="multi")`.
-
-Refer to a workspace by **name**, or by the opaque `ws_...` handle. Never print the internal numeric id, never ask for it, and if it appears in an error, name the workspace instead.
-
-**Why this gate matters here.** The output of this skill is **a recommendation to pay, hold or reject** — it gates money leaving the business. It also names vendors and, where approval data exists, individuals.
-
----
-
-## Gate 1 — Establish the datasource and entity scenario
-
-Call `get_agent_datasources` for the confirmed workspace.
-
-| Scenario | What it means here |
-|---|---|
-| **No datasource connected** | The document-by-document match still works exactly as the original describes, on uploaded files. **The population-wide match does not.** Say so. |
-| **Exactly one company file** | Confirm the `display_name`. **Entity matching (Step 2) is against this entity.** |
-| **Several company files** | **The buyer entity is one of the header checks.** An invoice billed to the wrong group company is exception 13's cousin and is common in groups sharing suppliers. |
-| **Connected but stale or broken** | A `reconnect_url` means the connection needs the user. Stop — **a partial population produces "no exceptions" for invoices that were simply not read.** |
-
-Refer to company files by `display_name`. Pass `data_source_id` between tools; never display it.
-
----
-
-# PART A — Explore the confirmed sources, and personalise this run
-
-The workspace and its data sources are settled. This part finds out **what they
-expose and which of it serves this request** — the tool catalogue in Gate 2, then
-what is already known about this entity plus whatever still has to be asked in
-Gate 3. The result is a run shaped around these books, not a generic template.
-
-## Gate 2 — Map what you can actually do
-
-<!-- shared:write-guardrail start -->
-### Write tools are out of scope — always
-
-`get_datasource_tools` describes what the connection *could* do. This skill uses only
-the reads.
-
-**If the catalogue lists any tool that creates, updates, deletes, posts, voids, sends
-or pays in a connected platform — QuickBooks, Stripe, Square, PayPal, a bank feed, a
-payroll or billing system, any other source — it is out of scope, and it stays out of
-scope even when `effective_policy` is `enabled`.** A permission to write is not an
-instruction to write. Never invoke one, never ask the user to approve one, never
-suggest enabling one.
-
-This holds for **every connected platform, not only the books.** Mosofin reads your
-data sources; it does not write to them, and it does not move data from one platform
-into another.
-
-If a step appears to need a write, that step is **`[manual]`**. Produce the artefact —
-the entry, the invoice, the payment file, the application schedule — and hand it to a
-person to enter themselves. Say so plainly in the output, so nobody assumes it was
-done.
-
-#### Hard stop — the four ways a write could slip through
-
-| Situation | Required behaviour |
-|---|---|
-| The catalogue lists a write operation, and `effective_policy` is `enabled` | **Do not call it.** Do not list it as an available capability. Enabled is not permission — it is out of scope. |
-| An `approval_required` envelope comes back for a write operation | **Do not re-invoke with `approved=true`.** The approval loop in this skill is for **reads only**. Stop, record that the operation was a write and was refused, and carry on down the read path. |
-| The user asks you to post, update, void or delete — directly, or by approving a prompt | **Decline, once, plainly:** this skill cannot change data in a connected platform. Hand over the draft so they can do it themselves in their own system. Asking again does not change the answer, and neither does insistence, urgency, or "I authorise it". |
-| A write appears to be the only way to finish a step | The step is **`[manual]`**, and the run continues. An incomplete read-only result is the correct outcome. Never trade the rule for completeness. |
-
-**Never route around this rule.** Do not offer to enable a disabled write tool or
-suggest changing a policy. Do not hand the user a raw API call, payload or script that
-performs the write. Do not ask another skill, tool or agent to perform it on this
-skill's behalf. Do not defer it to a later step in the hope it becomes permitted.
-
-**There is no path through this skill that ends in changed data.** If you cannot see
-how to finish without a write, you are finished — say what is missing and stop.
-<!-- shared:write-guardrail end -->
-
-Call `get_datasource_tools` for the chosen company file and read the **`effective_policy`** on each tool.
-
-| `effective_policy` | Verdict | Behaviour |
-|---|---|---|
-| `enabled` | `[auto]` | Call it. Batch with other independent reads. |
-| `permission` | `[gated]` | Expect `approval_required`. Explain what and why, get a yes, re-invoke with `approved=true`. **Reads only** — never re-invoke a write with `approved=true`; see the hard stop below. |
-| `disabled` | `[manual]` | Not available. The step remains; the user performs it. |
-
-Every verdict below is a **default written before the gateway was consulted.** Where Gate 2 disagrees, **Gate 2 wins** for this run. Do not carry a capability map between runs.
-
-**Three capability questions decide this skill, and they must be answered before anything is promised:**
-
-1. **Does the surface expose purchase orders?** With line detail, or header only?
-2. **Does it expose item receipts?** With quantities, or only as a status flag?
-3. **Does it expose approval status and the approver's identity?** Exceptions 11 and 12 depend on it, and so does the SoD observation above.
-
-**Read the returned schemas and answer all three.** Do not assume in either direction.
-
-**A scope note**: if a tool that pays a bill or releases a payment appears in the listing, it is **out of scope regardless of `effective_policy`.** This skill produces a recommendation; a person pays.
-
-Read tool names off the response. `UNKNOWN_TOOL` means re-read the list.
-
-**Every call is stateless.** Carry `data_source_id` on each invocation, including the retry after approval.
-
-**Batch independent reads.** Open bills, purchase orders, item receipts, the vendor master and payment history are independent. **Read the whole open population**, not a sample — that is the point.
-
-### The `mock: true` flag
-
-Fixture data has **POs, receipts and invoices that agree**, because they were generated together from the same source. **Every one of the fifteen exception tests passes.**
-
-**And the output of this skill is a payment recommendation.** Label it in the file name, on the match summary, and beside every Pay recommendation.
-
----
-
-## Gate 3 — Read the profile, then interview for what remains
-
-Call `get_my_skill` and `get_skills` before asking anything.
-
-Interview for:
-
-1. **The tolerance policy** — price %, quantity %, total amount. `[manual]`. **If none is provided, default to exact match and flag every variance** — the original's rule, preserved.
-2. **The approval matrix** — who may approve at what amount. `[manual]`, **and persist it**; it changes rarely and exception 12 cannot run without it.
-3. **Whether services POs are in scope**, and what substitutes for a GRN.
-4. **The FX policy** for multi-currency POs. `[manual]`.
-5. **Who owns exception resolution.** `[manual]` — Sheet 3 needs an owner per row.
-
-**Decisions are the user's; state is the workspace's.**
-
----
-
-## How to read the verdicts
-
-- **`[auto]`** — Mosofin can do this from live reads, unattended.
-- **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` (**reads only — never for a write**) and the `data_source_id`.
-- **`[manual]`** — not on this surface, or not a machine's judgment. **The step stays. The user performs it.**
-
-**Everything here is a recommendation.** The gateway is read-only. **Mosofin pays nothing, holds nothing and releases nothing** — a human acts on the Pay / Hold / Reject conclusion.
-
----
-
-## Inputs
-
-All six preserved.
-
-| Input | Format | Required | Mosofin source | Verdict |
-|-------|--------|----------|----------------|---------|
-| **Purchase order(s)** | PDF, XLSX, CSV, or pasted | **Required** | **`[auto]` where the system holds POs**; otherwise the original's upload path | Conditional |
-| **Goods receipt / proof of delivery / service confirmation** | PDF, XLSX, CSV, or pasted | **Required for goods** | **`[auto]` where item receipts exist — frequently they do not** | Conditional |
-| **Vendor invoice(s)** | PDF, XLSX, CSV, or pasted | **Required** | **`[auto]`, always** — bills in the AP ledger | `[auto]` |
-| Tolerance policy | Price %, quantity %, total amount | Recommended | Not in the books; **persist it** | `[manual]` |
-| Vendor master | For payment terms verification | Optional | **`[auto]`** | `[auto]` |
-| Approval matrix | Who can approve a PO at what amount | Optional | **Not in the books.** Persist it. | `[manual]` |
-
-> **If a goods receipt is not applicable — a services-only PO — the match becomes effectively a two-way match (PO ↔ invoice) plus a service-completion confirmation. Confirm with the user.**
-
-**Preserved, and note it is the deliberate version of the situation described at the top of this file.** A services PO with no GRN is a two-way match **by design**; a goods PO with no GRN is a two-way match **by omission.** They look identical in the output and they are not the same thing. **Distinguish them.**
-
----
-
-## Workflow
-
-### Step 1 — Extract structured data from each document
-
-`[auto]` where the system holds the record; `[manual]` extraction from uploads otherwise. Use `invoice-data-extractor` for uploaded invoices.
-
-All three field sets preserved in full.
-
-**Purchase Order fields** — PO number; PO date; vendor; buyer (entity); PO total; currency; payment terms; delivery terms (Incoterms, address); **approval signatures / approval status; approval timestamp**; and line items: line #, description, SKU/code, quantity ordered, unit price, line total, expected delivery date.
-
-`[auto]` for most where POs are held. **Approval status and timestamp depend on Gate 2's third question** — and they are what exceptions 11 and 12 run on.
-
-**Goods Receipt / Service Confirmation fields** — GRN number; receipt date; PO reference; vendor; receiving entity; **receiver name**; and line items: line #, description, SKU, quantity received, **condition (accepted / damaged / rejected)**. For services: confirmation of completion, hours or units delivered, service period.
-
-**Two fields here are rarely in an accounting system even where receipts are**: the **receiver's name** and the **condition**. Condition is what exception 15 needs, and its absence means that test does not run. Say so rather than reporting no damaged-goods exceptions.
-
-**Invoice fields** — invoice number; invoice date; vendor; bill-to entity; PO reference; invoice total, tax, shipping; currency; payment terms; and line items: line #, description, SKU, quantity billed, unit price, line total.
-
-`[auto]`, with the caveat that **line-level detail varies** — some bills are entered as a single line with no item detail, which limits the match to header level. Check, and report which invoices could only be matched at header level.
-
----
-
-### Step 2 — Match the three documents
-
-`[auto]` where the legs exist.
-
-**First confirm at header level** — all four preserved:
-
-- **PO references match across all three documents**
-- **Vendor name matches across all three** — **allow for legal name versus DBA differences; flag**
-- **Currency matches**
-- **Entity (buyer / receiver / bill-to) matches**
-
-**Then match at line-item level.** For each invoice line:
-
-1. **Find the corresponding PO line** — by line #, SKU, or description match
-2. **Find the corresponding GRN line(s)** — **a PO line may have multiple partial receipts**
-3. **Compare the three values:**
-   - **Quantity**: PO ordered vs. GRN received vs. invoice billed
-   - **Price**: PO unit price vs. invoice unit price
-   - **Description / SKU**: should match across all three
-
-**On line matching by description** `[auto]` with a caution: description matching is fuzzy by nature, and a wrong line match produces a **false variance** on two lines at once — one appears overbilled and another underbilled. **Prefer line number, then SKU, then description**, and **report the matching basis used per line** so a reviewer can see which matches are confident. Where a line cannot be matched confidently, **flag it as unmatched rather than forcing it** — an unmatched line is a question; a wrongly matched line is two wrong answers.
-
----
-
-### Step 3 — Apply tolerances
-
-`[auto]` given the policy. All three tolerance types preserved.
-
-- **Price variance tolerance** — e.g. ±2% or a fixed amount per line
-- **Quantity variance tolerance** — e.g. ±5%, allowing for a short shipment that is accepted
-- **Total invoice variance tolerance** — e.g. a fixed amount
-
-> **If no tolerance is provided, default to exact match (zero tolerance) and flag every variance.**
-
-**Preserved exactly. The default is strict, and that is right** — a tool inventing a tolerance is a tool deciding how much overbilling is acceptable, which is a policy decision belonging to the business.
-
-**Variance classifications**, both preserved:
-
-- **Within tolerance** → auto-match, no exception
-- **Outside tolerance** → exception, requires resolution before pay
-
-**One `[auto]` observation worth reporting**, and it is only visible across a population: **variances that sit consistently just inside tolerance.** A vendor whose prices are always 1.8% above PO, against a 2% tolerance, is not producing random variances — and each instance passes, which is precisely why nobody notices. **Report the pattern with its count and its total value**, exactly as a petty-cash review reports a persistent within-tolerance shortage. **As a pattern, with figures, never as an allegation.**
-
----
-
-### Step 4 — Identify exception types
-
-**All fifteen preserved, with severities — and with one severity corrected.**
-
-| # | Exception | Description | Severity | Verdict |
-|---|---|---|---|---|
-| 1 | **Price overbilling** | Invoice price > PO price | High | `[auto]` |
-| 2 | **Price underbilling** | Invoice price < PO price | Low (favourable, but flag) | `[auto]` |
-| 3 | **Quantity overbilling** | Invoice qty > GRN qty | High | **`[auto]` — needs the receipt leg** |
-| 4 | **Short-shipment billed in full** | Invoice qty > GRN qty | High | **`[auto]` — needs the receipt leg** |
-| 5 | **Item not on PO** | Invoice line has no matching PO line | High | `[auto]` — needs the PO leg |
-| 6 | **Item on PO not invoiced** | PO line has no matching invoice line | Low (open commitment) | `[auto]` |
-| 7 | **Item received not billed** | GRN line has no matching invoice line | **Information → see below** | **`[auto]` — needs the receipt leg** |
-| 8 | **Item billed not received** | Invoice + PO line but no GRN | **High — possible fraud or vendor error** | **`[auto]` — needs the receipt leg** |
-| 9 | **Duplicate against prior invoice** | Same vendor + PO line + amount paid already | **Critical** | `[auto]` — see `duplicate-invoice-detection` |
-| 10 | **Currency mismatch** | Different currency on any document | High | `[auto]` |
-| 11 | **PO not approved** | PO lacks approval signature / status | **Critical** | **`[auto]` if approval status is exposed** |
-| 12 | **Approved by wrong authority** | PO total exceeds approver's limit per the matrix | **Critical** | `[auto]` **given the matrix and the approver identity** |
-| 13 | **Vendor mismatch** | Different vendor on PO vs. invoice | **Critical** | `[auto]` |
-| 14 | **Tax mismatch** | Tax on invoice doesn't reconcile to expected | Medium | `[auto]` |
-| 15 | **Damaged goods on GRN but full billing** | GRN flagged damage or rejection, invoice billed full | High | **`[manual]` — condition is rarely digitised** |
-
-#### One correction to exception 7's severity
-
-The original marks **"item received not billed"** as **Information**, on the reasoning that the vendor may simply be late invoicing. **From an AP-control standpoint that is right.**
-
-**From an accounting standpoint it is a liability.** Goods received and not yet invoiced is **goods received not invoiced (GRNI)** — **the business owes for them, and the obligation must be accrued at period end** whether or not the invoice has arrived. An unrecorded GRNI at a year end understates both liabilities and, depending on what was received, either inventory or expense.
-
-**So exception 7 is Information to AP and a close item to the accountant**, and it should be flagged as both. `[auto]` to quantify the whole GRNI population at any date, which is exactly what the accrual needs and is a query nobody usually runs. See `month-end-close-checklist` and `accruals-and-deferrals`.
-
-#### Exception 8, and where it leads
-
-**"Item billed not received — possible fraud or vendor error."** Preserved with its severity.
-
-`[auto]` to detect, **`[manual]` to conclude.** The overwhelming majority are timing — the receipt was not posted, or was posted late, or the goods arrived at a different site. **A minority are not**, and this exception is the reason the receipt leg exists at all.
-
-**Report the population with amounts and ages. Never as an allegation.** Where a pattern emerges — one vendor, repeatedly, with no receipts ever — that is a fraud-investigation finding, and it belongs with whoever owns those rather than being resolved in an AP queue.
-
-#### Exceptions 11 and 12, and the segregation-of-duties link
-
-These two are **authority** exceptions, not arithmetic ones, and they are the ones a clean match will not surface — per the third near-substitute.
-
-`[auto]` where approval data is exposed. **And read them alongside the segregation-of-duties tests of a SOX controls review:** the same user creating the PO, approving it, receiving against it and entering the invoice is a structural finding that no individual exception captures. **`[auto]` across the population**, and far more informative than any single trio.
-
----
-
-### Step 5 — Resolution suggestions
-
-`[auto]` to propose; **`[manual]` to decide and to act.** All five preserved.
-
-- **Hold for AP investigation**
-- **Reject the invoice**
-- **Request vendor credit memo**
-- **Approve override** — **with documented reason and authority**
-- **Partial payment** — pay the matched portion, dispute the remainder
-
-**The override deserves its qualifier preserved.** An override without a documented reason and a named authority is not a resolution; **it is the control being switched off for one invoice**, and a population of undocumented overrides is the finding that matters more than any of them individually. `[auto]` to count them.
-
----
-
-### Step 6 — Output
-
-An `.xlsx` workpaper. All four of the original's sheets, plus two additions.
-
-**Sheet 1: Match Summary**
-- PO #, GRN #, Invoice #
-- Header-level match status
-- Line-level match counts — matched / exception
-- **Overall recommendation: Pay / Hold / Reject**
-
-**Header carries, in bold: which match was actually performed** — three-way, two-way by design, or two-way by omission — **and which of the fifteen tests could not run**, with the reason. Plus the fixture flag.
-
-**Sheet 2: Line-by-Line Match**
-| Inv Line | Description | PO Qty | GRN Qty | Inv Qty | PO Price | Inv Price | PO Total | Inv Total | Variance | Tolerance Applied | Status |
-
-**Add a Match Basis column** — line #, SKU, description, or unmatched — per the Step 2 caution.
-
-**Sheet 3: Exceptions**
-| # | Exception Type | Severity | Description | Recommended Action | Resolution Owner |
-
-**Every row has an owner.** Exception 7 flagged as both Information and a close item.
-
-**Sheet 4: Document References**
-Source PO, GRN and invoice references with key fields, for the audit trail. **`[auto]` — and this is where the connected version is materially better than the manual one**: every reference is a live record with its own transaction detail, rather than a filename.
-
-**Sheet 5: Population Findings** *(Mosofin addition)*
-What only a population view shows:
-
-| Finding | Vendor / scope | Count | Value | Period | Action |
-|---|---|---|---|---|---|
-
-Variances consistently just inside tolerance. Receipts posted in bulk on one date. Same user across multiple stages. Vendors with recurring unreceipted invoices. Undocumented overrides. **Total GRNI at the period end.**
-
-**Sheet 6: Coverage and Provenance** *(Mosofin addition)*
-The mandatory coverage sheet, **including which legs were available.**
-
-Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
-
-File naming: `3WayMatch_PO[PONumber]_[YYYY-MM-DD].xlsx` for a single trio; **`Match_Population_[YYYY-MM]_[EntityName].xlsx`** for a population run — **and the name should not say "3Way" when only two legs were matched.**
-
-Entity `display_name` on every sheet.
-
----
-
-## Edge Cases
-
-All eleven preserved, in order.
-
-**Multiple invoices against one PO** — progress billings: **each invoice matched against the PO; cumulative billed cannot exceed the PO total. Track a running balance.** **`[auto]`, and materially easier at population level** — the cumulative test requires seeing every invoice against that PO at once, which is exactly what a document-by-document match cannot do. **This is a case where the manual method structurally cannot perform the test properly.**
-
-**Multiple POs combined on one invoice**: **split the invoice virtually and match per PO. Each invoice line maps to one PO.** `[auto]`.
-
-**Service POs with no GRN**: **substitute a service-completion confirmation, signed by the service receiver. Treat the confirmation as the GRN equivalent.** `[manual]` — a signed confirmation is not usually in the accounting system. **And this is two-way by design**, per the Inputs note.
-
-**Blanket POs with releases**: **match against the release, not the blanket. Roll up to the blanket for commitment tracking.** `[auto]` where releases are recorded; **matching an invoice to a blanket PO's total will pass almost anything**, which is why the release is the right unit.
-
-**Partial deliveries / partial billing**: **match the delivered or billed portion. Carry forward the open balance. Multi-period matching tracked.** **`[auto]`, and again easier at population level**, since the open balance persists across periods and a per-trio match loses it.
-
-**Substitutions** — vendor delivers a similar but different SKU: **if authorised, match by authorisation reference. Otherwise flag.** `[manual]` for the authorisation; `[auto]` to flag the SKU mismatch.
-
-**Price changes mid-PO** — long-running POs where market price moved: **if the PO has a price-adjustment clause, the invoice price may legitimately differ. Confirm against the contract or clause reference.** `[manual]` — **the clause is in the contract, not the PO record**, and this is a common source of exceptions that are not errors.
-
-**Multi-currency POs and invoices**: **convert at the PO's stated rate or the invoice date's rate per policy. Flag the FX treatment.** `[manual]` for the policy; `[auto]` for the conversion. **A price variance that is really an FX movement is the classic false positive here** — separate the two before raising exception 1; the translation itself is an FX revaluation task.
-
-**Tax discrepancies** — PO had estimated tax, invoice has actual: **flag for total reconciliation; the tax line itself may not need a match if pricing aligns.** `[auto]`. **Note the use-tax angle: an invoice with no tax charged may create a self-assessment obligation**, which is a finding this population read can supply for free.
-
-**Goods received before the PO was issued** — rush orders: **require retroactive PO approval. Flag as a process exception even if the amounts match.** **`[auto]` — compare the receipt date to the PO date**, which is a trivially cheap test and catches a real control breakdown that a value-based match never sees. **The amounts agreeing is precisely what makes it invisible otherwise.**
-
-**Open POs received and billed but not yet matched in the system** — **backlog cleanup mode: match historic transactions and update commitment balances.** **`[auto]`, and this is where a population run earns its keep on the first engagement.** A business that has never run the match has a backlog; **clearing it is one query rather than months of clerical work**, and the GRNI figure that falls out of it is usually the most valuable single number produced.
-
----
-
-## Output Quality Standards
-
-All seven preserved.
-
-- **Every invoice line has a match status.** `[auto]` — **including "unmatched", which is a status, not a gap.**
-- **Every exception has type, severity and recommended action.** `[auto]`, **with an owner.**
-- **Tolerance application is documented per line.** `[auto]`
-- **Cumulative match across multiple invoices per PO tracks correctly.** **`[auto]`, and only reliably possible at population level.**
-- **No silent auto-resolution of exceptions outside tolerance.** `[auto]` to enforce — **and overrides are counted, not just recorded.**
-- **File naming consistent.** `[auto]`
-- **Pay / Hold / Reject recommendation is explicit.** `[auto]` to recommend; **`[manual]` to act.**
-
-**Five Mosofin additions:**
-
-- **Which match was performed is stated** — three-way, two-way by design, or two-way by omission.
-- **Tests that could not run are listed**, so their absence from the exception list is not read as a pass.
-- **The match basis is recorded per line**, since a wrong line match produces two false variances.
-- **Population patterns are reported**, not just individual exceptions.
-- **GRNI is quantified at the period end**, because it is an accrual and not merely information.
-
----
-
-## Coverage and Provenance sheet (mandatory)
-
-**Section A — Environment**
-- Workspace name (never the numeric id)
-- Company file `display_name` (never the `data_source_id`)
-- **Which legs were available**: invoices / POs / receipts, and at what level of detail
-- **Which of the fifteen exception tests ran, and which did not, with reasons**
-- Population and period covered, or the specific trio
-- Tolerance policy applied; approval matrix used
-- **Fixture flag** — any `mock: true`? In bold: **generated documents agree, so every test passes — and this skill recommends payments.**
-
-**Section B — Capability map as observed today**
-Each tool used: name as returned by `get_datasource_tools`, `effective_policy`, resulting verdict. **Including the three Gate 2 questions and their answers.**
-
-**Section C — Steps by verdict**
-Every step, and **every exception type**, with whether it ran.
-
-**Section D — What was not done, and why**
-- **Goods receipts**, where the system does not hold them — **and therefore exceptions 3, 4, 7, 8 and 15**
-- **Condition data** (damaged / rejected), which is rarely digitised
-- **Approval status or approver identity**, where not exposed — **and therefore exceptions 11 and 12**
-- **The approval matrix**, where not supplied
-- **Contract price-adjustment clauses** — in the contract, not the PO
-- **Service completion confirmations**
-- **Authorisation for substitutions**
-- **Any conclusion of fraud** — the data shows the pattern; people conclude
-- **Payment.** The gateway is read-only
-
-**Section E — Unknowns carried forward**
-Unmatched lines. Exceptions unresolved by age. Unreceipted invoices outstanding. Undocumented overrides. GRNI not yet accrued. Vendors showing within-tolerance drift.
-
-**Section F — Parameters used**
-Tolerances. Matching precedence. Population and dates. Approval matrix version. **A control test that cannot be reproduced is not evidence** — and this one is a SOX control, so it will be re-performed.
-
----
-
-## Seed to evolved: what happens on the first real run
-
-**What must never be frozen into a seed:** the capability map — Gate 2 reads it fresh, and **which legs exist is exactly the thing that changes when a client adopts POs or receipting.**
-
-**What is worth persisting into the workspace-scoped skill:**
-
-1. **Which legs the system holds**, and at what detail — the answer to the three Gate 2 questions.
-2. **The tolerance policy**, and the date it was set.
-3. **The approval matrix**, without which exception 12 cannot run.
-4. **The matching precedence** and any client-specific SKU or description conventions.
-5. **Vendors with known legitimate price-adjustment clauses**, so recurring exceptions that are not errors stop being raised.
-6. **Exceptions previously resolved with their reasons**, so the same invoice is not re-flagged monthly.
-7. **The override log**, cumulatively — **the pattern is the finding.**
-8. **The GRNI baseline**, so the accrual is a movement rather than a discovery each period.
-
-Persist through `create_skill`, scoped to the workspace. **Client facts belong in a client-scoped skill, never back in the seed** — this analysis names vendors, approvers and disputed amounts.
-
-**The evolved version runs the whole population every period** and reports what changed: new exceptions, ageing unresolved ones, the GRNI movement, and any drift in the patterns. That is a standing control rather than a clerical task.
-
----
-
-## Anti-patterns
-
-- **Calling a two-leg exercise a three-way match.** The missing leg is usually the one that proves the goods arrived.
-- **Letting absent tests read as passed tests.** List what did not run.
-- **Treating a PO number on an invoice as a match.** It is a reference.
-- **Treating a posted item receipt as evidence of receipt.** Bulk receipts posted on one date are a bookkeeping action.
-- **Forcing an uncertain line match.** It produces two false variances, not one.
-- **Inventing a tolerance.** Exact match is the default; the policy belongs to the business.
-- **Ignoring variances that sit just inside tolerance.** Each passes; the pattern is the finding.
-- **Raising a price exception that is an FX movement.**
-- **Matching against a blanket PO's total** instead of the release.
-- **Treating GRNI as information only.** It is an accrual.
-- **Resolving a repeated unreceipted-invoice pattern in the AP queue.** That belongs with fraud detection.
-- **Recording overrides without counting them.**
-- **Missing a receipt dated before its PO.** The amounts agreeing is what hides it.
-- **Running the match on a sample when the population is available.**
-- **Saying "paid" or "released".** The gateway reads; a person pays.
-
----
-
-## Related skills
-
-| Skill | Relationship |
-|---|---|
-| `invoice-data-extractor` | Extraction of uploaded invoices, explicitly out of scope for the match itself. |
-| `duplicate-invoice-detection` | Exception 9, in depth. |
-| `vendor-statement-reconciliation` | The other direction: what the vendor thinks is owed. |
-| `month-end-close-checklist` / `accruals-and-deferrals` | The GRNI accrual falling out of exception 7. |
-| `inventory-to-gl-reconciliation` | Where received-not-billed goods sit in stock. |
-
-Skills for SOX controls testing, fraud investigation, vendor onboarding, FX revaluation, sales tax and VAT, and standard costing are queued for this library and will be linked here when they ship.
+| [`references/mosofin-protocol.md`](references/mosofin-protocol.md) | Before the first tool call |
+| [`references/gates.md`](references/gates.md) | Stage 2, Mosofin path |
+| [`references/method.md`](references/method.md) | Stages 3–6 |
+| [`references/edge-cases.md`](references/edge-cases.md) | Stage 4, and whenever something looks unusual |
+| [`references/output.md`](references/output.md) | Before presenting |
+| [`references/overview.md`](references/overview.md) | Background, or when a user asks why |
