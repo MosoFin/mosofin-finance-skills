@@ -749,7 +749,7 @@ credits at both stages.**
 The rows for reconciliations tied out, management approval, and **locking the period** read `manual`
 with named owners. Locking in particular must never appear as done.
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `Closing_Entries_TB_FY[YYYY]_[EntityName].xlsx`
 

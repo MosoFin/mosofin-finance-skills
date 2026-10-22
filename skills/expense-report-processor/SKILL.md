@@ -743,7 +743,7 @@ ageing; the Employee Reimbursement Payable reconciliation; claimants with no emp
 **If no policy was supplied, every Step 2 row reads `manual — not performed`.** That is the honest entry,
 and it is more useful than a validation that did not happen.
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **Output naming:** `[Employee]_ExpenseReport_[YYYY-MM].xlsx`
 

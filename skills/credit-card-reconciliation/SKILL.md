@@ -704,7 +704,7 @@ receipt was matched and verified".**
 Rows for the statement, the receipts, business purpose and sanctions screening read `manual` with their
 gaps named. That is the correct, expected result.
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `CC_Recon_[Cardholder]_[YYYY-MM].xlsx`
 

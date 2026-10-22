@@ -685,7 +685,7 @@ If the user declined to set a threshold, say so and apply none, rather than pick
 
 ## Step 8 — Output
 
-Deliver an `.xlsx` workpaper. If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Offer an `.xlsx` workpaper: ask the user whether they want it as an Excel file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **Sheet 1: Summary**
 

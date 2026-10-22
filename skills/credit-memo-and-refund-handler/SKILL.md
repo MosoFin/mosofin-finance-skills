@@ -653,7 +653,7 @@ currency mismatch — and the Step 3 tax-mirroring check.
 
 | Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used | Policy | `mock` | Gap — what could not be verified and who supplied it |
 
-If creating xlsx, read: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `CreditMemos_[YYYY-MM].xlsx`
 

@@ -464,7 +464,7 @@ nothing**, and reporting an invoice as "not previously seen" on that basis is wo
 
 ## Step 1 — Read the document(s)
 
-**Read the pdf-reading skill first**: `/mnt/skills/public/pdf-reading/SKILL.md`
+**Read uploaded PDFs with whatever PDF-reading ability the host provides.** If text cannot be extracted, say so and ask for a text-based copy rather than guessing.
 
 - **PDF with text layer → extract text directly**
 - **Scanned PDF or image → OCR-capable extraction**
@@ -691,7 +691,7 @@ plausibility, remit-to comparison — **and the bank-detail check, recorded as N
 }
 ```
 
-If creating xlsx, read: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `Invoices_Extracted_[YYYY-MM-DD]_[count]invoices.xlsx`
 

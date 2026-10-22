@@ -576,7 +576,7 @@ Variances consistently just inside tolerance. Receipts posted in bulk on one dat
 **Sheet 6: Coverage and Provenance** *(Mosofin addition)*
 The mandatory coverage sheet, **including which legs were available.**
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 File naming: `3WayMatch_PO[PONumber]_[YYYY-MM-DD].xlsx` for a single trio; **`Match_Population_[YYYY-MM]_[EntityName].xlsx`** for a population run — **and the name should not say "3Way" when only two legs were matched.**
 

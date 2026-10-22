@@ -20,8 +20,7 @@ classification all read `manual` with the gap "bank statement not supplied", and
 says the reconciliation was not completed**. That is the correct, expected output — not a defect,
 and not something to disguise with a book-side total.
 
-If creating xlsx, use the host's spreadsheet skill when one is available (on Claude.ai it lives at
-`/mnt/skills/public/xlsx/SKILL.md`); where there is none, deliver one CSV per file instead.
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming — Mosofin addition** (the original left it unstated, and multi-account, multi-entity
 output needs it): `Bank_Rec_[AccountName]_[YYYY-MM].xlsx`, and in a multi-entity run

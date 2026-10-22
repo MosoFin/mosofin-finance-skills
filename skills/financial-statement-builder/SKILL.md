@@ -790,9 +790,9 @@ as a proposal**, since Mosofin posts nothing.
 Include a row for **each of the seven tie-outs**, since tie-out 6 is `[manual]` and its absence otherwise
 looks like a pass.
 
-**Optionally a clean PDF render** — read `/mnt/skills/public/pdf/SKILL.md` if creating PDF.
+**Optionally a clean PDF render** — offer it, and create it only if the user says yes.
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `Financial_Statements_[YYYY-MM]_[EntityName].xlsx`
 

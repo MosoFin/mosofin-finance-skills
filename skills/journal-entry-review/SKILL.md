@@ -670,7 +670,7 @@ any summary**; it is where the workspace contributes most.
 
 | Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used / external source | Population and size | As-at date | `mock` | Gap |
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `JE_Review_[Period]_[EntityName].xlsx`
 

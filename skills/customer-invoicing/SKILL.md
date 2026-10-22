@@ -580,7 +580,7 @@ HTML, or system input):
 - **Payment instructions**: how and where to pay
 - **Footer**: any required statutory text
 
-**If the user requests PDF: read `/mnt/skills/public/pdf/SKILL.md` first.**
+**If the user wants a PDF, confirm the file name with them, then produce it with whatever PDF capability the host has; if there is none, give the invoice as text they can print or save as a PDF.**
 
 **Mark every generated document as a draft for review.** Mosofin has not created it in the accounting
 system and has not sent it. Two specific cautions:
@@ -624,7 +624,7 @@ Covering mandatory fields, line validations, the arithmetic check, **duplicate i
 
 | Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used | Policy | `mock` | Gap — what could not be evidenced and who supplied it |
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `Invoices_[YYYY-MM-DD]_batch[N].xlsx`
 

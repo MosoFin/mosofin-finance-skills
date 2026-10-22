@@ -550,7 +550,7 @@ QuickBooks, `[Datasource]_AR_Aging_Collections_YYYY-MM-DD.xlsx`. In a multi-enti
 include the entity: `…_AR_Aging_Collections_YYYY-MM-DD_[EntityDisplayName].xlsx`, plus one
 combined file. Every file states which datasource and `display_name` it covers.
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 ## 7. Evolve the skill (Mosofin-specific, final step)
 

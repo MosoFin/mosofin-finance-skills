@@ -668,7 +668,7 @@ Optionally, a **master workbook** listing all account reconciliations with:
 - **Added:** support-side coverage, so the controller can see at a glance how much of the balance
   sheet is genuinely evidenced
 
-If creating xlsx, read first: `/mnt/skills/public/xlsx/SKILL.md`
+Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
 **File naming:** `BS_Recs_[YYYY-MM]_[EntityName].xlsx`
 
