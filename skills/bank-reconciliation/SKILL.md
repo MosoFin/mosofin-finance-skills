@@ -41,7 +41,7 @@ Ask only what you cannot already see.
 
 | # | Ask | Why it matters | If unanswered |
 |---|---|---|---|
-| **A** | *Use your Mosofin connection for this, or upload the data yourself?* | Decides the path | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
+| **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which bank account, or accounts?* | One bridge per account; several accounts at one bank are a classic mix-up | On the Mosofin path, list the cash accounts from the chart of accounts **by name** and ask which are in scope. **Never display or store a full account number.** |
 | **C** | *Which period? Start and end date.* | Sets every read and the statement date on both sides | **Never default the period.** |
 | **D** | *The bank statement — PDF or CSV, or at least the ending balance and the lines.* | The one side Mosofin cannot see | **Required, always.** Ask early. If it cannot be supplied, say now what the output will and will not be, then continue with the book-side preparation. |

@@ -37,7 +37,7 @@ Ask only what you cannot already see.
 
 | # | Ask | Why it matters | If unanswered |
 |---|---|---|---|
-| **A** | *Use your Mosofin connection for this, or upload the data yourself?* | Decides the path | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
+| **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which processor? Stripe, Square, PayPal or another* | Each has its own clearing account and export | Ask again. Nothing can start without it. |
 | **C** | *Which period? Start and end date.* | Sets every read and every cut-off | **Never default the period.** |
 | **D** | *Are sales recorded one by one, or as one entry per payout?* | The reconciliation is built differently for each, and the workpaper must say which | **Required.** If the user is unsure, show them the clearing-account entries for the period — one per sale, or one per payout — and **let them confirm.** Don't decide for them. |

@@ -43,7 +43,7 @@ question at a time. Ask only what you cannot already see.
 
 | # | Ask | Why it matters | If unanswered |
 |---|---|---|---|
-| **A** | *Use your Mosofin connection for this, or upload the documents yourself?* | Decides the path | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
+| **A** | *Use Mosofin as the data source for this run, or upload the documents yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *What tolerance applies: price %, quantity %, and a total-amount limit?* | Decides what is a match and what is an exception | **Default to exact match and flag every variance.** Say that you did. |
 | **C** | *Who may approve a purchase order, and up to what amount?* | Exceptions 11 and 12 (unapproved, or approved beyond authority) cannot run without it | Run the other thirteen tests and list 11 and 12 as not run. **Persist the matrix** once given; it changes rarely. |
 | **D** | *Are services purchase orders in scope, and what stands in for a goods receipt on them?* | A services PO with no receipt is a two-way match **by design**; a goods PO with no receipt is two-way **by omission**. They look the same in the output and are not | Treat as goods unless told otherwise, and say so. |
