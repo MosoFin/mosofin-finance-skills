@@ -110,7 +110,7 @@ The original is written **document by document**: *"uploading a PO + receipt + i
 
 **A connected workspace changes the unit of work.** Every open invoice, every PO, every receipt is readable together, so the match runs across **the whole population, every period**, unattended.
 
-That converts a per-invoice clerical check into **a standing control** — and it is precisely one of the ledger-evidenced controls that `sox-controls-design-and-testing` identifies as testable at full population rather than by sample. **The exceptions found are the same; the coverage is not.**
+That converts a per-invoice clerical check into **a standing control** — and it is precisely one of the ledger-evidenced controls that a SOX controls review can test at full population rather than by sample. **The exceptions found are the same; the coverage is not.**
 
 ### Three near-substitutes
 
@@ -476,7 +476,7 @@ All three field sets preserved in full.
 - **Within tolerance** → auto-match, no exception
 - **Outside tolerance** → exception, requires resolution before pay
 
-**One `[auto]` observation worth reporting**, and it is only visible across a population: **variances that sit consistently just inside tolerance.** A vendor whose prices are always 1.8% above PO, against a 2% tolerance, is not producing random variances — and each instance passes, which is precisely why nobody notices. **Report the pattern with its count and its total value**, exactly as `petty-cash-management` reports a persistent within-tolerance shortage. **As a pattern, with figures, never as an allegation.**
+**One `[auto]` observation worth reporting**, and it is only visible across a population: **variances that sit consistently just inside tolerance.** A vendor whose prices are always 1.8% above PO, against a 2% tolerance, is not producing random variances — and each instance passes, which is precisely why nobody notices. **Report the pattern with its count and its total value**, exactly as a petty-cash review reports a persistent within-tolerance shortage. **As a pattern, with figures, never as an allegation.**
 
 ---
 
@@ -508,7 +508,7 @@ The original marks **"item received not billed"** as **Information**, on the rea
 
 **From an accounting standpoint it is a liability.** Goods received and not yet invoiced is **goods received not invoiced (GRNI)** — **the business owes for them, and the obligation must be accrued at period end** whether or not the invoice has arrived. An unrecorded GRNI at a year end understates both liabilities and, depending on what was received, either inventory or expense.
 
-**So exception 7 is Information to AP and a close item to the accountant**, and it should be flagged as both. `[auto]` to quantify the whole GRNI population at any date, which is exactly what the accrual needs and is a query nobody usually runs. See `month-end-close-checklist` and `accruals-and-prepayments`.
+**So exception 7 is Information to AP and a close item to the accountant**, and it should be flagged as both. `[auto]` to quantify the whole GRNI population at any date, which is exactly what the accrual needs and is a query nobody usually runs. See `month-end-close-checklist` and `accruals-and-deferrals`.
 
 #### Exception 8, and where it leads
 
@@ -516,13 +516,13 @@ The original marks **"item received not billed"** as **Information**, on the rea
 
 `[auto]` to detect, **`[manual]` to conclude.** The overwhelming majority are timing — the receipt was not posted, or was posted late, or the goods arrived at a different site. **A minority are not**, and this exception is the reason the receipt leg exists at all.
 
-**Report the population with amounts and ages. Never as an allegation.** Where a pattern emerges — one vendor, repeatedly, with no receipts ever — that is a finding for `fraud-detection-and-forensics`, and it should go there rather than being resolved in an AP queue.
+**Report the population with amounts and ages. Never as an allegation.** Where a pattern emerges — one vendor, repeatedly, with no receipts ever — that is a fraud-investigation finding, and it belongs with whoever owns those rather than being resolved in an AP queue.
 
 #### Exceptions 11 and 12, and the segregation-of-duties link
 
 These two are **authority** exceptions, not arithmetic ones, and they are the ones a clean match will not surface — per the third near-substitute.
 
-`[auto]` where approval data is exposed. **And read them alongside the SoD tests in `sox-controls-design-and-testing`:** the same user creating the PO, approving it, receiving against it and entering the invoice is a structural finding that no individual exception captures. **`[auto]` across the population**, and far more informative than any single trio.
+`[auto]` where approval data is exposed. **And read them alongside the segregation-of-duties tests of a SOX controls review:** the same user creating the PO, approving it, receiving against it and entering the invoice is a structural finding that no individual exception captures. **`[auto]` across the population**, and far more informative than any single trio.
 
 ---
 
@@ -602,9 +602,9 @@ All eleven preserved, in order.
 
 **Price changes mid-PO** — long-running POs where market price moved: **if the PO has a price-adjustment clause, the invoice price may legitimately differ. Confirm against the contract or clause reference.** `[manual]` — **the clause is in the contract, not the PO record**, and this is a common source of exceptions that are not errors.
 
-**Multi-currency POs and invoices**: **convert at the PO's stated rate or the invoice date's rate per policy. Flag the FX treatment.** `[manual]` for the policy; `[auto]` for the conversion. **A price variance that is really an FX movement is the classic false positive here** — see `multicurrency-fx-revaluation`, and separate the two before raising exception 1.
+**Multi-currency POs and invoices**: **convert at the PO's stated rate or the invoice date's rate per policy. Flag the FX treatment.** `[manual]` for the policy; `[auto]` for the conversion. **A price variance that is really an FX movement is the classic false positive here** — separate the two before raising exception 1; the translation itself is an FX revaluation task.
 
-**Tax discrepancies** — PO had estimated tax, invoice has actual: **flag for total reconciliation; the tax line itself may not need a match if pricing aligns.** `[auto]`. See `sales-tax-us-multistate` and `vat-gst-international` — **and note the use-tax angle: an invoice with no tax charged may create a self-assessment obligation**, which is a finding this population read can supply for free.
+**Tax discrepancies** — PO had estimated tax, invoice has actual: **flag for total reconciliation; the tax line itself may not need a match if pricing aligns.** `[auto]`. **Note the use-tax angle: an invoice with no tax charged may create a self-assessment obligation**, which is a finding this population read can supply for free.
 
 **Goods received before the PO was issued** — rush orders: **require retroactive PO approval. Flag as a process exception even if the amounts match.** **`[auto]` — compare the receipt date to the PO date**, which is a trivially cheap test and catches a real control breakdown that a value-based match never sees. **The amounts agreeing is precisely what makes it invisible otherwise.**
 
@@ -717,12 +717,8 @@ Persist through `create_skill`, scoped to the workspace. **Client facts belong i
 |---|---|
 | `invoice-data-extractor` | Extraction of uploaded invoices, explicitly out of scope for the match itself. |
 | `duplicate-invoice-detection` | Exception 9, in depth. |
-| `sox-controls-design-and-testing` | Three-way match as a ledger-evidenced control tested at full population — and the SoD reading of exceptions 11 and 12. |
-| `fraud-detection-and-forensics` | Where a recurring unreceipted-invoice pattern belongs. |
-| `vendor-onboarding-and-w9-tin` | The vendor master, and master-data change control. |
 | `vendor-statement-reconciliation` | The other direction: what the vendor thinks is owed. |
-| `month-end-close-checklist` / `accruals-and-prepayments` | The GRNI accrual falling out of exception 7. |
-| `multicurrency-fx-revaluation` | Separating an FX movement from a price variance. |
-| `sales-tax-us-multistate` / `vat-gst-international` | Tax mismatches, and the use-tax exposure on untaxed invoices. |
+| `month-end-close-checklist` / `accruals-and-deferrals` | The GRNI accrual falling out of exception 7. |
 | `inventory-to-gl-reconciliation` | Where received-not-billed goods sit in stock. |
-| `standard-costing-and-variance-analysis` | Where the actual purchase price enters, and becomes PPV. |
+
+Skills for SOX controls testing, fraud investigation, vendor onboarding, FX revaluation, sales tax and VAT, and standard costing are queued for this library and will be linked here when they ship.
