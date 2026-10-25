@@ -283,7 +283,7 @@ Settle the entity scenario — and here the domain rule is unusually clean:
 - **Multi-entity** — ask which set. **Each entity closes its own books.** The workflow runs **once
   per entity**, every call targeting exactly one `data_source_id`, and every entry, trial balance and
   tie-out carries that entity's `display_name`. **There is no such thing as a group closing entry** —
-  consolidation is a separate procedure (`consolidation-and-eliminations`) performed on already-closed
+  consolidation is a separate procedure performed on already-closed
   entity books. Never combine trial balances before closing.
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
@@ -735,7 +735,7 @@ year end; **the Step 0b closed-state finding**; whether any figure rests on `moc
 
 | Opening RE | + Net Income | − Dividends | + OCI to AOCI | = Closing RE |
 
-See `statement-of-equity-changes` for the full statement if multi-component equity.
+If equity has multiple components, the full statement of changes in equity is a separate piece of work.
 
 **Sheet 6: Tie-Outs** — pre-close TB to post-close TB reconciliation. **Confirmation that debits =
 credits at both stages.**
@@ -814,7 +814,7 @@ post-closing TB.
 carrying that entity's `display_name`. Then:
 
 - **There is no group closing entry.** Consolidation happens *after* each entity has closed, on the
-  closed figures — see `consolidation-and-eliminations`. Never combine trial balances before closing;
+  closed figures, in a separate consolidation procedure. Never combine trial balances before closing;
   the result would close intercompany balances into retained earnings.
 - **Entity type may differ across the group.** A corporation subsidiary and an LLC subsidiary take
   different Step 5 entries. Confirm the type per entity rather than per group.
@@ -906,7 +906,7 @@ persistent imbalance more often means the report was requested with a different 
 date range than expected. Check the request parameters before hunting a phantom transaction.
 
 **Multiple ledgers / multi-entity**: **each entity closes its own books.** Consolidation is a separate
-procedure (`consolidation-and-eliminations`). The closing entries are at the entity level.
+procedure. The closing entries are at the entity level.
 
 **Closing in a multi-currency environment**: closing entries are **in functional currency. CTA flows
 to AOCI, not RE.** Re-translation for consolidated reporting is separate.
@@ -917,10 +917,10 @@ the equity account names in the chart make the entity type strongly inferable �
 
 **Nonprofit**: typically uses **Net Assets** rather than RE, often split between **Without Donor
 Restrictions** and **With Donor Restrictions**. Closing rolls the change-in-net-assets into the
-appropriate net asset class. See `nonprofit-fund-accounting`.
+appropriate net asset class. Fund-level detail is a nonprofit fund-accounting task.
 
 **Prior period adjustment discovered after closing**: requires re-opening the prior year or restating
-per `restatement-and-prior-period-adjustment`.
+the prior period.
 
 **Stock-based compensation expense closed to RE**: routine. **The accumulated SBC sits in APIC, not
 closed. The expense is closed.**
