@@ -382,7 +382,7 @@ Rules that bite hardest here:
 - **A near-substitute is not a substitute:**
   - **A GL payroll balance is not a payroll register.** It is a total posted by a journal.
   - **A payment out of the bank account is not proof of remittance to the right authority** — the payee and
-    the memo are evidence, and the tax authority's acknowledgement is not here. See `payroll-tax-filings`.
+    the memo are evidence, and the tax authority's acknowledgement is not here; it sits with the payroll tax filings.
   - **A recorded disbursement is not a bank statement.** The same limit as `bank-reconciliation` and
     `merchant-and-payment-processor-rec`.
   - **A nil balance is not a reconciled account.** Two errors can offset.
@@ -521,7 +521,7 @@ four-year-old residual sits underneath it has explained the wrong thing.
 - **Salaries & wages expense**
 - **Employer tax expense**
 - **Benefits expense**
-- **Stock-based compensation expense** (see `equity-compensation-accounting`)
+- **Stock-based compensation expense** (an equity compensation accounting matter)
 
 **Ask the user for their specific account list.** **[auto]** to propose it: **read the chart and present the
 payroll accounts found**, so the user confirms a list rather than assembling one.
@@ -581,7 +581,7 @@ For each account with a difference, identify the components — **each with its 
 | **Timing — remittance after period end** | Withholding remitted on the 15th of next month | **[auto]** — the payment appears next period |
 | **Manual JE posted to clearing** | Year-end true-ups | **[auto]** — a journal with no payroll cycle behind it |
 | **Misclassified entry** | Wrong account used | **[auto]** — an entry inconsistent with the account's usual pattern |
-| **FX revaluation** | Foreign-currency payroll | **[gated]** — see `multicurrency-fx-revaluation` |
+| **FX revaluation** | Foreign-currency payroll | **[gated]** — the translation itself is an FX revaluation task |
 | **Rounding** | Per-employee penny differences | **[auto]** — small, persistent, proportional to headcount |
 | **Voided / cancelled payments** | Stop payments, recovered amounts | **[auto]** — a reversal in the account |
 | **Adjustment to prior period** | Corrections, retroactive pay | **[auto]** — an entry dated or referencing a prior period |
@@ -616,7 +616,7 @@ the bank statement proves the money left.** **State which was performed** — th
 
 - **Cumulative payroll register YTD** — **[manual]** without the payroll system
 - **Cumulative remittances YTD** — **[auto]** from payments
-- **Year-end forms (W-2 / T4 / equivalent) when produced** — **[manual]**; see `payroll-tax-filings`
+- **Year-end forms (W-2 / T4 / equivalent) when produced** — **[manual]**; they are produced with the payroll tax filings
 
 **Mid-year, the YTD reconciliation is a preview; year-end is the formal one.**
 
@@ -787,7 +787,7 @@ balance carrying its entity's `display_name`. Then:
   entity.** **One payroll run covering three companies produces three sets of liabilities**, and a single
   bank payment covering all three must be allocated. **The allocation basis is `[manual]`.**
 - **A payment made by one entity for another's payroll creates an intercompany balance** — not a payroll
-  reconciling item. See `intercompany-reconciliation`; both sides must agree.
+  reconciling item. It belongs in an intercompany reconciliation; both sides must agree.
 - **Employment jurisdiction, not entity location, drives the withholding accounts.** An entity employing
   people in three countries has three sets of withholding liabilities and three cadences.
 - **Age and reconcile per entity.** A group-level clearing balance that nets to nil can conceal one entity
@@ -795,7 +795,7 @@ balance carrying its entity's `display_name`. Then:
 - **Escheatment obligations follow the employment jurisdiction**, and differ by state or country. **Do not
   apply one entity's position to another.**
 - **Currency**: payroll in a currency other than the entity's functional currency creates FX on the
-  liability between accrual and remittance — see `multicurrency-fx-revaluation`.
+  liability between accrual and remittance — the translation itself is an FX revaluation task.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict per company
 file.
@@ -874,9 +874,9 @@ All of the original edge cases, plus the ones Mosofin's workspace model introduc
 by jurisdiction, then aggregate.**
 
 **Multi-currency payroll**: **reconcile in functional currency; track FX gain / loss on the period's payroll
-cycle.** See `multicurrency-fx-revaluation`.
+cycle.** The translation itself is an FX revaluation task.
 
-**Stock-based compensation accruals**: see `equity-compensation-accounting`. **The reconciliation for
+**Stock-based compensation accruals**: an equity compensation accounting matter. **The reconciliation for
 SBC-related accounts is separate from cash payroll.**
 
 **Severance and termination payments**: **often paid through separate channels; ensure they're in the
