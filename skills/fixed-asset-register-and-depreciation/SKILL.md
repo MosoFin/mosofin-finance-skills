@@ -481,7 +481,7 @@ against the actual chart of accounts:
 | **Machinery & equipment** | 5–15 years | Straight-line or Units-of-Production |
 | **Vehicles** | 3–7 years | Straight-line or DDB |
 | **Computer hardware** | 3–5 years | Straight-line |
-| **Computer software (capitalized)** | 3–5 years | Straight-line — but consider `intangibles-and-amortization` |
+| **Computer software (capitalized)** | 3–5 years | Straight-line — but consider whether it is an intangible |
 | **Office furniture & fixtures** | 5–10 years | Straight-line |
 | **Tools & small equipment** | 3–7 years | Straight-line |
 
@@ -586,8 +586,8 @@ Period depreciation = Units produced × per-unit rate
   specific recovery periods, declining balance switching to straight-line**
 - **Other jurisdictions: capital allowances, AIA (UK), CCA (Canada), bonus depreciation, Section 179**
 
-**Book depreciation and tax depreciation often differ — this creates deferred tax differences** (see
-`corporate-tax-provision-asc740`).
+**Book depreciation and tax depreciation often differ — this creates deferred tax differences**, which
+the tax provision accounts for.
 
 **For book purposes, apply the entity's policy method. For tax depreciation specifically, hand off to the
 tax return prep skills.**
@@ -871,7 +871,7 @@ every asset and balance carrying its entity's `display_name`. Then the points sp
   report look right — that is a different transaction.
 - **Intra-group asset transfers are the classic trap.** On transfer, the receiving entity records cost at
   the transfer price, but **on consolidation the asset must be carried at original group cost, with the
-  intra-group profit and the excess depreciation eliminated.** See `consolidation-and-eliminations`.
+  intra-group profit and the excess depreciation eliminated.** That elimination is a consolidation step.
   **Reading each entity's register separately will not reveal this** — it needs the transfer history.
 - **Policies must be consistent for consolidation.** Different useful lives for the same class in different
   subsidiaries produce a group charge that is not comparable. **Flag policy differences across entities**;
@@ -1088,7 +1088,7 @@ All of the original standards, plus the Mosofin ones.
 - Useful lives, salvage values, the threshold and the convention are **all stated with their source**, and
   none was assumed
 - In a multi-entity run, **depreciation stays with the entity holding the asset**, policy differences across
-  entities are flagged, and intra-group transfers are raised for `consolidation-and-eliminations`
+  entities are flagged, and intra-group transfers are raised for the consolidation
 - Every task carries its verdict (`[auto]` / `[gated]` / `[manual]`), the tool or external source used, and
   its as-at date, in the coverage sheet
 - `mock` status is reported wherever it applies, and no proposed entry rests on mock data
