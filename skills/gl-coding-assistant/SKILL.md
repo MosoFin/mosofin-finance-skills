@@ -662,8 +662,7 @@ intercompany transaction**, not a third-party expense.
 
 **Always split between Interest Expense (P&L) and Principal (BS liability reduction). Ask for the split if
 not obvious from the source.** **[auto]** support: the loan liability account and its movement are readable,
-which often reveals the principal portion directly — but **the amortization schedule is `[manual]`** (see
-`debt-and-covenant-tracking`).
+which often reveals the principal portion directly — but **the amortization schedule is `[manual]`**.
 
 ## Step 5 — Output
 
@@ -747,8 +746,8 @@ alongside the installed skill.
 
 **Never persist transaction lists, amounts, or the coding history itself.** The history is state and is
 re-read every run — that is the point of reading it. **Persist the rules; never the transactions.** And
-**never persist a "possible personal" or related-party flag against a named individual** — see
-`fraud-detection-and-forensics` for why an unrebutted suspicion must not be carried forward.
+**never persist a "possible personal" or related-party flag against a named individual** — an
+unrebutted suspicion must not be carried forward.
 
 **Key every preference and asset by datasource + entity `display_name`.** Write "quickbooks / Northbrook
 Trading — cloud hosting to 6310, threshold 1,000 from 2025-01-01, uncategorized is 8999" — not "cloud
@@ -799,7 +798,7 @@ suggestion carrying its entity's `display_name`. Then:
   each entity's history separately.** Never carry a Tier 1 match across company files.
 - **A vendor whose name matches another connected entity is an intercompany transaction.** **[auto]** to
   detect — compare vendor names against the other files' legal names — and it should be coded to an
-  intercompany account, not an expense. See `consolidation-and-eliminations`.
+  intercompany account, not an expense.
 - **A transfer between two group entities is not an inter-account transfer.** The original's transfer rule
   covers movements between the entity's *own* accounts. Money moving to a sibling company is an
   intercompany balance in both sets of books.
@@ -881,8 +880,8 @@ the read is unavailable, and **the fallback in use must be stated.**
 **No jurisdiction provided** → **skip tax codes or mark "TBD".** *Mosofin note*: the country is `[auto]`;
 **the rules are not**, so a known country does not license a tax treatment.
 
-**Multi-currency transactions** → **code based on nature; do not convert FX here. Flag for the
-`multicurrency-fx-revaluation` skill.**
+**Multi-currency transactions** → **code based on nature; do not convert FX here. Flag for
+FX revaluation.**
 
 **Reimbursable vs. own-cost** → **if the entity passes through expenses to clients, ask whether there's a
 separate Recoverable / Reimbursable account.** **[auto]** to check whether such an account exists.
