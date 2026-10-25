@@ -589,7 +589,7 @@ a timing variance that has already reversed is proven, not asserted.
 For each material **permanent** variance, assess the full-year implication — **[gated]**:
 
 - **Will this variance persist?** → update the full-year outlook
-- **Is a re-forecast warranted?** → hand to `rolling-forecast`
+- **Is a re-forecast warranted?** → raise it as a re-forecasting task
 - **Does it threaten annual targets?** → escalate
 
 **[auto]** to compute the arithmetic of extrapolation — the run-rate implication of a monthly
@@ -733,7 +733,7 @@ cross-entity step:
   instance. Test for common-direction variances across entities; they usually have one cause and one
   fix.
 - **Eliminate intercompany lines before the group comparison**, or intercompany charges appear as
-  both a cost overrun and a revenue beat. See `consolidation-and-eliminations`.
+  both a cost overrun and a revenue beat. The elimination itself is a consolidation task.
 - **Each entity is compared to its own budget version**, and any entity on a different version is
   labelled — comparing one entity to a revised budget and another to the original makes the group
   number meaningless.
