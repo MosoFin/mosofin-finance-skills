@@ -811,7 +811,7 @@ every claim and account carrying its entity's `display_name`. Then the points sp
   an employee of the services company travelling to a client of the trading company. **The duplicate check
   must run against the entity whose card paid**, which may not be the entity employing the claimant.
 - **A claim charged to the wrong entity is an intercompany balance**, not just a coding error. Flag it for
-  `consolidation-and-eliminations` rather than silently recoding.
+  elimination at consolidation rather than silently recoding.
 - **Policies may differ by entity** — different countries, different caps, different mileage rates.
   **Never apply one entity's per-diem table to another's staff.** Store rates keyed by entity.
 - **Corporate cards are often issued centrally.** The clearing account may sit in one entity while the
