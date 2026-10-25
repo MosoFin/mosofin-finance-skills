@@ -88,7 +88,7 @@ This is a **seed skill**, written to be rewritten the first time it runs against
 
 Worth saying plainly, because it is unusual in this pack.
 
-Most reconciliations here tie one part of a ledger to another part of the same ledger, and I have had to say repeatedly that they **agree by construction** — the balancing balance sheet in `financial-statement-builder`, the segment reconciliation in `segment-reporting`, the detail-to-summary tie in `quickbooks-ar-aging-collections`, the equity roll-forward in `statement-of-equity-changes`.
+Most reconciliations here tie one part of a ledger to another part of the same ledger, and I have had to say repeatedly that they **agree by construction** — the balancing balance sheet in `financial-statement-builder`, a segment reconciliation, the detail-to-summary tie of an AR aging, an equity roll-forward.
 
 **This one is different.**
 
@@ -98,7 +98,7 @@ That makes it the same kind of thing as a bank statement — and **it is the sam
 
 ### Which makes it the primary control over completeness of AP
 
-**Completeness is the hardest assertion to test.** `internal-audit-workpaper` makes the point and `sox-controls-design-and-testing` repeats it: a full-population test of what is in the ledger still cannot prove that nothing is missing, because absence leaves no trace.
+**Completeness is the hardest assertion to test.** Internal audit makes the point and SOX controls testing repeats it: a full-population test of what is in the ledger still cannot prove that nothing is missing, because absence leaves no trace.
 
 **A vendor statement is one of the few things that can.** The supplier lists what they believe you owe them. **Anything on their list and not on yours is a candidate unrecorded liability** — and unrecorded liabilities are the classic AP misstatement, understating both payables and expense.
 
@@ -299,7 +299,7 @@ Refer to company files by `display_name`. Pass `data_source_id` between tools; n
 - **One combined statement**: reconciling it against a single entity's ledger produces false "missing invoice" exceptions for everything belonging to the siblings. **`[auto]` where the other entities are connected** — read all of them and match across, then split the result by entity.
 - **Separate statements**: check the account reference on the statement matches the entity being reconciled. **A statement for the wrong account is the commonest cause of a reconciliation that will not converge.**
 
-And the related trap from `vendor-onboarding-and-w9-tin`: **if the supplier exists twice in one vendor master, half the invoices are under the other record** and will present as missing. **Run the duplicate check before concluding anything.**
+And a related vendor-master trap: **if the supplier exists twice in one vendor master, half the invoices are under the other record** and will present as missing. **Run the duplicate check before concluding anything.**
 
 ---
 
@@ -459,7 +459,7 @@ Standardise all five fields:
 
 #### Three normalisation traps, all `[auto]` to handle and all routinely missed
 
-**Document numbers are text.** Leading zeros, prefixes, and the supplier's internal reference versus the number printed on the invoice. **`INV-0042`, `42` and `0042` are one document**, and a match on the raw string finds none of them. Normalise both sides the same way and **record the normalisation applied** — the same discipline `quickbooks-ar-aging-collections` applies to preserving document numbers as text.
+**Document numbers are text.** Leading zeros, prefixes, and the supplier's internal reference versus the number printed on the invoice. **`INV-0042`, `42` and `0042` are one document**, and a match on the raw string finds none of them. Normalise both sides the same way and **record the normalisation applied** — the same discipline an AR aging applies to preserving document numbers as text.
 
 **Cutoff dates differ.** **The supplier's statement cutoff is very often not your period end.** A statement dated the 25th against a ledger at the 30th will show five days of legitimate difference in both directions. **Establish both dates explicitly** and treat the gap as a known reconciling window rather than a set of exceptions.
 
@@ -515,7 +515,7 @@ An invoice on the supplier's statement and not in your ledger means one of:
 
 `[auto]` can distinguish several of these: the duplicate-vendor case, the wrong-entity case where entities are connected, and the entered-late case where the invoice appears after the cutoff.
 
-**What remains is `[manual]` and needs the invoice**, per the second near-substitute: **you cannot book from the statement line.** Request the invoice copy, and **at a period end, accrue where the liability is confirmed but the document has not arrived** — which is the same accrual as the GRNI position in `three-way-match`. See `accruals-and-prepayments` and `month-end-close-checklist`.
+**What remains is `[manual]` and needs the invoice**, per the second near-substitute: **you cannot book from the statement line.** Request the invoice copy, and **at a period end, accrue where the liability is confirmed but the document has not arrived** — which is the same accrual as the GRNI position in `three-way-match`. See `accruals-and-deferrals` and `month-end-close-checklist`.
 
 #### Missing credits, which nobody looks for
 
@@ -551,7 +551,7 @@ A credit note on the statement and not in your ledger is **a reduction in what y
 
 > **"with support"**
 
-**The qualifier is preserved and it is the important part.** A statement line is not support. **Recording a liability needs the invoice** — for the amount, for the coding, for the tax treatment, and for input tax recovery, which generally requires a valid invoice and not a statement (see `vat-gst-international` Step 5).
+**The qualifier is preserved and it is the important part.** A statement line is not support. **Recording a liability needs the invoice** — for the amount, for the coding, for the tax treatment, and for input tax recovery, which generally requires a valid invoice and not a statement.
 
 **Where the liability is confirmed and the document has not yet arrived, the answer is an accrual, not an invoice posting.** They are different entries with different consequences: an accrual reverses and is replaced when the invoice arrives; a posted invoice without the document leaves a payable nobody can support and, in a VAT jurisdiction, an input tax claim that may be disallowed.
 
@@ -601,7 +601,7 @@ Entity `display_name` on every sheet — **and the statement's addressee**, per 
 
 **The statement is for a different entity in the group.** Every invoice presents as missing. **Check the account reference before reconciling** — the commonest cause of a reconciliation that will not converge.
 
-**The supplier exists twice in the vendor master.** Half the invoices sit under the other record. **Run the duplicate-vendor check first.** See `vendor-onboarding-and-w9-tin`.
+**The supplier exists twice in the vendor master.** Half the invoices sit under the other record. **Run the duplicate-vendor check first.**
 
 **Different cutoff dates.** A window of legitimate difference in both directions. Establish both dates and treat the gap as known, not as exceptions.
 
@@ -611,9 +611,9 @@ Entity `display_name` on every sheet — **and the statement's addressee**, per 
 
 **The supplier's error.** An invoice on the statement that was genuinely never issued to you, or was settled and not applied on their side. **The reconciliation is two-way**, and pushing back is legitimate — `[manual]`.
 
-**Payments made to an old bank account.** A payment you made and they did not receive. **Serious**, and it connects to `vendor-onboarding-and-w9-tin`'s bank-change detection: if the details were changed fraudulently, the supplier's statement is the thing that reveals it — **which is another reason the reconciliation matters.**
+**Payments made to an old bank account.** A payment you made and they did not receive. **Serious**, and it connects to vendor bank-change detection: if the details were changed fraudulently, the supplier's statement is the thing that reveals it — **which is another reason the reconciliation matters.**
 
-**Foreign currency statements.** The supplier states in their currency; your ledger may hold both. **Match on document and quantity of currency, not on the converted amount** — the converted figures will differ by the rate used and by revaluation. See `multicurrency-fx-revaluation`.
+**Foreign currency statements.** The supplier states in their currency; your ledger may hold both. **Match on document and quantity of currency, not on the converted amount** — the converted figures will differ by the rate used and by revaluation; the revaluation itself is an FX revaluation task.
 
 **Rebates and volume credits.** Frequently agreed commercially and not invoiced or credited for months. **They may appear on neither side** and are a completeness question of their own. `[manual]` — ask.
 
@@ -722,12 +722,9 @@ Persist through `create_skill`, scoped to the workspace. **Client facts belong i
 | `bank-reconciliation` | The other genuine external reconciliation on this side of the ledger. |
 | `three-way-match` | GRNI — goods received not invoiced — which the supplier's statement will show as invoices. |
 | `duplicate-invoice-detection` | Duplicates on either side. |
-| `vendor-onboarding-and-w9-tin` | Duplicate vendor records, and the bank-change detection this reconciliation can confirm. |
 | `invoice-data-extractor` | Extracting the statement where it arrives as a document. |
-| `accruals-and-prepayments` | Accruing confirmed liabilities where the invoice has not arrived. |
+| `accruals-and-deferrals` | Accruing confirmed liabilities where the invoice has not arrived. |
 | `month-end-close-checklist` | Where the reconciliation belongs as a recurring close task. |
 | `journal-entry-builder` | Formats the proposed entries. |
-| `vat-gst-international` | Why input tax recovery needs the invoice, not the statement. |
-| `multicurrency-fx-revaluation` | Foreign currency statements and why converted amounts differ. |
-| `internal-audit-workpaper` / `sox-controls-design-and-testing` | Completeness as the assertion hardest to test — and why this reconciliation is the control that addresses it. |
-| `accounts-payable-automation` | The upstream process whose failures show up here. |
+
+Skills for vendor onboarding, VAT and GST, FX revaluation, internal audit and SOX controls testing, and AP invoice processing are queued for this library and will be linked here when they ship.
