@@ -541,8 +541,8 @@ DR  Inventory                                      $cost
 Memo: Sales return [SR #] re: invoice [Inv #] — [reason]
 ```
 
-**The inventory portion uses original cost** (per the inventory costing policy — see
-`inventory-costing-fifo-lifo-wavg`). **[gated]**: the item's cost is often readable
+**The inventory portion uses original cost** (per the inventory costing policy: FIFO, LIFO or
+weighted average). **[gated]**: the item's cost is often readable
 (*`read_item`*), but whether the goods came back saleable is not — see the damaged-return edge case.
 
 #### Vendor credit note (applied to future bill)
@@ -718,7 +718,7 @@ every credit carrying its entity's `display_name`. Then:
 
 - **A credit belongs to the entity that issued the original invoice.** Applying one entity's credit
   against another's invoice is an **intercompany transaction**, not an application — it moves value
-  between legal entities. Flag it and route it to `intercompany-reconciliation`.
+  between legal entities. Flag it and route it to an intercompany reconciliation.
 - **A customer trading with several entities may hold credits at one and owe another.** They will
   frequently ask to net them. That netting is a group decision with intercompany consequences, not a
   routine application — say so rather than doing it.
@@ -801,7 +801,7 @@ materiality forces a prior-period adjustment. Note in the memo.** *Mosofin note*
 automatically** — compare the credit date against the invoice date and the fiscal year end.
 
 **Credit issued in a different currency**: **use the original invoice's FX rate to preserve the offset,
-then post an FX gain / loss for any rate movement.** Flag for `multicurrency-fx-revaluation`. The currency
+then post an FX gain / loss for any rate movement.** Flag it as an FX revaluation matter. The currency
 mismatch itself is **[auto]** to detect; the rate is **[manual]**.
 
 **Partial sales return with a restocking fee**: **the restocking fee is income; reduce the credit by the
