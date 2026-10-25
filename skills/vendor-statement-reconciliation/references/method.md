@@ -197,6 +197,8 @@ Hand drafted entries to `journal-entry-builder`. **Marked PROPOSED — NOT POSTE
 6. **Known permanent differences** — a consignment arrangement, a self-billing agreement — so they are not re-raised.
 7. **Vendors reconciled and when**, so "never reconciled" stays accurate.
 
+**Ask before saving anything.** Only after the user has **seen the results**, ask — explicitly, at that point, not earlier — whether to save these as their own customized version. A general "yes, go ahead" from earlier does not count. Decline, or no answer, and nothing is written.
+
 Persist through `create_skill`, scoped to the workspace. **Client facts belong in a client-scoped skill, never back in the seed.**
 
 **The evolved version opens with the exception list carried forward and the vendors due for reconciliation this period** — which turns a periodic clean-up into a running control.

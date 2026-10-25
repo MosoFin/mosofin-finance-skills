@@ -256,6 +256,8 @@ All seven preserved.
 7. **The override log**, cumulatively — **the pattern is the finding.**
 8. **The GRNI baseline**, so the accrual is a movement rather than a discovery each period.
 
+**Ask before saving anything.** Only after the user has **seen the results**, ask — explicitly, at that point, not earlier — whether to save these as their own customized version. A general "yes, go ahead" from earlier does not count. Decline, or no answer, and nothing is written.
+
 Persist through `create_skill`, scoped to the workspace. **Client facts belong in a client-scoped skill, never back in the seed** — this analysis names vendors, approvers and disputed amounts.
 
 **The evolved version runs the whole population every period** and reports what changed: new exceptions, ageing unresolved ones, the GRNI movement, and any drift in the patterns. That is a standing control rather than a clerical task.

@@ -425,6 +425,8 @@ This file is a **seed**. It was written without seeing the client's books, so ev
 6. **The errors found and fixed**, so the same tests run first next period. If recoverable tax was in the asset once, check it every time.
 7. **Any observed policy that differed from this file's default**, so the next run's expectations are calibrated.
 
+**Ask before saving anything.** Only after the user has **seen the results**, ask — explicitly, at that point, not earlier — whether to save these as their own customized version. A general "yes, go ahead" from earlier does not count. Decline, or no answer, and nothing is written.
+
 Persist that through `create_skill`, scoped to the workspace it came from. **Client-specific facts belong in a client-scoped skill, never back in the seed** — the seed is what gets handed to the next engagement, and it must not arrive carrying the last client's account numbers.
 
 **The evolved version should be shorter in its interview and longer in its findings.** That is the direction of travel: fewer questions each month, because the answers accumulate; more tests each month, because the known failure modes accumulate too.

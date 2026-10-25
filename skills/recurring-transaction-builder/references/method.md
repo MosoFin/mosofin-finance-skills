@@ -272,6 +272,8 @@ The entity `display_name` goes in the file name and on every sheet — a schedul
 7. **Escalation terms once obtained**, since they come from contracts and are expensive to gather.
 8. **Any observed policy that differed from this file's defaults.**
 
+**Ask before saving anything.** Only after the user has **seen the results**, ask — explicitly, at that point, not earlier — whether to save these as their own customized version. A general "yes, go ahead" from earlier does not count. Decline, or no answer, and nothing is written.
+
 Persist through `create_skill`, scoped to the workspace. **Client facts belong in a client-scoped skill, never back in the seed.**
 
 **The evolved version's most valuable output is not a new schedule. It is the monthly answer to "did everything that should have run, run?"** — which is a report the client currently gets from nobody.
