@@ -591,8 +591,8 @@ If bills are in multiple currencies and the entity pays from a single-currency b
 - **Flag the rate source and the date used** — a converted figure without its rate and date
   cannot be checked later
 - **Each payment will have an FX gain / loss at settlement** — the difference between the
-  rate when the bill was booked and the rate when it is paid. Note it for
-  `multicurrency-fx-revaluation`
+  rate when the bill was booked and the rate when it is paid. Note it; recognising it is an
+  FX revaluation task
 
 ## Step 7 — Output
 
@@ -715,7 +715,7 @@ run, one workpaper.
   have three different tiers assigned. Show the vendor once per entity, labelled, plus the
   group total.
 - **Intercompany payables** — where one entity owes another — should be flagged and settled
-  through `intercompany-reconciliation`, not paid through a normal run.
+  through an intercompany reconciliation, not paid through a normal run.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict
 per company file.
