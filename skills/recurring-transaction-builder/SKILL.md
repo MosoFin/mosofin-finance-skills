@@ -120,7 +120,7 @@ The original waits to be told what to automate. A live ledger can be asked **wha
 
 **"Ready to post" is not "posted."** Every occurrence carries a status, and the status starts at Pending.
 
-**The ledger's history of a charge is not the contract behind it.** Fourteen months of identical rent tells you what was paid. It does not tell you the lease has a step-up in month fifteen. Extrapolating a schedule from posting history is a hypothesis about the future, and it must be checked against the agreement. See `lease-accounting-asc842-ifrs16`.
+**The ledger's history of a charge is not the contract behind it.** Fourteen months of identical rent tells you what was paid. It does not tell you the lease has a step-up in month fifteen. Extrapolating a schedule from posting history is a hypothesis about the future, and it must be checked against the agreement. For rent, that agreement is the lease.
 
 ### And one risk that is specific to producing a loadable file
 
@@ -431,7 +431,7 @@ All twelve preserved.
 | **Recurring JE** | Depreciation, prepaid amortisation, accrual reversals, allocations | The template comes from `journal-entry-builder`. See also `prepaid-amortization-schedule` and `fixed-asset-register-and-depreciation`, both of which generate exactly this shape. |
 | **Recurring Bill** | Monthly rent, SaaS subscriptions, vendor retainers | The duplicate check in Step 2c matters most here — a duplicated recurring bill is a duplicated payment. |
 | **Recurring Invoice** | Subscription billing, retainer billing, lease income | A duplicated recurring invoice is a customer billed twice, which is worse commercially than it is financially. |
-| **Subscription Schedule** | Customer-facing SaaS or service subscription with billing cycles | Carries service-period dates; see Step 5 and `revenue-recognition-asc606`. |
+| **Subscription Schedule** | Customer-facing SaaS or service subscription with billing cycles | Carries service-period dates; see Step 5. |
 
 ---
 
@@ -446,7 +446,7 @@ The original's four confirmations, all preserved, all `[auto: computed]`:
 
 > **For business-day-aware schedules, identify the holiday calendar to use (the entity's jurisdiction). If not provided, ask. Do not pick a default.**
 
-Preserved exactly, and it is the same discipline `r-and-d-tax-credit` applies to tax rates: **do not supply a value that varies by jurisdiction and changes over time.** A holiday calendar is not in the accounting system either — it is a client fact, so ask once and persist it (Gate 3).
+Preserved exactly, and it is the same discipline that applies to tax rates: **do not supply a value that varies by jurisdiction and changes over time.** A holiday calendar is not in the accounting system either — it is a client fact, so ask once and persist it (Gate 3).
 
 ---
 
@@ -542,7 +542,7 @@ All four preserved:
 
 Preserved, and it is what makes a schedule auditable a year later: the row itself says why its amount differs from the row above it.
 
-**The CPI rule deserves the same emphasis as the holiday calendar**, and for the same reason. An inflation assumption is a forecast that varies by jurisdiction, by index, and by month. **Nothing in this file supplies one and nothing persisted from a prior run may supply one either** — persist the *index source* the client uses, never the *rate*. This is the identical discipline `r-and-d-tax-credit` applies to tax rates, and `quarter-end-close` applies to covenant definitions.
+**The CPI rule deserves the same emphasis as the holiday calendar**, and for the same reason. An inflation assumption is a forecast that varies by jurisdiction, by index, and by month. **Nothing in this file supplies one and nothing persisted from a prior run may supply one either** — persist the *index source* the client uses, never the *rate*. This is the identical discipline that applies to tax rates and to covenant definitions.
 
 `[auto: read]` supporting observation: where the charge has history, **whether escalations have actually been applied in the past, and when.** A rent that has not moved in four years, under a lease with an annual review, is either a review that was never applied or a lease whose terms differ from what is being assumed. Both are worth raising before building three more years on the assumption.
 
@@ -560,7 +560,7 @@ All four preserved:
 
 **Recurring Invoice** (customer) — an invoice record per occurrence: customer, invoice date, due date, line items, revenue account, tax code.
 
-**Subscription Schedule** — **include the service period dates on each occurrence.** The original notes why and it is worth restating: **the service period, not the invoice date, drives deferred revenue.** A subscription invoiced annually in advance produces eleven months of deferred revenue on day one, and a schedule that omits the period dates cannot support that. See `revenue-recognition-asc606`.
+**Subscription Schedule** — **include the service period dates on each occurrence.** The original notes why and it is worth restating: **the service period, not the invoice date, drives deferred revenue.** A subscription invoiced annually in advance produces eleven months of deferred revenue on day one, and a schedule that omits the period dates cannot support that. Recognising the deferred revenue is a revenue-recognition task.
 
 **And the handoff, stated plainly.** What Mosofin produces is a **specification**: every field, validated, with every occurrence computed. What creates the recurrence is a person entering that specification into the accounting system's own recurring-transaction feature, or loading the occurrences as a batch.
 
@@ -643,9 +643,9 @@ All ten preserved, in order.
 
 **Cadence change mid-schedule**: **build as two sub-schedules.** `[auto: computed]`. Two clean schedules are auditable; one schedule with a hidden rule change is not.
 
-**Currency change or revaluation**: each occurrence is in the contract currency; FX is handled separately at posting time via `multicurrency-fx-revaluation`. `[auto: computed]` to hold the currency; `[manual]` for the FX treatment. **Do not convert occurrences into the functional currency in this schedule** — that bakes in a rate that will be wrong by the time the transaction posts.
+**Currency change or revaluation**: each occurrence is in the contract currency; FX is handled separately at posting time, as an FX revaluation task. `[auto: computed]` to hold the currency; `[manual]` for the FX treatment. **Do not convert occurrences into the functional currency in this schedule** — that bakes in a rate that will be wrong by the time the transaction posts.
 
-**Vendor or customer is also a related party**: flag for elimination consideration via `consolidation-and-eliminations`. **`[auto: read]` to detect** where the counterparty's name matches another connected company file's `display_name`, or appears in both the customer and vendor lists. `[manual]` to conclude. See `intercompany-reconciliation` and `related-party-disclosures-asc850`.
+**Vendor or customer is also a related party**: flag for elimination consideration on consolidation. **`[auto: read]` to detect** where the counterparty's name matches another connected company file's `display_name`, or appears in both the customer and vendor lists. `[manual]` to conclude. Intercompany reconciliation and related-party disclosure follow from the same detection.
 
 **Schedule with both a fixed and a variable component** — base rent plus CAM (common area maintenance) service charges that vary: **build the fixed schedule and flag the variable as requiring per-period actual amounts.** `[auto: computed]` for the fixed part. **Do not average the variable part into the fixed schedule.** An averaged estimate posted automatically every month is an accrual nobody decided to make, and it will drift.
 
@@ -766,10 +766,6 @@ Persist through `create_skill`, scoped to the workspace. **Client facts belong i
 | `fixed-asset-register-and-depreciation` | The other large source of recurring journal entries. |
 | `journal-entry-review` | The reversal check in Sheet 4, and unreversed accruals generally. |
 | `month-end-close-checklist` | Where a recurring entry that failed to run shows up as a missing close task. |
-| `revenue-recognition-asc606` | Why subscription occurrences must carry service-period dates, not just invoice dates. |
-| `multicurrency-fx-revaluation` | FX at posting time; occurrences stay in contract currency. |
-| `consolidation-and-eliminations` | Where a recurring transaction with a related party needs eliminating. |
-| `related-party-disclosures-asc850` | The disclosure side of the same detection. |
 | `vendor-statement-reconciliation` | What happens when a near-miss name creates a second vendor record. |
-| `lease-accounting-asc842-ifrs16` | Recurring rent — where the escalation terms actually live. |
-| `real-estate-and-property-accounting` | Recurring rental income on the lessor side, and its straight-lining. |
+
+Skills for revenue recognition, FX revaluation, consolidation and eliminations, related-party disclosures, lease accounting and real estate accounting are queued for this library and will be linked here when they ship.
