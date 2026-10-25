@@ -88,7 +88,7 @@ This finds out where the three disagree and why.
 
 This skill works **across product categories**. **The costing method — FIFO / LIFO / weighted average /
 standard cost — drives the valuation but not the reconciliation procedure**;
-`inventory-costing-fifo-lifo-wavg` handles the costing method.
+choosing and applying the costing method is a separate inventory-costing task.
 
 It is **workspace-scoped**: the GL balances, the item quantities, the transaction cut-off evidence and the
 reserve movements come from tool calls against a company file connected to your Mosofin workspace in this
@@ -409,7 +409,7 @@ country / region.
 | **Inventory locations / warehouses** | Recommended — **[gated]** | Readable where location tracking is used. |
 | **Standard cost vs. actual cost variance accounts** | Recommended — **[auto]** where they exist | Their balances are readable; **the absorption policy is `[manual]`.** |
 | **In-transit / consignment inventory** — quantity and value | Recommended — **[manual]** | **Title terms are contractual.** |
-| **Inventory reserve / write-down policy** | Recommended — **[manual]** | See `inventory-obsolescence-and-reserve`. |
+| **Inventory reserve / write-down policy** | Recommended — **[manual]** | Setting the reserve itself is an inventory obsolescence task. |
 | **Whether the subledger is a separate system** | **Required — Mosofin addition** | **Decides what this reconciliation proves.** |
 | **When the last physical count was performed** | **Required — Mosofin addition** | If never, that is the finding. |
 | **Confirm scope** | **Required** | Read back in-scope and excluded company files by `display_name`, and the period. |
@@ -597,7 +597,7 @@ which per variance, rather than assigning causes uniformly.
 | **In-transit inventory** (entity-owned in shipping) | **Title has transferred per Incoterms** | **Should be on subledger; ensure GL reflects** | **[gated]** — **Incoterms are `[manual]`** |
 | **Returns from customers in transit** | Returned but not yet received | **Hold in "Returns Pending" account** | **[gated]** — credit memos are readable |
 | **WIP component cost adjustments** | Re-costing of WIP at period end | **Usually GL-driven; ensure subledger reflects** | **[auto]** on the balance, `[manual]` on the basis |
-| **Inventory write-downs (NRV, obsolescence)** | Lower of cost or NRV adjustments | **GL reserve account; subledger may stay at cost — track contra** | **[auto]** — see `inventory-obsolescence-and-reserve` |
+| **Inventory write-downs (NRV, obsolescence)** | Lower of cost or NRV adjustments | **GL reserve account; subledger may stay at cost — track contra** | **[auto]** — setting the reserve itself is an obsolescence task |
 | **Sample / promotional inventory consumed** | No invoice, but units gone | **Track separately as marketing expense** | **[gated]** — a common untracked shrinkage cause |
 | **Manufacturing variances** | Standard vs. actual cost differences | **PPV, MUV, etc. — see standard costing** | **[auto]** on balances |
 
@@ -664,8 +664,8 @@ DR  Cost of Goods Sold / Inventory Write-Down       $write-down
 Memo: NRV write-down — [SKU or category]
 ```
 
-**Cut-off correction**: **reverse or move the misposted entry to the right period** (see
-`restatement-and-prior-period-adjustment` if cross-year).
+**Cut-off correction**: **reverse or move the misposted entry to the right period** (if
+cross-year, it is a prior-period adjustment).
 
 **Note the memo lines reference a count date** — which is the original's own reminder that these entries
 follow a count, not a query.
@@ -793,10 +793,10 @@ balance and quantity carrying its entity's `display_name`. Then the points speci
   and if it does, both entities are misstated.
 - **Goods in transit between group entities belong to whichever entity holds title**, per the internal
   terms. **At period end this stock is frequently on neither balance sheet or on both** — check both sides
-  explicitly, exactly as `intercompany-reconciliation` checks both sides of a balance.
+  explicitly, exactly as an intercompany reconciliation checks both sides of a balance.
 - **An intra-group sale creates inventory in the buyer at the transfer price**, carrying mark-up that is not
   group profit. **The reconciliation is per entity at each entity's own cost; the elimination is a
-  consolidation step** — see `consolidation-and-eliminations`.
+  consolidation step**, outside this reconciliation.
 - **Shrinkage should be computed and investigated per entity and per location.** A group shrinkage rate
   averages away the one site with a problem, which is the only thing the number was going to tell you.
 - **Counts happen per location, not per entity**, and a group with ten sites may have counted three.
@@ -896,8 +896,8 @@ between entity and 3PL is the entity's.** **The 3PL statement is `[manual]`.**
 damaged. Don't reactivate damaged returns at full cost.**
 
 **Long-aged inventory (slow-moving / obsolete)**: **candidate for write-down. The entity's policy might be:
-aged > 12 months → 25% reserve; > 24 months → 50%; > 36 months → 100%. Apply per policy.** See
-`inventory-obsolescence-and-reserve`.
+aged > 12 months → 25% reserve; > 24 months → 50%; > 36 months → 100%. Apply per policy.** Setting the
+reserve itself is an inventory obsolescence task.
 
 **Damaged / scrap inventory**: **write off at the time of scrapping; document with photos and approvals if
 material.** **Condition is `[manual]`** — nothing here can see it.
@@ -912,7 +912,7 @@ overhead applied to in-process units. Reconciliation must trace from raw materia
 goods.** **Impossible where the chart has a single inventory account** — a structural limitation to report.
 
 **Inventory acquired in a business combination**: **opening value at fair value, often higher than book cost.
-Track separately for cost-allocation purposes.** See `business-combinations-asc805`.
+Track separately for cost-allocation purposes.** Measuring that fair value is business-combination accounting (ASC 805).
 
 **ROU vs. inventory**: **leased equipment is not inventory — it's ROU under ASC 842 / IFRS 16. Common
 misclassification.**
