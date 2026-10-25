@@ -125,7 +125,7 @@ payroll journal.** What it can do is make the proposal correct before a person p
 `payroll-clearing-reconciliation`. **Check at Gate 1.**
 
 **This skill feeds two others**: the entries built here are what `payroll-clearing-reconciliation`
-subsequently reconciles, and the liabilities created are what `payroll-tax-filings` remits. **Build them so
+subsequently reconciles, and the liabilities created are what the payroll tax filings remit. **Build them so
 those skills can use them** — which mostly means using the account map consistently.
 
 ---
@@ -547,7 +547,7 @@ separate them either.
 
 **For costs that should be capitalized** — e.g. labor on a self-constructed asset or capitalized software
 development — **route to the asset account rather than expense — flag these.** **[manual]** to identify; see
-`fixed-asset-register-and-depreciation` and `intangibles-and-amortization`, **where the same labor appears
+`fixed-asset-register-and-depreciation` and an intangibles amortization review, **where the same labor appears
 from the other side.**
 
 **[auto]** checks: **the allocation sums to the total** — Step 7's requirement — and **the allocation is
@@ -601,7 +601,7 @@ accrual's ratio to the last full run's total cost** should be plausible.
 - **Total expense recognized = gross pay + employer costs** — **[auto]**, and **the mirror of the same
   test**: if employer costs were netted into gross, total expense will be right and the split will be wrong
 - **Liabilities created match amounts that will be remitted** — to tax authorities, retirement plans,
-  benefit providers, employees — **[gated]**; see `payroll-tax-filings`
+  benefit providers, employees — **[gated]**; the remittance itself is payroll tax filing work
 - **Department allocations sum to the total** — **[auto]**
 - **Accrual reverses correctly next period** — **[auto]** to verify in the following period
 
@@ -632,7 +632,7 @@ total.** **State whether the register was read or supplied.**
 prior-run comparison.
 
 **Sheet 5: Liability Summary** — **each payable created, amount, and to whom / when remitted** — feeds
-`payroll-tax-filings`.
+the payroll tax filings.
 
 **Sheet 6: Validation — NEW, Mosofin-specific** — the six original checks plus the four Mosofin ones, each
 with its result and the evidence.
@@ -707,14 +707,14 @@ longer connected is **flagged** — never silently dropped, never applied elsewh
   companies produces three journals**, not one split by class — **the liabilities are owed by different
   legal entities to different authorities.**
 - **A single bank payment covering several entities' payroll** must be allocated, **and the entities whose
-  payroll was paid by another owe it back** — an intercompany balance, not a payroll item. See
-  `intercompany-reconciliation`.
+  payroll was paid by another owe it back** — an intercompany balance, not a payroll item. It
+  belongs in an intercompany reconciliation.
 - **Employment jurisdiction drives the withholding types**, not the entity's own location. An entity
   employing people in two countries needs both sets of liability accounts.
 - **Shared employees recharged between entities** follow the recharge agreement — **the cost sits where the
   employment is, and the recharge is a separate transaction.**
 - **Currency**: payroll denominated in a currency other than the entity's functional currency creates FX
-  between accrual and payment — see `multicurrency-fx-revaluation`.
+  between accrual and payment — the translation itself is an FX revaluation task.
 - **Run the comparison per entity.** A group total can be stable while one entity's payroll has doubled.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict per company
@@ -809,7 +809,7 @@ when remitted. Don't net into tax accounts.** **Sensitive; report at account lev
 
 **Capitalized labor**: **labor on self-constructed assets or qualifying software development is capitalized,
 not expensed. Route to the asset account; flag for the FA register**
-(`fixed-asset-register-and-depreciation`) **or intangibles** (`intangibles-and-amortization`).
+(`fixed-asset-register-and-depreciation`) **or intangibles** (an intangibles amortization review).
 
 **Payroll clearing account**: **when used, the JE credits clearing and a separate bank entry clears it. The
 clearing account should reconcile to zero** (`payroll-clearing-reconciliation`).
@@ -819,7 +819,7 @@ actual payroll is booked. Use reversing entries.** *Mosofin note*: **whether the
 `[auto]` to check** — and it is the check that prevents the double-count.
 
 **Multi-currency / multi-entity payroll**: **book each in the right entity and currency; intercompany
-recharges of shared employees follow `intercompany-reconciliation`.**
+recharges of shared employees follow an intercompany reconciliation.**
 
 **Corrections / retro pay**: **prior-period adjustments and retroactive pay create catch-up entries; book in
 the current period with a clear memo.**
