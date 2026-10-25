@@ -557,7 +557,7 @@ DR  Accounts Receivable                            $total inclusive
     CR  Output Tax Payable                           $tax
 ```
 
-**And schedule periodic recognition. Hand to `revenue-recognition-asc606` for ASC 606 compliance.**
+**And schedule periodic recognition. ASC 606 compliance is a revenue-recognition task.**
 
 Use the **real account names from the connected chart of accounts** (*`search_accounts`*, **[auto]**) —
 including the **default income account already set against each item** (*`read_item`*), which is usually
@@ -697,8 +697,8 @@ only**. Then:
 - **Number sequences must not collide.** Where entities share a numbering convention, confirm each has its
   own range or prefix. Two legal entities issuing invoice "1042" is a real problem at audit.
 - **Invoicing between group entities is an intercompany transaction.** It still needs a proper invoice
-  where the jurisdictions require one, and it must be eliminated on consolidation — see
-  `consolidation-and-eliminations` and `intercompany-reconciliation`.
+  where the jurisdictions require one, and it must be eliminated on consolidation and agreed in an
+  intercompany reconciliation.
 - **The gap-and-duplicate check runs per entity**, since each sequence is its own.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict per company
@@ -782,8 +782,8 @@ before sending.** *Mosofin note*: **detectable** — check whether prior invoice
 PO reference, and flag its absence before the invoice goes out rather than thirty days later.
 
 **Progress billings** (construction, long projects): **bill against completed milestones. Each invoice
-references the contract and the milestone(s) billed.** May trigger POC accounting via
-`construction-percentage-of-completion`.
+references the contract and the milestone(s) billed.** May trigger percentage-of-completion (POC)
+accounting.
 
 **Retainage**: **invoice the gross but expect partial payment, with the rest held until project
 completion. Track the retainage receivable separately** — otherwise the aging shows a permanently overdue
