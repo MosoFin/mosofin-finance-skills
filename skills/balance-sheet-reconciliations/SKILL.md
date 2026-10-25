@@ -475,24 +475,24 @@ inventory platform changes several rows at once.
 |---|---|---|---|
 | Cash / Bank | Bank statement (use `bank-reconciliation` skill) | **[auto]** | **[manual]** — the statement is outside the books |
 | Accounts Receivable | A/R sub-ledger / open invoice listing | **[auto]** | **[auto]** — *`get_aged_receivables`*, *`search_invoices`* |
-| Allowance for Doubtful Accounts | Allowance calculation (see `bad-debt-and-write-offs`) | **[auto]** | **[manual]** — the calculation is a schedule |
+| Allowance for Doubtful Accounts | Allowance calculation | **[auto]** | **[manual]** — the calculation is a schedule |
 | Inventory | Inventory subledger / physical count (see `inventory-to-gl-reconciliation`) | **[auto]** | **[gated]** — *`search_items`* gives the master; counts and valuation usually **[manual]** |
 | Prepaid Expenses | Prepaid amortization schedule (see `prepaid-amortization-schedule`) | **[auto]** | **[manual]** |
 | Input Tax / VAT Receivable | Tax filing detail | **[auto]** | **[manual]** — *`search_tax_codes`* / *`search_tax_rates`* help identify, not evidence |
 | Fixed Assets (gross) | Fixed Asset Register (see `fixed-asset-register-and-depreciation`) | **[auto]** | **[manual]** |
 | Accumulated Depreciation | Fixed Asset Register depreciation summary | **[auto]** | **[manual]** |
-| Intangible Assets | Intangibles register (see `intangibles-and-amortization`) | **[auto]** | **[manual]** |
-| Right-of-Use Assets | Lease schedules (see `lease-accounting-asc842-ifrs16`) | **[auto]** | **[manual]** |
+| Intangible Assets | Intangibles register | **[auto]** | **[manual]** |
+| Right-of-Use Assets | Lease schedules | **[auto]** | **[manual]** |
 | Goodwill | Acquisition history + impairment tests | **[auto]** | **[manual]** |
 | Accounts Payable | A/P sub-ledger / open bill listing | **[auto]** | **[auto]** — *`get_aged_payables`*, *`search_bills`* |
 | Accrued Expenses | Accruals schedule (see `ap-accrual-cutoff`, `accruals-and-deferrals`) | **[auto]** | **[gated]** — booked entries **[auto]**, the calculations behind them **[manual]** |
-| Customer Deposits / Deferred Revenue | Contract / customer schedule (see `revenue-recognition-asc606`) | **[auto]** | **[gated]** — receipts **[auto]**, the service periods **[manual]** |
+| Customer Deposits / Deferred Revenue | Contract / customer schedule | **[auto]** | **[gated]** — receipts **[auto]**, the service periods **[manual]** |
 | Sales Tax / VAT / GST Payable | Tax filing return + post-period activity | **[auto]** | **[manual]** for the return; post-period activity **[auto]** |
 | Payroll Liabilities | Payroll register + remittances (see `payroll-clearing-reconciliation`) | **[auto]** | **[manual]** unless a payroll platform is connected |
 | Income Tax Payable | Tax provision workpaper | **[auto]** | **[manual]** |
 | Lease Liability | Lease schedule | **[auto]** | **[manual]** |
 | Long-Term Debt | Loan amortization schedule + lender confirmation | **[auto]** | **[manual]** |
-| Intercompany Accounts | Counterparty entity's mirror balance (see `intercompany-reconciliation`) | **[auto]** | **[auto] if the counterparty is a connected company file**, otherwise **[manual]** |
+| Intercompany Accounts | Counterparty entity's mirror balance | **[auto]** | **[auto] if the counterparty is a connected company file**, otherwise **[manual]** |
 | Equity Accounts | Stock register / capital movements log | **[auto]** | **[manual]** |
 | Suspense / Clearing | Should be zero or near-zero; investigate every line | **[auto]** | **[auto]** — *`get_general_ledger`*; fully supported, and the highest-value quick win here |
 
@@ -739,8 +739,8 @@ one cross-entity step:
 - **The intercompany mirror check**, which is the genuine cross-entity reconciliation and the one
   worth doing deliberately: entity A's receivable from entity B against entity B's payable to
   entity A. Where both are connected company files, **both sides are `[auto]`** — pull each
-  entity's balance separately, compare, and report the mismatch. See
-  `intercompany-reconciliation`.
+  entity's balance separately, compare, and report the mismatch. Clearing the
+  mismatch is a separate intercompany reconciliation.
 - **A group master summary** showing, per entity, how many accounts tied, how many are
   unreconciled, and **how much of the balance sheet has an evidenced supporting side**. The last
   column is the one that reveals a weak component.
@@ -840,7 +840,7 @@ reconcile in the original currency** where applicable (e.g. a foreign-currency b
 revaluation may explain differences.
 
 **Intercompany account that's not netting to zero against the counterparty's mirror balance**:
-that is an intercompany mismatch, handed to `intercompany-reconciliation`. *Mosofin note*: if
+that is an intercompany mismatch, handed to an intercompany reconciliation. *Mosofin note*: if
 both entities are connected company files, **pull both sides and quantify the mismatch here**
 rather than only flagging it.
 
@@ -856,7 +856,7 @@ is `[auto]`, so this check should always be performed rather than skipped.
 of carry-forward and recommend establishing the prior-period baseline.
 
 **Adjustments to the opening balance**: typically prior-period adjustments — flag for
-`restatement-and-prior-period-adjustment`.
+review as a possible restatement.
 
 **Account that's been merged or split mid-period**: rebuild the reconciliation respecting the
 merge or split, with a memo explaining. *Mosofin note*: a renamed or merged account may return a
