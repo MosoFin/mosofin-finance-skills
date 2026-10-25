@@ -702,8 +702,8 @@ cross-entity step:
   same invoice accrued at two entities is a double-count. Compare vendor and amount across
   entities before combining.
 - Watch for the **intercompany accrual**: an accrual at one entity may be an unbilled
-  receivable at another. Flag the pair rather than netting silently — see
-  `intercompany-reconciliation`.
+  receivable at another. Flag the pair rather than netting silently; clearing the pair is an
+  intercompany reconciliation.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict
 per company file.
@@ -799,7 +799,7 @@ silently post a 50% larger accrual.**
 
 **Multi-currency**: accrue in the functional currency at the period-end FX rate. The reversal
 in the new period uses the same rate — or rebooks at the new-period rate per policy, but
-**consistency matters**; see `multicurrency-fx-revaluation`.
+**consistency matters**; the revaluation itself is an FX revaluation task.
 
 **Tax-inclusive vs exclusive estimates**: make sure the accrual is on the expense amount, not
 the gross. If the expected total includes tax, decompose it.
