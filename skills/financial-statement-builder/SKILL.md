@@ -406,7 +406,7 @@ books now answer**:
 | **Classification rules** — current / non-current criteria | Recommended — **[gated]** | **The current portion of debt and leases is the hard part**; it needs the amortization schedules. |
 | **Special presentation elements** — discontinued ops, extraordinary items, segments | If applicable — **[manual]** | Nothing in the ledger flags a disposal group. |
 | **Prior-year audited financials** — for continuity | Recommended — **[manual]**, and **more important than the original implies** | The check that catches unposted audit adjustments. |
-| **Presentation currency**, if different from functional | If applicable — **[manual]** | Translation per `foreign-currency-translation-asc830`. |
+| **Presentation currency**, if different from functional | If applicable — **[manual]** | Translation per ASC 830 / IAS 21. |
 | **Rounding basis** | Recommended — **[manual]** | Whole units, thousands, millions. |
 | **Share count for EPS**, if EPS is required | If applicable — **[manual]** | **Weighted average shares are not in the ledger.** |
 | **Confirm scope** | **Required** | Read back in-scope and excluded company files by `display_name`, **and whether the package is consolidated or separate**. |
@@ -502,7 +502,7 @@ due within 12 months.**
 
 **[gated]**: account types are `[auto]`, but the twelve-month test is judgment plus schedules. **The
 current portion of long-term debt is the classic case** — the ledger usually carries one loan balance, and
-splitting it needs the amortization schedule (see `debt-and-covenant-tracking`). The same applies to lease
+splitting it needs the amortization schedule. The same applies to lease
 liabilities and to deferred revenue.
 
 ### Balance Sheet structure
@@ -667,11 +667,9 @@ checks:
 
 **OCI items — closed to AOCI, not RE:**
 
-- **Foreign currency translation adjustments (CTA)** — **[gated]**; arises on translation, see
-  `foreign-currency-translation-asc830`
+- **Foreign currency translation adjustments (CTA)** — **[gated]**; arises on translation
 - **Available-for-sale debt securities — unrealized gains / losses** — **[manual]**; needs market values
-- **Cash flow hedge gains / losses (effective portion)** — **[manual]**; see
-  `derivatives-and-hedging-asc815`
+- **Cash flow hedge gains / losses (effective portion)** — **[manual]**; hedge accounting
 - **Defined benefit plan actuarial gains / losses** (per framework) — **[manual]**; actuarial
 - **Revaluation surplus on PP&E (IFRS only)** — **[manual]**; needs a valuation
 
@@ -692,9 +690,9 @@ required** — do not present a movement you cannot explain.
 
 ## Step 6 — Build the Statement of Cash Flows
 
-**Hand off to `cash-flow-statement-indirect-method` for the full procedure. The result fits in the package
-as the third primary statement.** **[gated]** — that skill has its own capability map; the balance-sheet
-movements it needs are `[auto]`, the non-cash and financing detail often is not.
+**Build it by the indirect method, which is a full procedure of its own. The result fits in the package
+as the third primary statement.** **[gated]** — the balance-sheet movements it needs are `[auto]`, the
+non-cash and financing detail often is not.
 
 Where the platform offers its own cash flow report (*`get_cash_flow_statement`*), **it is a useful
 cross-check, not a substitute** — platform cash flow reports classify by their own rules and frequently
@@ -702,7 +700,7 @@ misclassify financing and investing items.
 
 ## Step 7 — Build the Statement of Changes in Equity / Statement of Stockholders' Equity
 
-**Hand off to `statement-of-equity-changes`. This shows the roll-forward of each equity component.**
+**Prepare it as a procedure of its own. This shows the roll-forward of each equity component.**
 **[gated]** — the balances are `[auto]`, the movements need attribution.
 
 ## Step 8 — Cross-statement validations
@@ -773,9 +771,9 @@ provenance: the tool call, the entity `display_name`, the as-at date and the acc
 
 **Sheet 4: Statement of Comprehensive Income** — if material OCI items exist.
 
-**Sheet 5: Statement of Cash Flows** — from `cash-flow-statement-indirect-method`.
+**Sheet 5: Statement of Cash Flows** — by the indirect method, from Step 6.
 
-**Sheet 6: Statement of Changes in Equity** — from `statement-of-equity-changes`.
+**Sheet 6: Statement of Changes in Equity** — from Step 7.
 
 **Sheet 7: Cross-Statement Tie-Outs** — **the 7 critical validations from Step 8**, each with its computed
 difference.
@@ -858,7 +856,7 @@ cover the reporting entity.
 **Multi-entity.** Steps 0–11 run **once per entity**, each call targeting exactly one `data_source_id`,
 every statement carrying its entity's `display_name`. Then the decision that defines the deliverable:
 
-- **Consolidated statements.** Each entity's TB is consolidated per `consolidation-and-eliminations`, **then
+- **Consolidated statements.** Each entity's TB is consolidated first, **then
   the statements are built from the consolidated TB.** The consolidation eliminates intercompany items.
   **Do not build statements per entity and add them together** — that double-counts intercompany balances
   and revenue, and the result will still balance, which is what makes the error so durable.
@@ -868,7 +866,7 @@ every statement carrying its entity's `display_name`. Then the decision that def
 - **Non-controlling interests** appear in equity only on consolidated statements, and only where a
   subsidiary is partly owned.
 - **Multi-currency**: **each entity in its functional currency; group reporting currency requires
-  translation per ASC 830 / IAS 21. CTA flows to OCI.** See `foreign-currency-translation-asc830`.
+  translation per ASC 830 / IAS 21. CTA flows to OCI.**
 - **Parent-only statements** may be required in some jurisdictions **in addition to** consolidated ones.
   **Use the same procedure on the parent-only TB** — and label the two unmistakably.
 - **The tie-outs run on whichever set you present.** Consolidated tie-outs prove the consolidated package;
@@ -958,8 +956,8 @@ closing entries to build the IS — just use the YTD balances.**
 activity** — general ledger transactions or a pre-closing snapshot. *Mosofin note*: *`get_profit_and_loss`*
 for the period supplies it directly, which is easier than the original assumes.
 
-**Multi-entity consolidated statements**: **each entity's TB consolidated per
-`consolidation-and-eliminations`, then statements built from the consolidated TB. The consolidation
+**Multi-entity consolidated statements**: **each entity's TB consolidated first,
+then statements built from the consolidated TB. The consolidation
 eliminates intercompany items.**
 
 **Multi-currency**: **each entity in its functional currency; group reporting currency requires translation
@@ -972,11 +970,11 @@ restated to reflect.** *Mosofin note*: **nothing in the ledger flags a disposal 
 **Investment company / specialized industry presentation**: **certain industries have specific statement
 formats** — banks, insurance, REITs, registered investment companies. **Apply industry guidance.**
 
-**Going-concern doubt**: **doesn't change the statements themselves but requires disclosure** — see
-`notes-to-financial-statements`.
+**Going-concern doubt**: **doesn't change the statements themselves but requires disclosure** in the notes
+to the financial statements.
 
-**Restated comparatives**: **if the prior period was restated** (correction of an error per
-`restatement-and-prior-period-adjustment`), **present restated comparatives with disclosure.**
+**Restated comparatives**: **if the prior period was restated** (correction of a prior-period
+error), **present restated comparatives with disclosure.**
 
 **Materially different from the auditor's expected statements**: **if the auditor's adjustments materially
 change the statements, ensure those adjustments are in the TB before building.** *Mosofin note*: **this is
