@@ -652,7 +652,7 @@ Entity B (borrower):
 DR  Cash                                  $X
     CR  Intercompany Payable — Entity A       $X
 ```
-**Flag for `intercompany-reconciliation` at period end.**
+**Flag for intercompany reconciliation at period end.**
 
 **[gated]**, and stronger here than the original assumes: **where both entities are connected, both sides
 are built against their own real charts** — the account names differ between entities and **using the
@@ -824,12 +824,12 @@ not the last. Then:
   counterparty is not connected, **say the far side could not be built against a real chart** rather than
   guessing at its account names.
 - **Validate both sides.** The near side's accrual check, period check and account check all apply equally
-  to the far side — see `intercompany-reconciliation`, which is where these entries end up being tested.
+  to the far side — an intercompany reconciliation is where these entries end up being tested.
 - **Currencies differ by entity.** Each entry is in its entity's functional currency; **a cross-currency
-  intercompany pair will not mirror in local amounts**, and that is expected — see
-  `foreign-currency-translation-asc830`.
+  intercompany pair will not mirror in local amounts**, and that is expected — the translation itself is a
+  foreign-currency translation task.
 - **Consolidation-only entries belong to neither entity's books.** Elimination entries from
-  `consolidation-and-eliminations` are built for the consolidation ledger and **must be labelled so nobody
+  a consolidation are built for the consolidation ledger and **must be labelled so nobody
   imports them into a subsidiary.**
 - **Numbering conventions differ by entity.** Store them separately.
 
@@ -902,7 +902,7 @@ All of the original edge cases, plus the ones Mosofin's workspace model introduc
 
 **Multi-currency entries**: **each line must be in the same currency, or include explicit FX rate columns.
 For cross-currency entries, post in functional currency with an FX gain / loss plug. Flag for
-`multicurrency-fx-revaluation`.**
+FX revaluation.**
 
 **Penny imbalances from rounding allocations**: **do not pad with a "Rounding" plug. Allocate the rounding
 to the largest line and note in the memo.**
