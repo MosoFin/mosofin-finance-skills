@@ -94,10 +94,10 @@ It is **not** system-agnostic. It is **workspace-scoped**: every invoice, paymen
 account name comes from a tool call against a company file connected to your Mosofin workspace in
 this conversation, or from something you supplied by hand and that is labelled as such.
 
-**Related skill:** `ar-cash-application-lockbox` covers the same ground from the **operations**
-angle — the deduction-case workflow, the unapplied-cash aging, and the daily tie-out to bank
-deposits. **This skill covers the matching logic and the resulting journal entry in detail.** Use
-whichever fits the question; they share the same evidence base and should agree.
+**Related work:** a lockbox cash-application skill, queued for this library, covers the same
+ground from the **operations** angle — the deduction-case workflow, the unapplied-cash aging, and
+the daily tie-out to bank deposits. **This skill covers the matching logic and the resulting journal
+entry in detail.** When that skill ships, the two share the same evidence base and should agree.
 
 **The structural limit, stated up front.** Mosofin connects the **accounting system**. It reads
 payments **once they are recorded** and it reads the **open invoice population** in full. It cannot
@@ -805,8 +805,8 @@ invoice is created.** Do not force it onto an unrelated open invoice.
 for collections.
 
 **Payment from a related entity / parent paying on behalf of a subsidiary**: apply to the
-subsidiary's invoices; **capture the parent as payer-of-record.** Coordinate with intercompany — see
-`intercompany-reconciliation`.
+subsidiary's invoices; **capture the parent as payer-of-record.** Coordinate with intercompany; clearing the pair is an
+intercompany reconciliation.
 
 **Reversed payment / NSF**: **reverse the cash application JE, restore the invoice to open, charge
 any bank NSF fee.** *Mosofin note*: an invoice that reverts to open after being marked paid is
