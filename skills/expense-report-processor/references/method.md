@@ -103,8 +103,9 @@ a misspelling.
 
 ## Step 2 — Validate against policy
 
-**Policy validation only runs if the user provided a policy.** If no policy, **skip this step and move to
-Step 3** — GL coding, math check and obvious-personal flags only. **[manual]** on the policy throughout;
+**Policy validation only runs if the user provided a policy.** If no policy, **skip the policy checks and move to
+Step 3** — GL coding, math check and obvious-personal flags. **Duplicate detection, below, needs no policy
+and runs either way.** **[manual]** on the policy throughout;
 the arithmetic against it is `[auto]`.
 
 When a policy is provided, validate per its rules. Common dimensions:
@@ -325,7 +326,7 @@ ageing; the Employee Reimbursement Payable reconciliation; claimants with no emp
 
 | Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used / external source | As-at date | Policy | `mock` | Gap |
 
-**If no policy was supplied, every Step 2 row reads `manual — not performed`.** That is the honest entry,
+**If no policy was supplied, every Step 2 policy row reads `manual — not performed`; duplicate detection needs no policy and is reported as run.** That is the honest entry,
 and it is more useful than a validation that did not happen.
 
 Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
