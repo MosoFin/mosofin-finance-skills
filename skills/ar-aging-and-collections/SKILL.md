@@ -613,7 +613,7 @@ Then one cross-entity step:
   approach rather than three separate reminders, and may be disputed at one entity while being
   chased at another — which is exactly how a relationship gets damaged.
 - **Intercompany receivables** — where one entity owes another — are excluded from collections
-  and routed to `intercompany-reconciliation`.
+  and routed to an intercompany reconciliation.
 
 Capability is checked **per entity** at Gate 2: the aging detail capability may be listed for
 one company file and not its sibling, so the same task can be `[auto]` for one and `[manual]`
