@@ -92,7 +92,7 @@ from tool calls against a company file connected to your Mosofin workspace in th
 something you supplied by hand and that is labelled as such.
 
 **This skill identifies risk indicators and anomalies; it does not conclude fraud occurred** — that requires
-investigation (`fraud-detection-and-forensics`).
+a fraud investigation, which is outside this skill.
 
 ## What changes: screen everything, and name what cannot be screened
 
@@ -101,7 +101,7 @@ matter."* That is right about review and no longer right about screening.**
 
 > **Screening every entry is a query.** The population is readable, the criteria are computable, and the
 > cost of applying them to 8,000 entries is the same as applying them to 80. **So screen 100% and review the
-> top** — the same reasoning as `internal-audit-workpaper`, where a readable population removes sampling
+> top** — the same reasoning as an internal audit workpaper, where a readable population removes sampling
 > risk.
 >
 > **Report the population size and state that the screen was complete.** "All 4,812 entries screened; 63
@@ -122,8 +122,8 @@ than single entries. Here they are also cheaper.**
 > system that holds it.
 >
 > **And where a user field does exist, a user name is not a person.** Shared logins, delegated access and
-> system-generated entries all break that link — the same caveat as
-> `fraud-detection-and-forensics`, `internal-audit-workpaper` and `ipo-readiness-accounting`.
+> system-generated entries all break that link — the same caveat that applies in
+> fraud investigation, internal audit and IPO-readiness work.
 
 **One more inherited discipline:** **this skill escalates to the fraud skill and inherits its rules.** **An
 anomaly is not a finding.** Entries are posted by identifiable people; **a flagged list is a list of
@@ -593,8 +593,8 @@ of the skill**:
   **[auto]**: **compute the pre-entry and post-entry result and look at the direction and the proximity to
   round or threshold figures**
 - **Increasing manual entry volume to a sensitive account over time** — **[auto]**
-- **Reserves / accruals that move suspiciously with earnings** — **[auto]**, and **the same test as in
-  `fraud-detection-and-forensics`**: plot reserve movements against pre-reserve profit across periods. **A
+- **Reserves / accruals that move suspiciously with earnings** — **[auto]**, and **the same test a
+  fraud investigation runs**: plot reserve movements against pre-reserve profit across periods. **A
   reserve that reliably moves in the smoothing direction is an indicator worth investigating**
 
 **Patterns are often more telling than single entries.** **And they require the full population and several
@@ -608,7 +608,7 @@ For each item requiring follow-up — **[gated]**:
 - **Why it was flagged** — which criteria — **[auto]**
 - **The explanation obtained (or outstanding)** — **[manual]**
 - **Resolution: legitimate** (with rationale), **error** (correction needed), **or escalate** — potential
-  impropriety → `fraud-detection-and-forensics`
+  impropriety → a fraud investigation
 
 **On escalation**: **the fraud skill's rules apply from the moment you escalate** — objectivity, no
 accusation, evidence preservation as a separate discipline, and **no approval prompt to someone within
@@ -616,7 +616,7 @@ scope.** Read it before proceeding.
 
 ## Step 7 — Assess control implications
 
-**The review informs control assessment** (`sox-controls-design-and-testing`) — **[gated]**:
+**The review informs control assessment** (the kind a SOX controls review performs) — **[gated]**:
 
 - **Are JE approval controls operating?** — **[manual]**; **the review cannot answer this without approval
   data**, and saying so *is* the control observation
@@ -707,7 +707,7 @@ alongside the installed skill.
 **Never persist flagged entries, risk scores, user names, explanations or any anomaly.** **These are
 observations about how identifiable people did their jobs**, most of which will turn out to be entirely
 proper. **A flag carried forward outside a formal tracker, unrebutted and unclosed, becomes a permanent mark
-on someone who was never told** — the same rule as `fraud-detection-and-forensics`. **Persist the method;
+on someone who was never told** — the same rule a fraud investigation follows. **Persist the method;
 never the results.**
 
 **Key every preference and asset by datasource + entity `display_name`.** Write "quickbooks / Northbrook
@@ -742,7 +742,7 @@ entry and flag carrying its entity's `display_name`. Then:
   highest-risk population and the least visible** — see the edge cases. **If they are not in any connected
   file, say so.**
 - **Intercompany entries appear in two populations**, and **a manual entry on one side with no counterpart
-  on the other is both a JE-review flag and an intercompany break** — see `intercompany-reconciliation`.
+  on the other is both a JE-review flag and an intercompany break** — follow it up in an intercompany reconciliation too.
 - **Report flag rates per entity as well as in total.** A group rate averages away the one entity where the
   control has failed, which is the only thing the rate was going to tell you.
 
@@ -848,7 +848,7 @@ sensitive pair — reduces an expense, increases a different reserve — can mas
 account-level movement, not just the net.**
 
 **Escalation discipline**: **an anomaly is not a finding of fraud. Document objectively and escalate to
-investigation (`fraud-detection-and-forensics`) rather than accusing — preserve objectivity and avoid
+investigation rather than accusing — preserve objectivity and avoid
 prejudicing any inquiry.**
 
 **Approval-based criteria cannot run** — *Mosofin-specific, and the material gap*. **Four indicators, and
@@ -924,7 +924,7 @@ All of the original standards, plus the Mosofin ones.
   user-name caveat is stated wherever a user field is used**
 - **Measurable control observations are quantified** — the proportion of entries with weak descriptions,
   the manual proportion, the concentration by user or account
-- **Escalations follow `fraud-detection-and-forensics`** from the moment they are raised
+- **Escalations follow fraud-investigation discipline** from the moment they are raised
 - In a multi-entity run, **each entity is screened against its own baseline**, sensitive-account lists are
   per chart, and **flag rates are reported per entity as well as in total**
 - Every task carries its verdict (`[auto]` / `[gated]` / `[manual]`), the tool or external source used, and
