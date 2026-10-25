@@ -576,7 +576,7 @@ books:
 - **Time-and-materials** engagements (billed by hours worked): unbilled hours × rate —
   *`search_time_activities`* gives the hours where time is tracked in the connected books
 - **Milestone** projects: progress earned through period-end × contract value (per
-  `revenue-recognition-asc606`)
+  the revenue recognition standard)
 - **Subscription** services billed in arrears: pro-rated revenue
 
 **Audit / legal / professional fee accrual** — **[manual]**:
@@ -625,7 +625,7 @@ Memo: Recognize earned portion — [contract] — [period]
 your revenue, so it is split out at receipt.
 
 This is typically built as a schedule (similar to prepaid amortisation but on the revenue
-side). For ASC 606 / IFRS 15 compliance, use `revenue-recognition-asc606`.
+side). ASC 606 / IFRS 15 compliance itself is a revenue recognition task.
 
 Use the **real account names from the connected chart of accounts** (*`search_accounts`*,
 **[auto]**) rather than the generic labels above, and say which account you chose.
@@ -799,7 +799,7 @@ one cross-entity step:
 - Watch for the accrual that belongs to **one** entity but was estimated from **another's**
   run-rate — label it, and do not let a shared-service cost get accrued twice.
 - Where entities transact with each other, an accrual in one may be a deferral in the other;
-  flag the pair rather than netting them silently (see `intercompany-reconciliation`).
+  flag the pair rather than netting them silently, for an intercompany reconciliation.
 
 Capability is checked **per entity** at Gate 2, and the coverage sheet shows each item's
 verdict per company file.
@@ -898,8 +898,8 @@ others allow carry-forward. The vacation liability reflects the actual unused ba
 rate — so the policy has to be confirmed before the number means anything.
 
 **Multi-currency accruals**: accrue in the functional currency at the period-end FX rate. The
-reversal uses the same rate, or the current rate, per policy — see
-`multicurrency-fx-revaluation`. If the connected books hold only one currency but the
+reversal uses the same rate, or the current rate, per policy; the revaluation
+itself is an FX revaluation task. If the connected books hold only one currency but the
 underlying obligation is in another, that conversion is **[manual]**; say so.
 
 **Bonus / commission with deferral or clawback features**: only the **vested** portion is a
@@ -917,8 +917,7 @@ in the gross figure.
 
 **Catch-up / true-up of prior period accruals**: when the actual amount comes in differently
 from what was accrued, true it up in the current period. If the variance is material and
-relates to a prior period, consider whether a **restatement** is needed — see
-`restatement-and-prior-period-adjustment`.
+relates to a prior period, consider whether a **restatement** is needed.
 
 **Reclass of deferred revenue between current and non-current**: at each period end, the
 portion expected to be earned within twelve months is current; beyond that is non-current.
@@ -927,7 +926,7 @@ portion expected to be earned within twelve months is current; beyond that is no
 happens. Reverse it without an expense — do not leave it sitting on the balance sheet.
 
 **Stock-based comp expense**: accrued via the entity's vesting schedule — separate from this
-skill; see `equity-compensation-accounting`.
+skill; it is an equity compensation accounting task.
 
 **Pension / OPEB accruals**: actuarially determined. This skill summarises the result but does
 not compute the actuarial liability.
