@@ -596,7 +596,7 @@ For each statement — verdicts vary sharply, so mark each:
 - **Duplicate transactions on the same day** — **[auto]**, and worth running every month
 - **Disputed charges** (cardholder marked or known issues) — **[manual]**
 - **Charges from sanctioned countries** (compliance flag) — **[manual]**; merchant country is rarely in
-  the books, and **no sanctions list is available** — see `aml-kyc-procedures`
+  the books, and **no sanctions list is available**; screening belongs to whoever owns sanctions compliance
 - **Charges exceeding the cardholder's single-transaction limit** — **[gated]**: amounts are **[auto]**,
   the limit is **[manual]**
 - **Charges with no merchant identification** — **[auto]**
@@ -771,7 +771,7 @@ every charge carrying its entity's `display_name`. Then:
 
 - **A card issued to one entity but used for another's expenses** is the common cross-entity case. Those
   charges are **not that entity's expense** — they create an **intercompany balance**: entity A paid for
-  entity B's cost. Identify them, and route them to `intercompany-reconciliation` rather than coding them
+  entity B's cost. Identify them, and route them to an intercompany reconciliation rather than coding them
   as expense in the wrong company.
 - **A shared card programme across entities** produces one statement covering several legal entities.
   Reconcile the statement to the **combined** book activity, then allocate per entity — and treat the
