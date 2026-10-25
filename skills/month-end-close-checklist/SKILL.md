@@ -497,22 +497,21 @@ something outside the ledger, so completion cannot be confirmed from inside it**
 pays most
 - **Prepaid amortization** (`prepaid-amortization-schedule`)
 - **Depreciation** (`fixed-asset-register-and-depreciation`)
-- **Amortization of intangibles** (`intangibles-and-amortization`)
-- **Lease entries** (`lease-accounting-asc842-ifrs16`)
-- **Stock-based compensation expense** (`equity-compensation-accounting`)
+- **Amortization of intangibles**
+- **Lease entries**
+- **Stock-based compensation expense**
 - **Accruals and deferrals** (`accruals-and-deferrals`)
-- **Bad debt allowance true-up** (`bad-debt-and-write-offs`)
+- **Bad debt allowance true-up**
 - **Inventory write-downs** (`inventory-to-gl-reconciliation`)
-- **Revenue recognition entries** (`revenue-recognition-asc606`)
+- **Revenue recognition entries**
 - **Deferred revenue release**
 - **Loan amortization** (interest + principal)
-- **FX revaluation** (`multicurrency-fx-revaluation`)
+- **FX revaluation**
 
 **Day 4 — Reconciliations** — **[gated]**
 - **Balance sheet reconciliations** (`balance-sheet-reconciliations`) **for every BS account** — **[auto]**
   to list the accounts and their balances; **[manual]** to reconcile
-- **Intercompany reconciliations** (`intercompany-reconciliation`) — **[auto]** where both sides are
-  connected
+- **Intercompany reconciliations** — **[auto]** where both sides are connected
 - **Payroll clearing** (`payroll-clearing-reconciliation`) — **[auto]** for the clearing balance
 - **Tax accounts reconciliation** — sales tax, VAT, withholding — **[gated]**
 - **All other control accounts** — **[auto]** to enumerate
@@ -523,19 +522,18 @@ pays most
   budget where held
 - **BS variance to prior month** — **[auto]**
 - **Unusual fluctuations investigated** — **[auto]** to surface, **[manual]** to explain
-- **KPI dashboards refreshed** (`kpi-dashboard-builder`) — **[auto]**
+- **KPI dashboards refreshed** — **[auto]**
 
 **Day 6 — Consolidation (if multi-entity)** — **[gated]**; **drops out entirely for a single entity**
 - **Sub-entity closes complete**
 - **Currency translation** — each sub's functional currency → group reporting currency
-  (`foreign-currency-translation-asc830`)
-- **Intercompany eliminations** (`consolidation-and-eliminations`)
+- **Intercompany eliminations**
 - **Consolidation adjustments**
 - **Group trial balance review**
 
 **Day 7 — Reports and Sign-Off** — **[gated]**
 - **Financial statements built** (`financial-statement-builder`)
-- **Management reporting pack** (`management-reporting-pack`)
+- **Management reporting pack**
 - **Management review** — **[manual]**
 - **Final adjustments** — **[auto]** to observe
 - **Books locked** — **[gated]**; a system state
@@ -554,7 +552,7 @@ in 10.
 | **No fixed assets to speak of? Streamline FA steps** | **Fixed asset and accumulated depreciation balances** |
 | **Single entity, single currency? Skip consolidation and FX revaluation** | **Gate 1's file count; the profile's currency; any foreign-currency balances** |
 | **Cash basis entity? Remove most accruals** | **The accounting method on the reads, and whether accrual accounts carry balances** |
-| **Nonprofit? Add fund-accounting steps** (`nonprofit-fund-accounting`) | **Net asset accounts split by donor restriction; fund or program classes** |
+| **Nonprofit? Add fund-accounting steps** | **Net asset accounts split by donor restriction; fund or program classes** |
 
 **Report the scoping conclusions with their evidence** — *"no inventory account in the chart, so the four
 inventory tasks are removed"* — **so a task removed in error is visible and recoverable.**
@@ -563,15 +561,13 @@ inventory tasks are removed"* — **so a task removed in error is visible and re
 `[manual]` judgment**:
 
 - **SaaS**: **deferred revenue release, ARR/MRR calculation, customer churn analysis** — *note*:
-  **ARR and churn need the billing system**; see `kpi-dashboard-builder`
-- **Construction**: **percentage-of-completion calculations**
-  (`construction-percentage-of-completion`), **retainage review, WIP roll-forward**
+  **ARR and churn need the billing system**
+- **Construction**: **percentage-of-completion calculations**, **retainage review, WIP roll-forward**
 - **Real estate**: **rent roll, CAM reconciliation, depreciation**
 - **Manufacturing**: **variance analysis (PPV, MUV, OHV), inventory roll**
 - **E-commerce / retail**: **returns reserve, gift card liability, loyalty accrual**
 - **Professional services**: **WIP unbilled, project profitability**
-- **Healthcare**: **patient revenue, contractual adjustments, allowances** — see
-  `healthcare-revenue-cycle-accounting`
+- **Healthcare**: **patient revenue, contractual adjustments, allowances**
 
 **[auto]** corroboration: **the chart frequently confirms the industry pattern** — a gift card liability
 account, a retainage account, a WIP account. **Where an industry task has an account behind it, the task is
@@ -644,8 +640,7 @@ separately** so they are not buried among tasks that will complete themselves.
   **[manual]** for the tolerance
 - **Inter-period continuity** — **this period's opening = last period's closing** — **[auto]**, ⭐ **and the
   most valuable item here.** **A break means a prior period was reopened and something changed after it was
-  reported** — see `ipo-readiness-accounting` and `financial-statement-builder`, where the same check
-  appears. **Almost nobody runs it manually, and it is one comparison**
+  reported** — see `financial-statement-builder`, where the same check appears. **Almost nobody runs it manually, and it is one comparison**
 - **All adjusting entries posted and approved** — **[auto]** for posted; **[manual]** for approved
 - **Books are locked** — **[gated]**: a system state, not a balance
 - **Reports distributed** — **[manual]**
@@ -659,8 +654,8 @@ still needs to be known before this month's statements go out.
 **Post-close review** — **[gated]**:
 
 - **Where did the close slip?** — **[auto]** support: **the posting-date distribution shows when tasks
-  actually completed**, which is more reliable than recollection. See `ipo-readiness-accounting`, where the
-  same measurement anchors a readiness assessment
+  actually completed**, which is more reliable than recollection. The same measurement anchors an IPO
+  readiness assessment
 - **What manual workarounds were used?** — **[manual]**
 - **What can be automated?** — **[gated]**: **recurring identical entries are readable** and are the
   automation candidates
@@ -786,14 +781,13 @@ task and status carrying its entity's `display_name`. Then:
   board should show which one is holding it.
 - **A group member that is not connected still closes.** Its tasks belong on the checklist with an owner;
   **their status simply cannot be observed from here.** Mark them, do not omit them.
-- **Intercompany reconciliation is a Day 4 task that requires both sides** — see
-  `intercompany-reconciliation`. **A pair whose counterparty has not closed cannot be reconciled**, which
+- **Intercompany reconciliation is a Day 4 task that requires both sides**. **A pair whose counterparty has not closed cannot be reconciled**, which
   makes it a genuine dependency rather than a parallel task.
 - **Scoping is per entity.** One subsidiary may have inventory and another none. **Never apply one entity's
   scoped list across the group.**
 - **Materiality is usually set at group level and applied per entity**, which means **an amount immaterial
   to the group can be material to a small subsidiary's own statements.** Say which basis is in use.
-- **Translation is a Day 6 task** — see `foreign-currency-translation-asc830` — and **it depends on rates
+- **Translation is a Day 6 task**, and **it depends on rates
   that are `[manual]`**, so it is frequently the item waiting on outside information.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict per company
@@ -879,9 +873,8 @@ matter.**
 
 **Multi-time-zone teams**: **clarify whether deadlines are in entity HQ time or local time.**
 
-**Year-end close vs. monthly**: **year-end adds audit prep (`audit-prep-pbc-list`), tax provision
-(`corporate-tax-provision-asc740`), 1099/T4A (`1099-and-t4a-prep`), and other tasks. Use `year-end-close`
-for the full procedure.**
+**Year-end close vs. monthly**: **year-end adds audit prep, tax provision, 1099/T4A, and other tasks. The
+full year-end procedure is a close of its own.**
 
 **Close while implementing a system change**: **doubles the work. Plan for parallel running of old + new
 system data. Flag and resource appropriately.**
@@ -895,7 +888,7 @@ an undocumented re-open in the following month**, which is precisely why it belo
 **Materiality in a startup with small revenue**: **even small amounts may be material. Don't apply
 enterprise materiality to a startup.**
 
-**Process documentation for SOX-eligible companies** (`sox-controls-design-and-testing`): **each close task
+**Process documentation for SOX-eligible companies**: **each close task
 is potentially a control. Ensure documentation, evidence, and review/approval trails.** *Mosofin note*: **the
 Evidence column is the beginning of that trail**, though **an observed entry is not an approval**.
 
