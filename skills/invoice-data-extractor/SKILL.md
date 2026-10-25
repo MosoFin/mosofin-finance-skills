@@ -121,8 +121,8 @@ prevented. See `duplicate-invoice-detection` for the full matching discipline; t
 >
 > **Report this check as NOT RUN**, with what it would have shown and how to perform it. **Do not substitute
 > a weaker comparison and imply it covered the same ground** — this is the same gap named in
-> `duplicate-invoice-detection` (Rule 7) and `fraud-detection-and-forensics`, and it is consistent across
-> all three.
+> `duplicate-invoice-detection` (Rule 7), and it is consistent across
+> both skills.
 >
 > **What can be compared** is the **remit-to name and address** against the vendor master, which catches
 > some redirection attempts and is worth doing. **It is not the bank-detail check.**
@@ -513,7 +513,7 @@ the books rather than inventing a third variant.
 
 - **Matches an existing vendor** → validated; terms, tax ID and address comparable
 - **No match** → **a new vendor.** Not wrong, but **a new vendor with an immediate invoice is the shape of a
-  fictitious-vendor scheme** — see `fraud-detection-and-forensics`. Flag for setup and review, do not
+  fictitious-vendor scheme**. Flag for setup and review, do not
   accuse
 - **Matches several similar vendors** → **a duplicate vendor record**; the history is split, and the
   duplicate check is weakened
@@ -565,8 +565,8 @@ explicitly**: show pre-tax subtotal, tax amount, and total. **The invoice may sh
 — extract what's visible and flag any decomposition that requires assumption.**
 
 **Mosofin note on shipping and freight**: where the invoice is for inventory or a capital item, **freight is
-part of the asset's cost** — see `inventory-costing-fifo-lifo-wavg` and
-`fixed-asset-register-and-depreciation`, both of which flag freight expensed rather than capitalised.
+part of the asset's cost** — see
+`fixed-asset-register-and-depreciation`, which flags freight expensed rather than capitalised, as an inventory costing review does.
 **Capturing it separately is what makes that treatable.**
 
 ## Step 5 — Payment instructions
@@ -757,7 +757,7 @@ document answers it:
   entity's books.
 - **Run the duplicate check against the right entity — and consider running it across all of them.** An
   invoice posted to the wrong group company is still a payment made; **a cross-entity duplicate is invisible
-  to any single entity's review.** See `duplicate-invoice-detection` and `intercompany-reconciliation`.
+  to any single entity's review.** See `duplicate-invoice-detection`, and treat it as an intercompany reconciliation item.
 - **A Bill-To that matches no connected entity** is either a group member that is not connected, an invoice
   for someone else entirely, or a fraud attempt. **Stop and ask** — never route it to the nearest match.
 - **Vendor masters differ by entity.** A known vendor in one company file may be unknown in another, so
