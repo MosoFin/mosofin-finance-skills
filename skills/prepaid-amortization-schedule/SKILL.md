@@ -286,7 +286,7 @@ Then establish, **out loud with the user**, which of these you are in:
 
 Refer to company files by `display_name` throughout — "Northwind Trading Ltd", not the `data_source_id`. Pass the id between tools; never show it.
 
-**On multi-entity prepaids specifically.** Group insurance policies and group software licences are frequently paid by one entity for several. If two connected entities show prepaid balances that look related, do not net them and do not assume a recharge exists. Label every figure with the entity it came from. See `intercompany-reconciliation`, and the "paid by a related entity" edge case below.
+**On multi-entity prepaids specifically.** Group insurance policies and group software licences are frequently paid by one entity for several. If two connected entities show prepaid balances that look related, do not net them and do not assume a recharge exists. Label every figure with the entity it came from. See the "paid by a related entity" edge case below.
 
 ---
 
@@ -502,7 +502,7 @@ The original list is preserved in full, with the workspace read that finds each 
 |---|---|---|---|
 | Refundable deposits | Asset: Deposits | The money comes back at the end; nothing is consumed. Round sums, landlords and utilities. | `[auto]` to flag, `[manual]` to confirm from the agreement |
 | Equipment purchases | Fixed Asset, depreciated | A thing exists afterwards. See `fixed-asset-register-and-depreciation`. | `[auto]` to flag |
-| Inventory purchases | Inventory, expensed as COGS on sale | Goods for resale. See `inventory-costing-fifo-lifo-wavg`. | `[auto]` to flag |
+| Inventory purchases | Inventory, expensed as COGS on sale | Goods for resale, costed as inventory. | `[auto]` to flag |
 | Investments in financial instruments | Separate accounting entirely | Broker or fund counterparty | `[auto]` to flag |
 
 Flagging is automatic. **Deciding** is not — a deposit that will be applied to the final month's rent behaves like a prepaid; one that comes back in cash does not. Only the agreement says which, and the agreement is not on this surface.
@@ -796,19 +796,19 @@ All thirteen of the original's edge cases are preserved, in order, each with the
 
 **Item paid in installments rather than fully upfront**: each installment is its own prepaid with its own coverage period, if applicable. Or the entire contract value is set up as prepaid with an offsetting payable for the unpaid installments. `[auto]` to detect the installment pattern; `[manual]` to choose between the two treatments, and **apply the choice consistently** — a book that does both will not reconcile.
 
-**Foreign-currency prepaid items**: a prepaid asset is **non-monetary** — typically **not revalued for FX after initial recognition**. Some entities elect otherwise; confirm the policy. `[auto]` and important: **look for revaluation-source entries hitting the prepaid account.** If they are there and the policy is non-revaluation, an FX process is reaching an account it should not touch, and it will do so again next month. This is a one-query finding of a recurring error. See `multicurrency-fx-revaluation` and `foreign-currency-translation-asc830`.
+**Foreign-currency prepaid items**: a prepaid asset is **non-monetary** — typically **not revalued for FX after initial recognition**. Some entities elect otherwise; confirm the policy. `[auto]` and important: **look for revaluation-source entries hitting the prepaid account.** If they are there and the policy is non-revaluation, an FX process is reaching an account it should not touch, and it will do so again next month. This is a one-query finding of a recurring error. Correcting the FX process itself is an FX revaluation task.
 
 **Tax-inclusive prepayments** (VAT/GST jurisdictions): set up the prepaid **net** of recoverable tax; recover the tax **in full at payment**, not amortized across the coverage period. `[auto]` to test, as set out in Step 6 — compare the prepaid debits to the gross bill amounts. This is one of the most reliably detectable errors in the whole skill.
 
-**Prepayments to related parties**: check substance. If it is effectively a loan, it does not belong in prepaid. If it is a genuine advance for services, it does. `[auto]` to flag — a prepayment to a name that also appears in the customer list, or to a connected entity's `display_name`, is worth a second look. `[manual]` to judge, because substance is not a field. See `intercompany-reconciliation` and `related-party-transactions`.
+**Prepayments to related parties**: check substance. If it is effectively a loan, it does not belong in prepaid. If it is a genuine advance for services, it does. `[auto]` to flag — a prepayment to a name that also appears in the customer list, or to a connected entity's `display_name`, is worth a second look. `[manual]` to judge, because substance is not a field. The wider review is an intercompany reconciliation or a related-party review.
 
 **Prepaid items that become impaired** (the vendor fails, the service will not be delivered): write down the unamortized balance. `[manual]` to learn of it — vendor insolvency is not in the ledger. `[auto]` for one weak signal: a vendor with an open prepaid balance and no transaction activity for an unusually long stretch is worth asking about. Weak, but free.
 
-**Initial direct costs of obtaining a lease**: formerly parked in prepaid; under ASC 842 / IFRS 16 they are **included in the ROU asset**. `[auto]` to flag lease-related items sitting in prepaid; `[manual]` to reclassify. See `lease-accounting-asc842-ifrs16`.
+**Initial direct costs of obtaining a lease**: formerly parked in prepaid; under ASC 842 / IFRS 16 they are **included in the ROU asset**. `[auto]` to flag lease-related items sitting in prepaid; `[manual]` to reclassify. The reclassification itself is lease-accounting work.
 
 **Subscriptions that auto-renew without an explicit invoice**: the schedule rolls into the new period automatically; make sure the new period's invoice is captured. `[auto]` and genuinely useful — **compare the vendors on the schedule to the vendors with recent charges.** A schedule item whose coverage has ended with no renewal charge in the books is either a cancelled service or an uncaptured invoice, and both need an answer.
 
-**Prepayment paid by a related entity on behalf of this entity**: due-from / intercompany handling. The prepaid is real, offset by an intercompany payable. `[auto]` where both entities are connected to the workspace — read both sides in one batch and check they agree. **If only one side is connected, this cannot be reconciled**, and a single-sided figure should be labelled as such rather than presented as agreed. See `intercompany-reconciliation`.
+**Prepayment paid by a related entity on behalf of this entity**: due-from / intercompany handling. The prepaid is real, offset by an intercompany payable. `[auto]` where both entities are connected to the workspace — read both sides in one batch and check they agree. **If only one side is connected, this cannot be reconciled**, and a single-sided figure should be labelled as such rather than presented as agreed. Matching the two sides is an intercompany reconciliation.
 
 **Mid-year change in policy or amortization method**: a change in **estimate**, applied **prospectively**. Document it. `[auto]` to detect — Step 0b's convention read will show the point where the credit pattern changed. `[manual]` to document the reason, because the reason is not in the books.
 
@@ -915,14 +915,11 @@ Specific to this skill, and each one has been seen.
 
 | Skill | Relationship |
 |---|---|
-| `revenue-recognition-asc606` | The mirror image — deferred revenue is the customer-side version of the same timing idea. Use that skill, not this one, for money received in advance. |
 | `month-end-close-checklist` | The parent process. Prepaid amortization is one line on it; run this skill for that line, not for the whole close. |
 | `journal-entry-builder` | Formats and validates the proposed entries from Steps 6, 7 and 9. |
 | `recurring-transaction-builder` | Where the monthly entry gets automated — by the user, in the accounting system. Mosofin drafts it and later verifies it ran. |
-| `lease-accounting-asc842-ifrs16` | Initial direct costs and prepaid rent both migrate here under the current standards. |
-| `multicurrency-fx-revaluation` | Prepaid is non-monetary and should generally be left alone by revaluation. Cross-check when FX entries appear in the account. |
 | `fixed-asset-register-and-depreciation` | Where miscoded equipment purchases belong. Step 0c flags them. |
-| `intercompany-reconciliation` | For prepayments made by one connected entity on behalf of another. |
 | `bank-reconciliation` | Confirms the cash side of the original prepayment and of any refund. |
 | `financial-statement-builder` | The current / non-current split for multi-year prepaids lands on the balance sheet there. |
-| `notes-to-financial-statements` | Significant prepaid balances and their composition, where disclosure is required. |
+
+Skills for revenue recognition (deferred revenue, the customer-side mirror of a prepaid), lease accounting, FX revaluation, intercompany reconciliation and notes to the financial statements are queued for this library and will be linked here when they ship.
