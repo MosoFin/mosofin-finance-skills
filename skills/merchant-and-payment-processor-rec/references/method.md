@@ -144,7 +144,7 @@ account, no fee account, refunds netted against revenue.
 
 **Each component has different recognition timing:**
 
-- **Gross customer charges**: **revenue at the point of sale** (per `revenue-recognition-asc606`)
+- **Gross customer charges**: **revenue at the point of sale** (under the entity's revenue recognition policy)
 - **Refunds**: **contra-revenue at the time of refund** (per `credit-memo-and-refund-handler`)
 - **Chargebacks**: **contra-revenue + chargeback fee at the time the chargeback is processed**
 - **Processor fees**: **expense at the time of the transaction**, or on aggregate per the entity's policy
@@ -231,7 +231,7 @@ which was performed. See `bank-reconciliation`, where the same distinction gover
 - **The transaction date vs. the settlement date rates differ**
 
 **[auto]**: the entity's functional currency is known. **[manual]**: every rate — consistent with
-`foreign-currency-translation-asc830` and `multicurrency-fx-revaluation`, where no rate is ever supplied
+foreign-currency translation and FX revaluation practice, where no rate is ever supplied
 from memory.
 
 ## Step 7 — Tax handling
@@ -437,8 +437,8 @@ case:
   the original's own edge case. **[manual]** to define the attribution rule; **[auto]** to apply it where
   the processor tags transactions by entity, product or account.
 - **A single payout covering several entities' sales** must be split. **The bank deposit lands in one
-  entity's account**, so **the others are owed** — creating an intercompany balance. See
-  `intercompany-reconciliation`; both sides must agree.
+  entity's account**, so **the others are owed** — creating an intercompany balance. Reconcile it
+  as an intercompany balance; both sides must agree.
 - **Run the clearing roll-forward per entity**, not once for the processor account. **A processor-level
   reconciliation that balances can conceal two entities' clearing accounts being wrong in opposite
   directions.**

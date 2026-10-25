@@ -24,7 +24,7 @@ be attributed to the correct entity; the clearing account is per entity.**
 reserve for likely losses; others wait. Document.**
 
 **Subscription billing through processor**: **each renewal is a new charge; ensure recognition timing matches
-the service period, not the billing event** (handed to `revenue-recognition-asc606`).
+the service period, not the billing event** (a revenue recognition question, outside this reconciliation).
 
 **Application fees** — for marketplaces using Stripe Connect, PayPal and similar: **the processor splits the
 gross between the marketplace's fee and the seller's net. The marketplace recognizes its fee as revenue; the

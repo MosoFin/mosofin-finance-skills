@@ -22,7 +22,7 @@ reconciliation is possible; see Gate 1.
 
 ## Two sides, and one error worth the whole skill
 
-**This is a two-sided reconciliation, like `intercompany-reconciliation`**, and the same rule applies:
+**This is a two-sided reconciliation, like an intercompany reconciliation**, and the same rule applies:
 **a one-sided read is not a reconciliation.**
 
 | Side | Verdict |
