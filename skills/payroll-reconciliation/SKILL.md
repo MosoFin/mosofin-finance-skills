@@ -112,7 +112,7 @@ individual's payroll data.**
 | **The general ledger** — every payroll account and movement | **`[auto]`**, entirely |
 | **The payroll register** — gross, withholdings, employer costs, net, **and the taxable wage bases** | **`[auto]` if a payroll platform is connected; `[manual]` otherwise** |
 | **The bank** — what actually left the account | **`[manual]`** for the statement; **`[auto]`** for the recorded disbursement |
-| **The filings** — what was reported to the authority | **`[manual]`** — see `payroll-tax-filings` |
+| **The filings** — what was reported to the authority | **`[manual]`** — the filings themselves are payroll tax filing work |
 
 **So this is a four-way reconciliation in which the workspace owns one corner exactly and contributes to
 two others.** That is worth stating, because **a "reconciliation" performed against only the corner you can
@@ -408,7 +408,7 @@ quarter and year ends where Steps 4 and 5 bite — **country / region**.
 | **Bank statement / payment records** | **Required — [gated]** | **Recorded disbursements `[auto]`; the statement `[manual]`.** |
 | **Liability remittance records** | **Required for liability rec — [gated]** | **Payments `[auto]`; the authority's receipt `[manual]`.** |
 | **Period** — month / quarter / year | **Required** | **Steps 4 and 5 apply at quarter and year end.** |
-| **Tax filing figures** | Recommended — **[manual]** | See `payroll-tax-filings`. |
+| **Tax filing figures** | Recommended — **[manual]** | Prepared with the payroll tax filings. |
 | **Prior period reconciliation** | Recommended — **[gated]** | **Opening balances `[auto]`; carried items `[manual]`.** |
 | **The taxable wage base rules** per tax | **Required for Step 5 — [manual]** | Pre-tax deductions, caps, ceilings. **Not derivable here.** |
 | **Remittance due dates** per liability | **Required for the overdue flag — [manual]** | |
@@ -543,7 +543,7 @@ dates, the flag is arithmetic; without them it cannot be raised.** Ask for them.
 
 ## Step 4 — Reconcile to tax filings (quarter/year-end)
 
-**When filings are prepared** (`payroll-tax-filings`), **tie the payroll records to the filed figures** —
+**When filings are prepared**, **tie the payroll records to the filed figures** —
 **[gated]**: the GL side `[auto]`, **the filings `[manual]`**:
 
 - **Total taxable wages per the GL / register = taxable wages on the filing**
@@ -707,10 +707,10 @@ figure carrying its entity's `display_name`. Then:
   mid-year **may restart a cap in the new entity** depending on jurisdiction — a real and easily missed
   effect.
 - **A payment by one entity covering another's liabilities** is an intercompany balance, not a remittance
-  for that entity. See `intercompany-reconciliation`.
+  for that entity. It belongs in an intercompany reconciliation.
 - **Run the negative-balance and overdue checks per entity.** A group view nets them away.
 - **Currency**: payroll liabilities denominated in another currency revalue between accrual and remittance —
-  see `multicurrency-fx-revaluation`.
+  the translation itself is an FX revaluation task.
 
 Capability is checked **per entity** at Gate 2; the coverage sheet shows each reconciliation's verdict per
 company file.
