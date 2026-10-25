@@ -63,7 +63,7 @@ own row with its own `data_source_id` and `display_name`.
   exactly one `data_source_id`, and every variance and commentary line carries its entity's
   `display_name`. **Never compare one entity's actuals to another's budget** — and be careful of
   the subtler version: a group total variance that nets a large overspend at one entity against an
-  underspend at another tells management nothing. See the cross-entity step.
+  underspend at another tells management nothing. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

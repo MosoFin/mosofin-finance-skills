@@ -64,7 +64,7 @@ Settle the entity scenario — and here it matters more than in most skills:
   formal intercompany loan. **A group forecast that nets one entity's surplus against another's
   shortfall is wrong unless the cash can genuinely move.** Run the forecast **once per entity**,
   every call targeting exactly one `data_source_id`, then consolidate only on an explicit
-  confirmation that funds are transferable. See the cross-entity step.
+  confirmation that funds are transferable. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

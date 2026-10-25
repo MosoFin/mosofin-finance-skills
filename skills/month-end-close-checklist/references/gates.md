@@ -58,7 +58,7 @@ Day 6:
 
 - **One connected company file** → **no consolidation phase.** Day 6 drops out entirely.
 - **Several** → **Day 6 applies**, and **the close is only as fast as its slowest entity.** See the
-  cross-entity step.
+  cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 - **Connected subledger platforms** — payroll, billing, inventory, expenses — **tell you which Day 1 and
   Day 2 tasks have a system behind them** and which are manual.
 

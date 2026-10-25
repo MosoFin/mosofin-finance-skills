@@ -62,7 +62,7 @@ Settle the entity scenario:
 - **Single-entity** — ask which company by `display_name`; the workflow runs against that one
   `data_source_id`.
 - **Multi-entity** — ask which set. **Assets are frequently held in one entity and used by another**, which
-  is the defining cross-entity issue here. See the cross-entity step.
+  is the defining cross-entity issue here. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

@@ -63,7 +63,7 @@ Settle the entity scenario:
 - **Multi-entity** — ask which set. The workflow runs **once per entity**, every call targeting exactly
   one `data_source_id`, and every credit carries its entity's `display_name`. **A credit must be applied
   against an invoice at the same entity that issued it** — crediting one entity's customer against
-  another's invoice is an intercompany transaction, not an application. See the cross-entity step.
+  another's invoice is an intercompany transaction, not an application. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

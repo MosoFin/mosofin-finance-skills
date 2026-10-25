@@ -62,7 +62,7 @@ Settle the entity scenario explicitly:
 
 - **Single-entity** — ask which company by `display_name`. Statements cover that entity alone.
 - **Multi-entity** — ask which set, and then: **are these consolidated statements, or a set of separate
-  entity statements?** The two are entirely different deliverables. See the cross-entity step.
+  entity statements?** The two are entirely different deliverables. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

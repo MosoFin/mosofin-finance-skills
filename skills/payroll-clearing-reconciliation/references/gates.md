@@ -62,7 +62,7 @@ Settle the entity scenario:
 
 - **Single-entity** — one company file, one set of payroll accounts.
 - **Multi-entity** — ask which set. **A shared payroll service running several entities** is common, and
-  **the clearing account is per entity.** See the cross-entity step.
+  **the clearing account is per entity.** See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

@@ -65,7 +65,7 @@ Settle the entity scenario:
 - **Single-entity** — one company file; the entry is built against its chart.
 - **Multi-entity** — ask which set, **and which entity employs the people in this run.** **A payroll run
   covering several group entities produces one journal per entity**, not one journal split by class. See
-  the cross-entity step.
+  the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

@@ -65,7 +65,7 @@ Settle the entity scenario:
   exactly one `data_source_id`, and every payment, match and exception carries its entity's
   `display_name`. **Never apply one entity's receipt to another entity's invoice.** The legitimate
   version of that — a customer paying one lump sum covering invoices from several group companies —
-  is handled explicitly in the cross-entity step, split and labelled.
+  is handled explicitly in the cross-entity step under *Both entity scenarios* in [`method.md`](method.md), split and labelled.
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

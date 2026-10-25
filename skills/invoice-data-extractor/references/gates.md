@@ -60,7 +60,7 @@ Settle the entity scenario — and here it matters immediately:
 
 - **Single-entity** — one company file; the Bill-To should match it.
 - **Multi-entity** — ask which set. **A batch of invoices frequently spans several group entities**, and
-  **the Bill-To on each document decides which company file it belongs to.** See the cross-entity step —
+  **the Bill-To on each document decides which company file it belongs to.** See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md) —
   this is the defining multi-entity question for this skill.
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.

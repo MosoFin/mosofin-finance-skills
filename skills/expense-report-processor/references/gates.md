@@ -63,7 +63,7 @@ Settle the entity scenario:
 - **Single-entity** — ask which company by `display_name`; the workflow runs against that one
   `data_source_id`.
 - **Multi-entity** — ask which set. **The employee-to-entity question is the one that matters**: staff are
-  employed by one entity but may incur costs on behalf of another. See the cross-entity step.
+  employed by one entity but may incur costs on behalf of another. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

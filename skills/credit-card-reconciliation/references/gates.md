@@ -67,7 +67,7 @@ Settle the entity scenario:
   `data_source_id`.
 - **Multi-entity** — ask which set. The workflow runs **once per entity**, every call targeting exactly
   one `data_source_id`, and every charge carries its entity's `display_name`. **A card issued to one
-  entity but used for another's expenses** is a real and common pattern — see the cross-entity step,
+  entity but used for another's expenses** is a real and common pattern — see the cross-entity step under *Both entity scenarios* in [`method.md`](method.md),
   because it creates an intercompany balance rather than an expense.
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.

@@ -61,7 +61,7 @@ Settle the entity scenario:
 
 - **Single-entity** — one company file, one register.
 - **Multi-entity** — ask which set. **A shared payroll service across entities** means the register covers
-  several and **each entity's GL holds only its share.** See the cross-entity step.
+  several and **each entity's GL holds only its share.** See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

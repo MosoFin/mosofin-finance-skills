@@ -59,7 +59,7 @@ Settle the entity scenario:
   `data_source_id`.
 - **Multi-entity** — ask which set, **and confirm which entity each batch of transactions belongs to before
   coding any of them.** Coding is entity-specific: the same vendor may map to different accounts in
-  different company files, because the charts differ. See the cross-entity step.
+  different company files, because the charts differ. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

@@ -62,7 +62,7 @@ Settle the entity scenario:
 
 - **Single-entity** — ask which company by `display_name`.
 - **Multi-entity** — ask which set. **Stock held for another group entity, and stock in transit between
-  entities, are the recurring cross-entity issues.** See the cross-entity step.
+  entities, are the recurring cross-entity issues.** See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

@@ -63,7 +63,7 @@ Settle the entity scenario:
   `data_source_id`.
 - **Multi-entity** — ask which set, **and ask which entity is actually selling**. This is not a
   presentational question: **each entity has its own legal name, its own tax registration and its own
-  invoice number sequence.** Draft from that entity's file only. See the cross-entity step.
+  invoice number sequence.** Draft from that entity's file only. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

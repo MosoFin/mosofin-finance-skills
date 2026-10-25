@@ -65,7 +65,7 @@ Settle the entity scenario:
 
 - **Single-entity** — ask which company by `display_name`; **the entry is built against that chart.**
 - **Multi-entity** — ask which set, **and which entity this entry belongs to, before building it.** For an
-  **intercompany** entry, **both entities are in scope** and both sides are built. See the cross-entity step.
+  **intercompany** entry, **both entities are in scope** and both sides are built. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

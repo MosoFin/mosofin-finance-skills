@@ -60,7 +60,7 @@ Settle the entity scenario — and here it produces a genuinely additional detec
 - **Multi-entity** — ask which set. The scan runs **once per entity**, every call targeting exactly one
   `data_source_id`. **Then run the cross-entity scan**: the same supplier invoice paid by two group
   entities is a duplicate that neither entity's own scan can see, and it is a well-known pattern in
-  groups with shared suppliers and decentralised AP. See the cross-entity step.
+  groups with shared suppliers and decentralised AP. See the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

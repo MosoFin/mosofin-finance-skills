@@ -65,7 +65,7 @@ limit on the review.
 Settle the entity scenario:
 
 - **Single-entity** — ask which company by `display_name`.
-- **Multi-entity** — ask which set. **Screen each entity separately**; see the cross-entity step.
+- **Multi-entity** — ask which set. **Screen each entity separately**; see the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 
