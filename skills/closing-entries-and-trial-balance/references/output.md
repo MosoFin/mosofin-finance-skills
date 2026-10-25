@@ -10,7 +10,7 @@ All of the original standards, plus the Mosofin ones.
 - **Net income per P&L = increase in RE from closing**
 - Dividends / distributions closed correctly **per entity type**
 - **OCI items routed to AOCI separately from net income to RE**
-- Period locked in system
+- Period lock assigned to a named person — Mosofin cannot lock a period, so it is never reported as done (Step 9)
 - New year opens with the post-closing TB as its opening balance
 - File naming consistent
 - **No silent ignoring of imbalances or unposted adjustments**

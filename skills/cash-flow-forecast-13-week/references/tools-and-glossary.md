@@ -22,8 +22,8 @@ Typical evidence tools — **resolve real names and policies from your Gate 2 ca
 | **Opening cash by account** | `get_balance_sheet` / `get_trial_balance` | `start_date`, `end_date`, `accounting_method` |
 | Open invoices with due dates | `get_aged_receivables` | `report_date`, `customer`, `aging_method`, `num_periods` |
 | Open bills with due dates | `get_aged_payables` | `report_date`, `vendor`, `aging_method`, `num_periods` |
-| **Invoice dates and terms** (days-to-pay numerator) | `search_invoices` / `read_invoice` / `get_term` | `start_date`, `end_date` (required), `customer_id`; `id` |
-| **When invoices were actually paid** (days-to-pay denominator) | `search_payments` / `get_payment` | `start_date`, `end_date` (required), `customer_id`; `id` |
+| **Invoice dates and terms** (days-to-pay start date) | `search_invoices` / `read_invoice` / `get_term` | `start_date`, `end_date` (required), `customer_id`; `id` |
+| **When invoices were actually paid** (days-to-pay end date) | `search_payments` / `get_payment` | `start_date`, `end_date` (required), `customer_id`; `id` |
 | Bill dates and when bills were actually paid | `search_bills` / `search_bill_payments` | `start_date`, `end_date` (required), `vendor_id` |
 | **Recurring disbursement patterns** | `get_vendor_expenses` | `start_date`, `end_date`, `vendor`, `summarize_column_by` |
 | **Actual weekly cash movement; payroll rhythm; annual one-offs** | `get_general_ledger` | `start_date`, `end_date`, `accounting_method`, `account` |

@@ -131,7 +131,7 @@ extracting.**
 Ask as **one short batch**. Propose defaults where reasonable — but **never** default a currency, a date
 interpretation, or a vendor identity.
 
-**On later runs**, read stored preferences first (Step 9), confirm in one line, and ask only what changed.
+**On later runs**, read stored preferences first (Step 8), confirm in one line, and ask only what changed.
 The vendor naming conventions, the invoice-number formats and the validation tolerances persist; **every
 document and every validation result is new each time.**
 

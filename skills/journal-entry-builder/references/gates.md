@@ -141,7 +141,7 @@ REQUIRED" label.**
 Ask as **one short batch**. Propose defaults where reasonable — but **never** default an account, a tax
 treatment, or a materiality threshold.
 
-**On later runs**, read stored preferences first (Step 9), confirm in one line, and ask only what changed.
+**On later runs**, read stored preferences first (Step 8), confirm in one line, and ask only what changed.
 The account map, the entry templates, the import format and the numbering convention persist; **balances and
 validation results are re-obtained every time.**
 
