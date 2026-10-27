@@ -126,8 +126,9 @@ books now answer**:
 | **Standard close template**, if existing | Recommended — **[manual]** | **Preferred over a generic list** where one exists. |
 | **Team / owners** | Recommended — **[manual]** | **Not in the ledger, and the checklist is worth little without them.** |
 | **Materiality threshold** | Recommended — **[manual]** | **Do not assume one**; see the startup edge case. |
-| ~~Sub-processes in scope~~ | **Now [gated]** | **Scoped from the chart**; confirm the result. |
-| **Prior month's close** | Recommended — **[gated]** | **Carry-forward items are `[manual]`; whether last month's entries posted is `[auto]`.** |
+| ~~Sub-processes in scope~~ | **Now mixed** — `[auto]` scoping, `[manual]` confirmation | **Scoped from the chart**; confirm the result. |
+| **Prior month's close** | Recommended — **mixed** | **Carry-forward items are `[manual]`; whether last month's entries posted is `[auto]`.** **Last month's trial balance as reported** is `[manual]` and is what the continuity check compares against; without it that check is not performed. |
+| **Accounting basis** — cash or accrual | **Required — [manual]** | Passed as `accounting_method` on every read; decides which Day 1 and Day 3 tasks apply. |
 | **Whether this is a soft or hard close** | **Required — Mosofin addition** | Different rigour; see the edge cases. |
 | **Confirm scope** | **Required** | Read back in-scope and excluded company files by `display_name`, and the period. |
 | **Confirm any profile contradiction** | **Required if one appears** | e.g. a monthly close for an entity whose periods are quarterly. |

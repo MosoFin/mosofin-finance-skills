@@ -45,7 +45,8 @@ depreciation been posted? did the accrual go in? is the FX revaluation done?*
 > moment during the close, is exactly the coordination this skill exists to provide.**
 
 **3. The final tie-out is nearly all `[auto]`** — including **inter-period continuity**, which is the one
-almost nobody checks by hand and the one that catches a reopened prior period.
+almost nobody checks by hand and the one that catches a reopened prior period, provided last month's trial
+balance **as reported** is supplied to compare against.
 
 **What the workspace cannot do:** **it cannot lock the books, post an entry, or mark a task complete.**
 **Mosofin is read-only.** It observes evidence and reports it; **the close is run by people.**

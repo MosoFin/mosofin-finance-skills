@@ -21,6 +21,10 @@
 Every step below is the original procedure, unchanged in count, order, or substance, with plain-language
 wording, an `[auto]` / `[gated]` / `[manual]` verdict, and the typical evidence tool added.
 
+`[gated]` means only what Gate 2 says: **the tool needs the user's approval**. A task group or task that is
+partly observable and partly done by people is tagged **mixed — see each task**, and each part carries its
+own `[auto]` or `[manual]`.
+
 **Never drop a task because no tool covers it.** Most close tasks are performed by people using other
 skills; this one coordinates them.
 
@@ -31,7 +35,8 @@ Tool names in *italics* are typical. Resolve real names and policies from your G
 **Batch independent reads into one message** — the chart, the balances, the entries and the prior period do
 not depend on each other. Never serialize them.
 
-The server is **stateless**: pass `data_source_id` on **every** call, including retries.
+The server is **stateless**: pass `data_source_id` on **every** call, including retries. Pass the
+**accounting basis the user confirmed at intake** (cash or accrual) as `accounting_method` on every read.
 
 Typical opening batch, per in-scope entity:
 
@@ -39,7 +44,8 @@ Typical opening batch, per in-scope entity:
 - *`search_journal_entries`* **for the period** — **the status evidence for every entry-based task** —
   usually **[auto]**
 - *`get_trial_balance`* at the period end **and at the prior period end** — **the tie-out and continuity
-  check** — usually **[auto]**
+  check** — usually **[auto]**. The continuity check also needs **last month's trial balance as reported**
+  (from last month's close pack or the statements sent out), supplied by the user — **[manual]**
 - *`get_balance_sheet`* current and prior — usually **[auto]**
 - *`get_profit_and_loss`* current and prior — **the reasonableness review** — usually **[auto]**
 - *`get_general_ledger`* around the period boundary — **cutoff evidence** — usually **[auto]**
@@ -76,18 +82,21 @@ where **`[auto]` means the checklist can observe whether it was done**:
 - **AR cutoff**: final invoices posted; subsequent invoices held for next month — **[auto]**: invoices dated
   in the period but entered after it
 - **AP cutoff**: final bill posting; subsequent bills held for next month — **[auto]**, same test
-- **Inventory cutoff**: shipments and receipts dated through last business day — **[auto]**
+- **Inventory cutoff**: shipments and receipts dated through last business day — **[auto]** to list
+  inventory receipts and sales dated in the last and first days around period end; **[manual]** to agree
+  them to receiving and shipping records
 - **Payroll cutoff**: confirm last payroll posted; accrue any partial-period — **[auto]** for the posting
 - **Bank transactions imported through period-end** — **[auto]**: latest transaction date in the cash
   account
 
-**Day 2 — Subledger Reconciliations and Initial Entries** — **[gated]**: **a reconciliation compares to
+**Day 2 — Subledger Reconciliations and Initial Entries** — **mixed — see each task**: **a reconciliation compares to
 something outside the ledger, so completion cannot be confirmed from inside it**
 - **AR aging run and review** (`ar-aging-and-collections`) — **[auto]** to produce, `[manual]` to review
 - **AP aging run and review** (`ap-aging-and-payment-runs`) — same
 - **Bank reconciliations** (`bank-reconciliation`) — **[manual]**: **no bank statement on this surface**
 - **Credit card reconciliations** (`credit-card-reconciliation`) — **[manual]**, same reason
-- **Merchant processor reconciliations** (`merchant-and-payment-processor-rec`) — **[gated]**
+- **Merchant processor reconciliations** (`merchant-and-payment-processor-rec`) — **mixed**: `[auto]` for the
+  ledger side, `[manual]` for the processor side unless that platform is connected
 - **Cash application** (`cash-application`) — **[auto]** for unapplied balances
 - **Inventory cycle count or roll-forward** (`inventory-to-gl-reconciliation`) — **[manual]** for the count
 - **AP accrual cutoff entries** (`ap-accrual-cutoff`) — **[auto]** for the entry
@@ -106,36 +115,42 @@ pays most
 - **Deferred revenue release**
 - **Loan amortization** (interest + principal)
 - **FX revaluation**
+- **Prior-month accruals reversed** — **[auto]**: a reversing entry dated in this period for each accrual
+  dated at last period end; a missing or doubled reversal is an exception
 
-**Day 4 — Reconciliations** — **[gated]**
+**Day 4 — Reconciliations** — **mixed — see each task**
 - **Balance sheet reconciliations** (`balance-sheet-reconciliations`) **for every BS account** — **[auto]**
   to list the accounts and their balances; **[manual]** to reconcile
 - **Intercompany reconciliations** — **[auto]** where both sides are connected
 - **Payroll clearing** (`payroll-clearing-reconciliation`) — **[auto]** for the clearing balance
-- **Tax accounts reconciliation** — sales tax, VAT, withholding — **[gated]**
+- **Tax accounts reconciliation** — sales tax, VAT, withholding — **mixed**: `[auto]` to list the balances,
+  `[manual]` to reconcile them to the returns
 - **All other control accounts** — **[auto]** to enumerate
+- **Clearing and suspense accounts at nil**, or each remaining item listed with an owner — Undeposited Funds,
+  Uncategorized Income / Expense, Ask My Accountant, Opening Balance Equity (nil after setup), payroll and
+  sales-tax clearing — **[auto]** from the trial balance
 
 **Day 5 — Review and Variances** — **[auto]** for the analysis
 - **Preliminary trial balance review** — **[auto]**
-- **P&L variance to budget / forecast** (`budget-vs-actual-analysis`) — **[gated]**: actuals `[auto]`,
-  budget where held
+- **P&L variance to budget / forecast** (`budget-vs-actual-analysis`) — **mixed**: actuals `[auto]`,
+  budget `[manual]` where held
 - **BS variance to prior month** — **[auto]**
 - **Unusual fluctuations investigated** — **[auto]** to surface, **[manual]** to explain
 - **KPI dashboards refreshed** — **[auto]**
 
-**Day 6 — Consolidation (if multi-entity)** — **[gated]**; **drops out entirely for a single entity**
+**Day 6 — Consolidation (if multi-entity)** — **mixed — see each task**; **drops out entirely for a single entity**
 - **Sub-entity closes complete**
 - **Currency translation** — each sub's functional currency → group reporting currency
 - **Intercompany eliminations**
 - **Consolidation adjustments**
 - **Group trial balance review**
 
-**Day 7 — Reports and Sign-Off** — **[gated]**
+**Day 7 — Reports and Sign-Off** — **mixed — see each task**
 - **Financial statements built** (`financial-statement-builder`)
 - **Management reporting pack**
 - **Management review** — **[manual]**
 - **Final adjustments** — **[auto]** to observe
-- **Books locked** — **[gated]**; a system state
+- **Books locked** — **[manual]**; a system state confirmed by its owner
 - **Distribution** — **[manual]**
 
 **Adjust the daily allocation based on the entity's close target** — some entities close in 3 days, others
@@ -150,13 +165,13 @@ in 10.
 | **No inventory? Skip inventory steps** | **No inventory account, or a nil balance** |
 | **No fixed assets to speak of? Streamline FA steps** | **Fixed asset and accumulated depreciation balances** |
 | **Single entity, single currency? Skip consolidation and FX revaluation** | **Gate 1's file count; the profile's currency; any foreign-currency balances** |
-| **Cash basis entity? Remove most accruals** | **The accounting method on the reads, and whether accrual accounts carry balances** |
+| **Cash basis entity? Remove most accruals** | **The basis the user confirmed at intake**; whether accrual accounts carry balances corroborates it only |
 | **Nonprofit? Add fund-accounting steps** | **Net asset accounts split by donor restriction; fund or program classes** |
 
 **Report the scoping conclusions with their evidence** — *"no inventory account in the chart, so the four
 inventory tasks are removed"* — **so a task removed in error is visible and recoverable.**
 
-**Add industry-specific tasks** — **[gated]**: the industry is `[auto]` from the profile, **the task set is
+**Add industry-specific tasks** — **mixed**: the industry is `[auto]` from the profile, **the task set is
 `[manual]` judgment**:
 
 - **SaaS**: **deferred revenue release, ARR/MRR calculation, customer churn analysis** — *note*:
@@ -189,6 +204,14 @@ observed**: the entry, its date, its amount, its reference. **Status says what s
 what the books show.** Where the two disagree — a task marked Complete with no entry posted — **that is the
 most useful line on the whole board.**
 
+**State the test before reading.** For each `[auto]` task, name the account(s) the entry must hit, the side,
+and the date window — *Depreciation: a credit to the accumulated depreciation account(s) dated in the
+period; compare the amount to last month's* — and show the test in the Evidence column. Comparing to last
+month also catches a recurring entry that posted twice or with a stale amount. **Where the chart has no
+account for the task, its status is `[manual]`** — never matched on memo text alone.
+
+**Review evidence** — **[manual]**: each task also records its **Reviewer (role)** and **Reviewed on** date.
+
 ## Step 4 — Materiality and risk
 
 **Apply materiality** — **[manual]** for the threshold:
@@ -214,9 +237,9 @@ and a list rebuilt from balances catches that.
 
 ## Step 5 — Track open items and review notes
 
-During close, track — **[gated]**:
+During close, track — **mixed — see each task**:
 
-- **Outstanding tasks** — **[gated]**: `[auto]` where status is observable
+- **Outstanding tasks** — **mixed**: `[auto]` where status is observable, `[manual]` otherwise
 - **Variances under investigation** — **[auto]** to surface
 - **Pending information from outside** — vendor statements, bank confirmations — **[manual]**, and
   **frequently the critical path**
@@ -233,32 +256,42 @@ separately** so they are not buried among tasks that will complete themselves.
 
 - **Trial balance balances (debits = credits)** — **[auto]**, **and note it is true by construction** from a
   double-entry platform. **It confirms the software works.** See `financial-statement-builder`
-- **Each BS account reconciled** — **[gated]**: **[auto]** to list every account and its balance and flag
-  any without a reconciliation recorded; **[manual]** for the reconciliations themselves
+- **Each BS account reconciled** — **mixed**: **[auto]** to list every balance sheet account and its
+  balance; **[manual]** for the reconciliation status, taken from the owner or the reconciliation workpaper
+  (preparer, date, reconciled balance) and agreed to the ledger balance — no read shows it
 - **Income statement reasonable** — variance to expected within tolerance — **[auto]** to compute,
   **[manual]** for the tolerance
-- **Inter-period continuity** — **this period's opening = last period's closing** — **[auto]**, ⭐ **and the
-  most valuable item here.** **A break means a prior period was reopened and something changed after it was
+- **Inter-period continuity** — **last month's trial balance as reported = a fresh read of the same prior
+  date, per account** — **[auto]** for the read, **[manual]** for the reported TB, ⭐ **and the most valuable
+  item here.** **A break means a prior period was reopened and something changed after it was
   reported** — see `financial-statement-builder`, where the same check appears. **Almost nobody runs it manually, and it is one comparison**
 - **All adjusting entries posted and approved** — **[auto]** for posted; **[manual]** for approved
-- **Books are locked** — **[gated]**: a system state, not a balance
+- **Books are locked** — **[manual]**: a system state, not a balance
 - **Reports distributed** — **[manual]**
 
 **Run the continuity check across every balance sheet account**, not just in total. **A total that continues
 while individual accounts do not means a prior-period reclassification** — which may be perfectly proper and
 still needs to be known before this month's statements go out.
 
+**Compare against what was reported, not against the ledger itself.** Live, a period's opening balance *is*
+the prior closing balance as the ledger stands now, so two live reads always agree. Without last month's
+TB as reported, the check is **"not performed — no reported prior TB"**, never a pass. In the **first month
+of a fiscal year**, the prior-year P&L closes into retained earnings, so a per-account break on the P&L lines
+and retained earnings is expected and is not a re-open.
+
 ## Step 7 — Lessons learned and improvements
 
-**Post-close review** — **[gated]**:
+**Post-close review** — **mixed — see each task**:
 
-- **Where did the close slip?** — **[auto]** support: **the posting-date distribution shows when tasks
-  actually completed**, which is more reliable than recollection. The same measurement anchors an IPO
+- **Where did the close slip?** — **[auto]** support: **the entry-created timestamp (not the transaction
+  date) shows when tasks actually completed** — close entries are dated the last day of the month whenever
+  they were entered. If the journal-entry read returns no created or last-modified time, this measurement is
+  **[manual]**; say so. This is more reliable than recollection. The same measurement anchors an IPO
   readiness assessment
 - **What manual workarounds were used?** — **[manual]**
-- **What can be automated?** — **[gated]**: **recurring identical entries are readable** and are the
+- **What can be automated?** — **[auto]**: **recurring identical entries are readable** and are the
   automation candidates
-- **What recurring issues keep appearing?** — **[gated]**: **the same account reconciling late, or the same
+- **What recurring issues keep appearing?** — **[auto]**: **the same account reconciling late, or the same
   entry posting after the target date, is measurable across periods**
 
 **Update the close calendar and template for next month.**
@@ -275,8 +308,9 @@ Deliver an `.xlsx` close workpaper:
 | Day | Task | Sub-Process | Owner | Due Date/Time | Dependencies | Status | Time Estimate |
 
 **Add three Mosofin columns**: **Applies?** (with the scoping evidence), **Status Verifiable?**
-(`[auto]` / `[manual]`), and **Evidence** (what the books show). Plus the header block: workspace name; the
-entity by `display_name`; excluded company files; **soft or hard close**; whether any read returned `mock`
+(`[auto]` / `[manual]`), and **Evidence** (what the books show, with the test applied), plus **Reviewer
+(role)** and **Reviewed on**. Plus the header block: workspace name; the entity by `display_name`; excluded
+company files; **soft or hard close**; the **accounting basis** (cash or accrual); whether any read returned `mock`
 data.
 
 **Sheet 2: Task Detail** — **for each major task: scope, procedure reference, expected output, completion
@@ -290,17 +324,19 @@ criteria.** **The procedure reference is the linked skill.**
 
 **Sheet 4: Variance Tracker**
 
-| Account | Period | Budget | Actual | Variance | Explanation Required Y/N | Explanation | Owner |
+| Account | Period | Comparison basis (budget / prior month) | Budget | Prior period | Actual | Variance | Explanation Required Y/N | Explanation | Owner |
 
 **Sheet 5: Materiality Application** — **threshold per the entity; areas above threshold flagged**, with
 **every balance sheet account listed above or below**.
 
 **Sheet 6: Final Tie-Out**
 - **Trial balance balanced**
-- **Each BS account status** (reconciled / variance / open)
-- **Inter-period continuity check** — **per account, not only in total**
+- **Each BS account status** (reconciled / variance / open), with **Reconciled balance per workpaper |
+  Ledger balance | Difference**
+- **Inter-period continuity check** — **per account, not only in total**, against last month's TB as
+  reported, or "not performed"
 - **Books locked Y/N**
-- **Sign-off**
+- **Sign-off** — **Prepared by / date — Reviewed by / date**, both `[manual]`
 
 **Sheet 7: Lessons Learned** — **issues encountered; improvements proposed**, **with the measured close
 timing**.
@@ -310,7 +346,7 @@ evidence for the decision.
 
 **Sheet 9: Coverage — NEW, Mosofin-specific**
 
-| Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used / external source | As-at date | `mock` | Gap |
+| Task | Entity (`display_name`) | Verdict (auto / gated / manual; a mixed task gets one row per part) | Tool used / external source | As-at date | `mock` | Gap |
 
 Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 

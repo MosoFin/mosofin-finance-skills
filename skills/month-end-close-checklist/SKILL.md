@@ -59,6 +59,7 @@ Ask only what you cannot already see.
 | **G** | *What materiality threshold applies?* | Splits reconciliations into full scrutiny and less detail | Recommended. **Never assume one** — a startup with small revenue is not an enterprise. Without it, the Step 4 split is not applied. |
 | **H** | *Do you have a standard close template, and last month's close?* | A template is preferred over a generic list; last month's carry-forward items are `[manual]` | Recommended. Without them, build from Step 1's list. |
 | **I** | *Industry, number of entities and currencies, fiscal calendar, time zone* | Drives the scoping in Step 2 and the industry additions | **Upload path only.** On the Mosofin path these come from Gate 1 and the company profile: confirm, don't ask. |
+| **J** | *Do you report on a cash or an accrual basis?* | Decides whether most Day 1 and Day 3 tasks apply, and which TB the tie-out uses | **Required.** Passed on every read and stated in the workpaper header. |
 
 **Then, depending on the answer to A:**
 
@@ -77,7 +78,7 @@ Ask only what you cannot already see.
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **Trial balance** at the period end **and** at the prior period end | **Required for the final tie-out** and the inter-period continuity check | CSV or XLSX |
+| **Trial balance** at the period end **and** at the prior period end, plus **last month's TB as reported** (from last month's close pack) | **Required for the final tie-out**; the reported TB for the inter-period continuity check, which is otherwise not performed | CSV or XLSX |
 | **Journal entries** posted in the period | Recommended — the status evidence for every entry-based task; without it, every status is owner-reported | CSV or XLSX |
 | **Chart of accounts** | Recommended — the scoping instrument; without it, Step 2's questions are asked instead | CSV or XLSX |
 | **Balance sheet** and **P&L**, current and prior | Recommended — the variance and reasonableness review | CSV, XLSX or PDF |
@@ -129,8 +130,8 @@ close, a system change, year-end, and a task marked Complete with no entry poste
 
 Run the final tie-out — trial balance balanced (true by construction), each balance sheet account's
 reconciliation status, income statement reasonableness, **inter-period continuity per account**,
-adjusting entries posted, books locked — then the lessons learned, using the measured posting
-dates rather than recollection, and build the workpaper with its scoping and coverage sheets:
+adjusting entries posted, books locked — then the lessons learned, using the measured entry-created
+times rather than recollection, and build the workpaper with its scoping and coverage sheets:
 [`references/method.md`](references/method.md) Steps 6–8. Ask before creating the `.xlsx`. Before
 presenting, check it against [`references/output.md`](references/output.md).
 
