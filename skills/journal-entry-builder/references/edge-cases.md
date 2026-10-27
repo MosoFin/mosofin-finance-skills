@@ -5,8 +5,13 @@
 All of the original edge cases, plus the ones Mosofin's workspace model introduces.
 
 **Multi-currency entries**: **each line must be in the same currency, or include explicit FX rate columns.
-For cross-currency entries, post in functional currency with an FX gain / loss plug. Flag for
-FX revaluation.**
+For cross-currency entries, translate every line at the spot rate (the exchange rate on the
+transaction date) — state the rate and its source — and post in the functional currency. No exchange
+gain or loss arises at initial recognition (ASC 830-20-30-1 / IAS 21.21): if the translated lines do
+not balance, the rate or an amount is wrong — stop and ask, never balance it with an FX gain / loss
+line. A realised gain or loss is booked only when a foreign-currency balance is settled (booked rate
+against settlement rate), and an unrealised one only at period-end remeasurement. Flag open
+foreign-currency balances for FX revaluation.**
 
 **Penny imbalances from rounding allocations**: **do not pad with a "Rounding" plug. Allocate the rounding
 to the largest line and note in the memo.**
@@ -37,10 +42,13 @@ questions.** Warn on both.
 **A payment entry where an accrual is already open** — *Mosofin-specific, and the highest-value check*.
 **The classic double-count.** Read the accrual account first.
 
-**A receipt booked to revenue where an invoice is open** — *Mosofin-specific*. It should clear AR.
+**A receipt booked to revenue where an invoice is open** — *Mosofin-specific*. It should be applied to the
+open invoice as a customer payment in the subledger, not a journal entry — a journal line to AR leaves the
+invoice open on the aging.
 
 **A loan payment booked entirely to expense** — *Mosofin-specific*. **Only interest is expense.** The
-liability movement shows the split.
+split comes from the lender statement or amortization schedule; the ledger balance only confirms the
+post-payment balance agrees to the lender's stated principal.
 
 **A closing entry proposed where the platform closes automatically** — *Mosofin-specific*. **Double-closes
 retained earnings.** See `closing-entries-and-trial-balance`.

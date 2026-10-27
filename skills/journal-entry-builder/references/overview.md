@@ -44,7 +44,7 @@ queries** rather than intentions:
 |---|---|---|
 | **Debits = Credits** | arithmetic | arithmetic — **[auto]** |
 | **All accounts exist in the COA** | verify against a supplied list | **[auto]** against the live chart |
-| **Date is within an open accounting period** | "warn if not" | **[gated]** — often determinable |
+| **Date is within an open accounting period** | "warn if not" | **[gated]** — the closed-through date is asked at intake; a lock or closing date is used only where the platform exposes it |
 | **Sign conventions match account types** | judgment | **[auto]** — **account types are readable** |
 | **Memo explains the business purpose** | judgment | judgment |
 | **References to source documents** | judgment | **[gated]** — the document may be in the system |
@@ -61,10 +61,11 @@ queries** rather than intentions:
 
 Three more from the same section:
 
-- **Pitfall 2 — a receipt where an invoice exists** should clear AR, not go to revenue. **[auto]**: the open
-  invoice is findable.
-- **Pitfall 5 — a loan payment booked entirely as expense.** **[auto]**: the loan liability balance and its
-  movement are readable, which shows the principal portion.
+- **Pitfall 2 — a receipt where an invoice exists** should be applied to the open invoice as a customer
+  payment, not go to revenue. **[auto]**: the open invoice is findable.
+- **Pitfall 5 — a loan payment booked entirely as expense.** **[manual]**: the split comes from the lender
+  statement or amortization schedule; the loan liability balance is read only to confirm the post-payment
+  balance agrees to the lender's stated principal.
 - **Manual JEs to revenue, cash, AR or AP control accounts** — the original flags these as auditor red
   flags. **[auto]**: whether the target is a control account is readable from the chart, so the flag raises
   itself.

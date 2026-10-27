@@ -43,8 +43,8 @@ Typical batch, per in-scope entity:
   check** — usually **[auto]**
 - *`search_invoices`* / *`search_bills`* — **whether a document already exists for this item** — usually
   **[auto]**
-- *`search_journal_entries`* — **the numbering convention in use, and whether the period still accepts
-  entries** — usually **[auto]**
+- *`search_journal_entries`* — **the numbering convention in use** — usually **[auto]**. It does not show
+  whether a period is closed: the closed-through (lock) date is asked at Stage 1
 - *`get_company_info`* — legal name, **functional currency**, year-end — usually **[auto]**
 
 Handle the envelopes:
@@ -79,9 +79,10 @@ reference accounts that do not exist in the real chart**, and it would be import
 **State the JE type explicitly in the header.**
 
 *Mosofin note on Closing*: **check whether the platform closes the year automatically** before proposing a
-closing entry — see `closing-entries-and-trial-balance`. **[auto]**: P&L accounts at zero after year-end
-with no visible closing journal means the system did it, and **a manual closing entry would double-close
-retained earnings.**
+closing entry — see `closing-entries-and-trial-balance`. **[auto]** from Gate 1: **QuickBooks Online and
+Xero close the year automatically** (net income rolls into retained earnings in reporting, with no closing
+journal) — **do not propose a closing entry for them; it would double-close retained earnings.** For other
+platforms, ask.
 
 ## Step 2 — Apply the accounting equation
 
@@ -151,6 +152,11 @@ appear there**, including formatting, so the import matches.
 
 `DR` is a debit, `CR` a credit. **Every pattern below is a proposal.**
 
+**Cash, AR and AP legs** in these patterns are recorded through the subledger (bill, bill payment, receive
+payment, deposit) where the platform has one; a journal entry only where no subledger transaction fits,
+with the customer or vendor name on the line. A journal line to AR or AP does not apply against the open
+invoice or bill, so the aging and the control account stop agreeing.
+
 ### Accrual (expense incurred, not yet invoiced)
 ```
 DR  Expense account                       $X
@@ -207,6 +213,12 @@ memo's entry number and date can be filled from the ledger rather than from memo
 - **Net correction** — just the difference — **for small true-ups**
 
 **Reference the original entry # in the memo either way.**
+
+**If the original sits in a closed or reported period, date the correction in the current open period.**
+Immaterial: correct through the current-period account, with the original referenced. Material: propose
+the correction against opening retained earnings (ASC 250-10-45-23 / IAS 8.42) and flag it for the
+accountant or tax preparer. Whether it is material is the user's call — ask. **Never date a correction
+inside a closed period without the user's say-so.**
 
 *Mosofin note*: **Mosofin cannot delete or alter anything**, which enforces the first sentence structurally.
 And **the original entry is readable**, so the reversal can be built from what was actually posted rather
@@ -269,8 +281,9 @@ Before delivering, verify — **and here most of these are performed, not merely
 - ✅ **Debits = Credits, to the penny** — **[auto]**
 - ✅ **All accounts exist in the provided COA** — **[auto]** against the live chart. **An account that does
   not exist is a hard stop**, not a warning
-- ✅ **Date is within an open accounting period (warn if not)** — **[gated]**: **entries existing after a
-  date, or the platform's own period status, indicate it.** **Warn about reporting status too** — a period
+- ✅ **Date is within an open accounting period (warn if not)** — **[gated]**: **the closed-through (lock)
+  date from Stage 1, recorded as user-asserted unless the platform's own setting is readable.** Entries
+  dated after the posting date are not evidence either way. **Warn about reporting status too** — a period
   the software will accept may already have been reported
 - ✅ **Memo explains the business purpose** — not "JE" or "adjustment"
 - ✅ **References to source documents included** — **[gated]**; findable where the document is in the system
@@ -282,10 +295,11 @@ Before delivering, verify — **and here most of these are performed, not merely
 **Mosofin additions to the validation set — the Pitfall checks, run as queries:**
 
 - ✅ **No existing accrual already covers this item** — **[auto]**. **The Pitfall 1 double-count check.**
-  Read the relevant accrual account before proposing a payment or invoice entry
+  Read the relevant accrual account, and its reversal, before proposing a payment or invoice entry
 - ✅ **No open invoice exists for a receipt being booked to revenue** — **[auto]**. Pitfall 2
-- ✅ **A loan payment is split between interest and principal** — **[auto]** support from the liability
-  balance. Pitfall 5
+- ✅ **A loan payment is split between interest and principal** — **[manual]**: split taken from the lender
+  statement or amortization schedule; the ledger balance is used only to confirm the post-payment balance
+  agrees to the lender's stated principal. Pitfall 5
 - ✅ **The target is not a control account** — **[auto]**: **manual entries to revenue, cash, AR or AP
   control accounts are auditor red flags**, and whether an account is one is readable
 - ✅ **The entry does not exceed materiality without a review flag** — **[gated]**; **the threshold is
@@ -293,8 +307,9 @@ Before delivering, verify — **and here most of these are performed, not merely
 - ✅ **A clearing or suspense account used here is expected to clear** — **[auto]** to report its current
   balance and age
 
-**Report the validation result with the entry.** A proposal that says "validated: 9 of 9 checks passed;
-account 6410 confirmed in chart; period open; no matching accrual found" is one a reviewer can post
+**Report the validation result with the entry.** A proposal that says "validated: 13 of 15 run, 13 passed;
+materiality not run (no threshold given); loan split n/a; account 6410 confirmed in chart; period open;
+no matching accrual found" is one a reviewer can post
 quickly. **One that says "validated" is not.**
 
 ## Step 7 — Output format
@@ -308,8 +323,13 @@ quickly. **One that says "validated" is not.**
 **System-specific column headers** — **and the connected platform is known from Gate 1**, so **use its
 format by default** rather than asking:
 
-- **QuickBooks Online**: `JournalNo`, `JournalDate`, `Line Description`, `Account`, `Debit`, `Credit`
-- **Xero**: `*Narration`, `*Date`, `Description`, `*AccountCode`, `*TaxRate`, `*Amount`
+- **QuickBooks Online**: `JournalNo`, `JournalDate`, `Line Description`, `Account`, `Debit`, `Credit`,
+  `Name`, `Class`, `Location` (Class and Location where tracking is on) — **`Name` filled on every AR or AP
+  line**, since QBO requires a customer or vendor there
+- **Xero**: `*Narration`, `*Date`, `Description`, `*AccountCode`, `*TaxRate`, `*Amount` — **one signed
+  `*Amount` column: debits positive, credits negative.** **`*TaxRate` on every line**, taken from the user's
+  answer to E (for no tax effect, the rate the user names, e.g. "No VAT", "Tax Exempt", "BAS Excluded") —
+  never defaulted
 - **NetSuite**: `External ID`, `Date`, `Account`, `Debit`, `Credit`, `Memo`, `Subsidiary`, `Department`,
   `Class`
 - **Sage Intacct / 50 / 200**: **format varies — ask the user for the import template**
@@ -412,20 +432,25 @@ company file.
 
 ## Pitfalls Specific to JE Construction (not covered above)
 
-**Preserved from the original, with the Mosofin verdict on each — four of the seven are now checkable.**
+**Preserved from the original, with the Mosofin verdict on each.**
 
 1. **Recording a payment when an accrual already exists** → **double-counts. Always check if a prior accrual
    covers the same item, and clear it.** — **[auto]**: **read the accrual account before proposing the
-   entry.** The highest-value check in this skill.
-2. **Using Cash for AR-related receipts** → **if an invoice exists, the receipt clears AR, not direct to
-   revenue.** — **[auto]**: the open invoice is findable.
+   entry.** The highest-value check in this skill. **Read the accrual and its reversal: if the accrual has
+   already reversed (e.g. auto-reversed on day 1), the bill posts to expense as normal — no double count.
+   Only when the accrual is still open (non-reversing policy) does the settlement clear it.** Where the
+   ledger does not show which, ask the user's reversal policy (stored at Step 8).
+2. **Using Cash for AR-related receipts** → **if an invoice exists, the receipt is applied to the open
+   invoice as a customer payment, not a journal entry, and not direct to revenue.** — **[auto]**: the open
+   invoice is findable.
 3. **Booking depreciation directly to the asset account** → **must use Accumulated Depreciation
    (contra-asset).** — **[auto]**: **whether a contra account exists is readable**, and the account type
    check catches the direct posting.
 4. **Recording owner contributions as revenue** → **goes to Equity.** — **[auto]**: account type check.
 5. **Recording full loan payment as expense** → **only interest is expense; principal reduces the loan
-   liability.** — **[auto]** support: the liability balance and movement show the split; **the amortization
-   schedule is `[manual]`.**
+   liability.** — **[manual]**: **the split comes from the lender statement or amortization schedule**; the
+   liability balance is read only to confirm the post-payment balance agrees to the lender's stated
+   principal.
 6. **Reversing entries dated the last day of the prior period** → **must be the FIRST day of the new
    period.** — **[auto]**: a date check.
 7. **Forgetting the tax line** when a transaction has tax effects in the entity's jurisdiction —

@@ -58,6 +58,7 @@ Ask only what you cannot already see.
 | **E** | *Does it have a tax effect, and in which jurisdiction?* | Decides whether tax lines appear, and which side they sit on | **Required if there are tax effects.** No tax lines without a jurisdiction; if the rules are unclear, ask — never assume the treatment. |
 | **F** | *What is the materiality threshold for a review flag?* | Drives the large-entry flag | **Never default it.** If unanswered, that check is named as not run. |
 | **G** | *Source document reference, and should the entry reverse?* | Goes in the header; an accrual usually reverses on the first day of the next period | Recommended / optional. Where the document is in the system it can be found. |
+| **H** | *What date are the books closed (or locked) through, and has any period after that already been reported?* | The open-period check; a journal search cannot show a lock date | **Required.** Recorded as user-asserted unless the platform's own setting is readable. |
 
 **Then, depending on the answer to A:**
 
@@ -66,7 +67,8 @@ Ask only what you cannot already see.
   (Gates 0–1 in [`references/gates.md`](references/gates.md)).
 - The **chart of accounts, entity, functional currency and accounting system** come from the
   books — don't ask for them. The import format follows the connected platform; ask only when its
-  import template is itself the uncertainty.
+  import template is itself the uncertainty. For a loan payment, ask for the lender statement or
+  amortization schedule — the split is not in the books.
 - **Invoked as a handoff from another skill?** The gates have usually run in this conversation:
   confirm the entity in one line rather than repeating them — never build against an unconfirmed
   entity.
@@ -77,11 +79,12 @@ Ask only what you cannot already see.
 |---|---|---|
 | The **transaction or event** — what happened, the amounts, the date | **Required** | Type it in the chat, or the source document as PDF or image |
 | **Chart of accounts** — account numbers, names and types | **Required** — without it, only descriptive placeholders labelled "PLACEHOLDER — REMAP REQUIRED" | CSV or XLSX, or the account names and numbers typed in |
-| Entity name and functional currency | Required | Type it in the chat |
+| Entity name, functional currency, **fiscal year-end** and **accounting basis** (cash or accrual) | Required | Type it in the chat |
 | Accounting system, or its import template | Recommended — without it, generic columns for you to remap | Type it in the chat; the template as CSV or XLSX |
 | **Tax jurisdiction** and rules | Required if the transaction has tax effects | Type it in the chat |
 | **Trial balance** or **GL detail** for the accounts touched, incl. accrual, prepaid, deferred and clearing accounts | Recommended — needed for the accrual double-count, clearing-balance and other ledger checks | CSV or XLSX |
 | **Materiality threshold**; the original entry for a reversal, reclass or correction | Recommended | Type it in the chat; the original as CSV, XLSX or PDF |
+| **Open invoices / open bills** (AR or AP aging detail) for a receipt or payment; the **loan statement or amortization schedule** for a loan payment | Recommended — the open-invoice check and the interest/principal split depend on them | CSV or XLSX; the statement as PDF |
 
 **Read back before starting, then wait for a yes:**
 
