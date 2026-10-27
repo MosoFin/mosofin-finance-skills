@@ -9,7 +9,7 @@ the contract; flag it. **[auto]** to find prior receipts of the same item
 (*`search_items`*, *`search_purchase_orders`*); the estimate itself is a judgment.
 
 **PO with multiple receipts, partial invoicing**: track cumulatively — GRNI = cumulative
-received − cumulative invoiced, **per line**. Line-level tracking matters; a PO-level netting
+received to period end − cumulative invoiced to period end, **per line**. Line-level tracking matters; a PO-level netting
 hides a line that is fully received and unbilled behind another that is fully billed.
 
 **Services delivered but no GRN equivalent**: depend on a service-completion confirmation,
@@ -21,8 +21,8 @@ estimated this month at $1,500 — flag it and ask the user to confirm or adjust
 silently post a 50% larger accrual.**
 
 **Multi-currency**: accrue in the functional currency at the period-end FX rate. The reversal
-in the new period uses the same rate — or rebooks at the new-period rate per policy, but
-**consistency matters**; the revaluation itself is an FX revaluation task.
+mirrors the accrual exactly, **at the same rate**. Any revaluation is a separate FX
+revaluation task.
 
 **Tax-inclusive vs exclusive estimates**: make sure the accrual is on the expense amount, not
 the gross. If the expected total includes tax, decompose it.
@@ -31,11 +31,13 @@ the gross. If the expected total includes tax, decompose it.
 different accounting — that is a **prepaid**, not an accrual. Hand to
 `prepaid-amortization-schedule`.
 
-**Bills received but not yet posted to A/P** (sitting in an inbox or approval queue): **not an
-accrual** — these should simply be posted. Check the approval queue first. **[manual]** in
-Mosofin: an unposted bill is by definition not yet in the books, so no tool can see it. Ask
-the user to clear the queue before finalising, and say that the schedule assumes it was
-cleared.
+**Bills received but not yet posted to A/P** (sitting in an inbox or approval queue): a bill
+**dated on or before period end** is **not an accrual** — it should simply be posted. A bill
+dated **after** period end for in-period work posts into the new period, so it is reviewed
+under Step 3 like a posted bill. Check the approval queue first. **[manual]** in Mosofin: an
+unposted bill is by definition not yet in the books, so no tool can see it. Ask the user to
+send any vendor invoices received since period end that are not yet entered (PDFs from the
+inbox or approval queue), and say that the schedule assumes none were left out.
 
 **Items accrued last period and reversed this period, but the invoice never arrived**:
 investigate. Either the service didn't happen and no accrual is needed, or the invoice is

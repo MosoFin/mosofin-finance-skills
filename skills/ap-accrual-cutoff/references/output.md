@@ -10,7 +10,7 @@ All of the original standards, plus the Mosofin ones.
 - Variance from the prior period is flagged where notable
 - Tax handling is documented (accrued or not, per jurisdiction)
 - File naming consistent
-- **No double-counting: an item is either GRNI or a subsequent invoice, never both**
+- **No double-counting: an item is GRNI, a subsequent invoice or a recurring accrual — only one**
 
 **Mosofin additions:**
 

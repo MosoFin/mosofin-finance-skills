@@ -34,8 +34,8 @@ inbox or approval queue**, so it asks for both. Background:
 - **Never defaults the period, the accounting method or the entity, and never assumes the tax
   rule.** With no materiality threshold it accrues everything identified and says so, rather
   than applying a figure of its own.
-- **Never counts an item twice:** a cost is GRNI or a subsequent invoice, never both, and every
-  PO-to-bill match says whether it was linked or inferred.
+- **Never counts an item twice:** a cost is GRNI, a subsequent invoice or a recurring accrual —
+  only one — and every PO-to-bill match says whether it was linked or inferred.
 
 Full wording: [`references/mosofin-protocol.md`](references/mosofin-protocol.md). **Read it before
 the first tool call.**
@@ -69,8 +69,10 @@ Ask only what you cannot already see.
   `[manual]` — ask for an open-PO export rather than reading vendor spend instead.
 - Derive the **recurring vendor list** from spend history and ask the user to confirm it and add
   anything the books do not show.
-- Ask the user to **clear the bill approval queue** before finalising: a received but unposted
-  bill is not an accrual, it should simply be posted, and no tool can see it.
+- Ask the user to **clear the bill approval queue** before finalising: an unposted bill dated on
+  or before period end should simply be posted, not accrued. No tool can see the queue, so ask
+  them to send any invoices received since period end that are not yet entered — Step 3
+  reviews them like posted bills.
 
 **Upload path — hand over one checklist.**
 
@@ -80,7 +82,7 @@ Ask only what you cannot already see.
 | **Goods receipts** — receiving log, signed delivery notes, service confirmations or time sheets | **Required for GRNI accruals** — an open PO without one is not accrued | CSV, XLSX, PDF, or a clear scan |
 | **Chart of accounts**, with the accrued-liability account named | Required | CSV or XLSX |
 | Period, entity name, functional currency, accounting basis, subsequent-event window | Required | Type it in the chat |
-| **Bills** posted in the period and in the subsequent-event window, with service dates and any PO reference | Recommended — needed to net invoices already matched against POs and for the late-invoice review | CSV or XLSX export, or PDF |
+| **Bills** posted in the period and in the subsequent-event window, with service dates and any PO reference, plus invoices received since period end not yet entered | **Required** — without them GRNI cannot be netted and the late-invoice review is not performed; the output says so | CSV or XLSX export, or PDF |
 | **Vendor bill history** for several prior periods, and any contracts for recurring vendors | Recommended — establishes the recurring vendors and their expected amounts | CSV or XLSX, or PDF |
 | Trial balance and last period's accrual entries | Recommended — checks that last period's reversals posted | CSV or XLSX |
 | Materiality threshold; tax jurisdiction if tax is recoverable | Recommended — required for tax if it is recoverable | Type it in the chat |
@@ -90,8 +92,8 @@ Ask only what you cannot already see.
 > *Building the **September** AP accrual schedule for **Northbrook Trading** (accrual basis),
 > with purchase orders, bills and spend history from **your Mosofin connection** and goods
 > receipts from **the warehouse log you uploaded**. Late invoices searched **1–10 October**,
-> when the books close; accruals credited to **Accrued Expenses**; materiality **$500**; tax
-> accrued gross, with no input-tax line. Shall I go ahead?*
+> when the books close; accruals credited to **Accrued Expenses**; materiality **$500**;
+> accrued net of recoverable tax, no input-tax line. Shall I go ahead?*
 
 On the upload path, name each file you received and say what was read from it — the period it
 covers, the row count, the totals. Flag anything unreadable, or covering the wrong period or
@@ -129,7 +131,7 @@ accrual reversed last period whose invoice never came.
 ## Stage 5 — Price, screen, propose the entries and present
 
 Calculate each amount and apply the confirmed tax rule — the conservative default is the expense
-gross of recoverable tax, with no input-tax line; draft each accrual with its reversing entry in
+net of recoverable tax, with no input-tax line; draft each accrual with its reversing entry in
 the real account names, and check that last period's reversals posted; then the materiality
 screen, including whether skipped items are material in aggregate; then the seven sheets:
 [`references/method.md`](references/method.md) Steps 4–7. Before presenting, check it against

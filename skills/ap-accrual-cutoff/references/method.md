@@ -76,7 +76,10 @@ that it arrived.
 
 Process:
 
-- **Pull all open POs with receipts in the period** — **[auto]** for the POs themselves
+- **Pull every PO still open at period end, whatever its PO date** (search from the oldest
+  open PO, not from the period start), **and the receipts dated on or before period end** —
+  goods received in an earlier month and still unbilled are GRNI too; receipts dated after
+  period end are excluded — **[auto]** for the POs themselves
   (*`search_purchase_orders`*, *`get_purchase_order`*); **[gated/manual] for the receipts**.
   This is the honest split, and it is the single most important capability judgment in this
   skill: most accounting connectors expose **orders and bills, but no separate
@@ -90,7 +93,9 @@ Process:
   reference their PO (*`search_bills`*, *`get-bill`*). Where the connector does not carry
   the PO link on the bill, match by vendor, date, amount and description and **say the match
   was inferred, not linked** — an inferred match is a judgment, and a wrong one causes the
-  double-count Step 7's quality standard forbids.
+  double-count Step 7's quality standard forbids. Net only bills **dated on or before period
+  end**; a bill dated after period end for these goods leaves the line as GRNI here and is
+  excluded from Step 3.
 - **Net = GRNI to accrue** — **[auto]**.
 
 **For services with completed service confirmations: same logic** — confirmed delivery
@@ -106,10 +111,11 @@ needs to be in this month's numbers.
 For each recurring vendor (rent, utilities, subscriptions, maintenance contracts, **staff
 augmentation** — contract staff working alongside your own — etc.):
 
-- **Confirm the period's bill has been received and posted** — **[auto]**
-  (*`search_bills`* for the period, by vendor).
-- **If not, accrue at the expected amount** based on — **[auto]** for all three bases, since
-  each is derivable from the connected books:
+- **Confirm a bill covering this period's service has been received and posted** — **[auto]**
+  (*`search_bills`* for the period, by vendor; read the service period, not the bill date).
+- **If not, accrue at the expected amount** based on — **[auto]** for the most recent invoice
+  and the recurring schedule; **[manual]** for the contract amount unless a recurring
+  template exists:
   - **The most recent invoice for the same service** (*`search_bills`*, *`get-bill`*)
   - **The contract / agreement amount** — **[manual]** where the contract is not in the
     books; **[auto]** where a recurring template or standing order exists
@@ -126,11 +132,12 @@ that gets missed by hand.
 
 Look at what arrived *after* you closed the gate, and ask whether it really belongs inside.
 
-**Subsequent-events review**: look at invoices received and posted after period end, dated
+**Subsequent-events review**: look at invoices received after period end — posted, or
+unposted ones the user sent from the inbox or approval queue — dated
 after period end, but **for services delivered before period end**. **[auto]** to find them
 (*`search_bills`* with `start_date` = period end + 1 through the close date confirmed at
-Gate 3); **[gated]** to judge each one, because the service period is often in the
-description rather than a structured field.
+Gate 3); **[manual] (judgment)** to judge each one, because the service period is often in
+the description rather than a structured field.
 
 **The service period is the test** — not the invoice date:
 
@@ -144,21 +151,29 @@ in the exceptions sheet rather than guessing a split.
 
 ## Step 4 — Calculate the accrual amount
 
+**Each cost lands in exactly one population.** Order: GRNI, then subsequent invoice, then
+recurring. A recurring vendor whose bill for this service period is found in the subsequent
+window is priced from that bill under Step 3 and dropped from Step 2.
+
 For each candidate:
 
-- **Estimate the gross expense amount** — **[auto]** from the evidence gathered above.
+- **Estimate the expense amount, net of recoverable tax** — **[auto]** from the evidence
+  gathered above. If the source figure includes tax, take the tax out.
 - **Tax handling** depends on whether the entity's jurisdiction allows accrual of **input
   tax** (the recoverable sales tax / VAT / GST on what you buy) on services without an
   invoice — **[manual]**, always, because this is a rule, not a number in the ledger:
   - **Most jurisdictions**: tax recovery requires a **valid tax invoice** — so accrue the
-    gross expense, book no input-tax line, and recognise the tax when the invoice arrives
+    expense net of recoverable tax, book no input-tax line, and recognise the tax when the
+    invoice arrives
   - **Some jurisdictions**: tax can be accrued — book input-tax recoverable alongside the
     expense
   - **Confirm with the user — do not assume**, and do not carry a rule over from a stored
     preference without re-confirming it
 
-**The conservative default**: accrue the expense gross of recoverable tax, and let the tax
-come through when the actual invoice posts.
+**The conservative default**: accrue the expense **net of recoverable tax** (the amount
+excluding tax), with no input-tax line, and let the tax come through when the actual tax
+invoice posts. Where tax is **not** recoverable, the tax is part of the cost and is accrued
+with it.
 
 The tax accounts and codes in use are **[auto]** to discover (*`search_tax_codes`*,
 *`search_tax_rates`*, *`search_accounts`*), which helps you name the right account — but the
@@ -172,7 +187,7 @@ recoverability rule stays the user's to confirm.
 For each accrual:
 
 ```
-DR  Expense account (per user's COA)               $accrual amount
+DR  Account the PO line / bill will post to         $accrual amount
     CR  Accrued Liabilities (BS, per user's COA)      $accrual amount
 Memo: Accrue [service] from [vendor] for [period] — invoice expected [date]
 ```
@@ -181,12 +196,17 @@ Mark each JE as **reversing on the first day of the new period**:
 
 ```
 DR  Accrued Liabilities                            $accrual amount
-    CR  Expense account                                $accrual amount
+    CR  Same account the accrual debited               $accrual amount
 Memo: Reversal of accrual [original JE #] — original [vendor] [service]
 ```
 
-**The reversal cancels the accrual; when the real invoice posts, it hits the same expense
-account, netting clean.**
+**The debit goes to the account the real bill will post to** — for a GRNI line, read the PO
+line's item or account (*`get_purchase_order`*): the **inventory asset** account for stock
+items, the **fixed-asset** account for capital items, otherwise the expense account. Goods
+received and held at period end are stock or equipment, not this month's expense.
+
+**The reversal cancels the accrual; when the real invoice posts, it hits the same account the
+accrual debited, netting clean.**
 
 Use the **real account names from the connected chart of accounts** (*`search_accounts`*,
 **[auto]**) rather than the generic labels above, and say which account you chose.
@@ -222,12 +242,18 @@ Offer an `.xlsx` workpaper: ask the user whether they want it as an Excel file, 
 - Count of items above / below threshold
 - **Added:** workspace name; each in-scope company file by `display_name`; each excluded
   company file and why; whether any figure rests on `mock` data
+- **Accrued-liability roll-forward:** opening balance per trial balance (agreed to last
+  period's closing schedule) − reversals posted + proposed accruals ± other postings =
+  proposed closing. List every residual item older than one period with owner and action, and
+  separate AP-accrual items from other accruals (payroll and the like) held in the same account
+- Prepared by / date — Reviewed by / date (left blank for the reviewer)
 
 **Sheet 2: GRNI Accruals**
 
-| Vendor | PO # | PO Line | GRN # | Received Qty | Unit Price | GRNI Amount | Currency | Functional Amount | Expense Account | Memo |
+| Vendor | PO # | PO Line | GRN # | Cumulative Qty Received to Period End | Unit Price | Cumulative Amount Invoiced to Period End | Match (linked / inferred) | GRNI Amount | Currency | Functional Amount | Debit Account | Debit account type (inventory / asset / expense) | Memo |
 
-Add a column recording, per line, whether the receipt quantity came from a tool or from the
+GRNI Amount = received × unit price − invoiced, readable off each row. Add a column
+recording, per line, whether the receipt quantity came from a tool or from the
 user — the GRN column is frequently the manual one.
 
 **Sheet 3: Recurring Accruals**
@@ -243,7 +269,8 @@ user — the GRN column is frequently the manual one.
 Pass-through to `journal-entry-builder`, including both the period-end accruals and the
 first-day-of-next-period reversals. Marked clearly as **proposals**.
 
-**Sheet 6: Exceptions / Open Items**
+**Sheet 6: Exceptions / Open Items** — each with Owner | Action needed | Due by | Effect if
+unresolved
 
 - Receipts on POs with no unit price (estimate needed)
 - Services with a completion confirmation but no contract value
