@@ -24,7 +24,7 @@ supplied by hand and that is labelled as such.
 query rather than a request:
 
 - **Does the invoice exist?** — readable
-- **Is the credit ≤ the invoice balance?** — readable, and a credit exceeding the balance is exactly the
+- **Are credits to date ≤ the original invoice amount?** — readable, and credits exceeding it are exactly the
   case the original says needs management approval
 - **Is the period right?** — readable, including whether the original sits in a closed year
 - **Does the currency match?** — readable
@@ -39,8 +39,8 @@ matter, and the second is often overlooked:
 - **Customer credits unapplied** — money you owe a customer that is quietly ageing. It overstates
   receivables and eventually becomes a refund request or unclaimed property.
 - **Vendor credits unapplied** — **money you are entitled to and have not taken.** A vendor credit note
-  sitting unused is a discount you already negotiated and are not receiving. This is the closest thing to
-  free money in the whole pack, and it is one query away.
+  sitting unused is a discount you already negotiated and are not receiving. Once agreed to the
+  supplier's statement, it is the closest thing to free money in the whole pack, and it is one query away.
 
 **Mosofin is read-only.** It cannot issue a credit memo, send a refund, or apply a credit. Every entry
 below is a *proposal* for a human.

@@ -115,15 +115,15 @@ answered:
 
 | What to confirm | Required? | Notes |
 |---|---|---|
-| **Credit memo type** — customer credit / customer refund / vendor credit / chargeback | **Required — [gated]** | Often inferable from the document type already recorded; **confirm it**, since the accounting differs materially by type. |
+| **Credit memo type** — customer credit / customer refund / vendor credit / chargeback | **Required — [auto]** for the document type; **[manual]** for the reason | Often inferable from the document type already recorded; **confirm it**, since the accounting differs materially by type. |
 | **Original invoice reference** — number, date, amount | **Required if applicable — [auto] to verify** | Ask for the number; **the existence, amount, balance, period and currency are then all checkable**. |
 | **Credit memo amount** | **Required** | |
-| **Reason for credit** — return, pricing dispute, goodwill, damage, error | **Required — [manual]** | Drives the accounting: a return hits inventory, a goodwill credit hits expense, a pricing error hits revenue. Never infer it. |
+| **Reason for credit** — return, pricing dispute, goodwill, damage, error | **Required — [manual]** | Drives the accounting: a return hits inventory, a goodwill credit or pricing error reduces revenue, a write-off of an unpaid balance goes to bad debt. Never infer it. |
 | **Chart of accounts** | **Required for GL posting — usually [auto]** | Confirm the sales returns, chargeback fee and write-off accounts by their real names. |
 | **Tax jurisdiction** | Required if tax was on the original invoice — **[manual]** | Drives the write-off recoverability question in Step 4. |
 | **Original tax code(s)** — from the related invoice | Required if tax involved — **usually [auto]** | Readable from the original invoice; confirm rather than ask. |
 | **Functional currency** | Optional — default same as original; usually **[auto]** | |
-| **Approval for any credit exceeding the invoice balance** | **Required if that check fails** | **[manual]** — and the check itself is **[auto]**. |
+| **Approval for credits exceeding the original invoice amount** | **Required if that check fails** | **[manual]** — and the check itself is **[auto]**. |
 | **Confirm scope** | **Required** | Read back in-scope and excluded company files by `display_name`. |
 | **Confirm any profile contradiction** | **Required if one appears** | |
 | **Confirm manual evidence** | **Required if Gate 2 produced any [manual]** | |

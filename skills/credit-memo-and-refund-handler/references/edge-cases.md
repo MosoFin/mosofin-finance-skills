@@ -4,19 +4,24 @@
 
 All of the original edge cases, plus the ones Mosofin's workspace model introduces.
 
-**Credit issued in a different period than the original invoice**: **post to the credit's period unless
-materiality forces a prior-period adjustment. Note in the memo.** *Mosofin note*: **detectable
+**Credit issued in a different period than the original invoice**: **post to the credit's own date. If the
+credit is dated after a period end but relates to sales before it and that period is still open, propose
+an accrual (`DR Sales Returns & Allowances / CR Refund Liability (or Allowance for Returns)`) in the earlier
+period, reversed the next day — whether to book it is the user's call. Restate a prior period only to
+correct an error. Note in the memo.** *Mosofin note*: **detectable
 automatically** — compare the credit date against the invoice date and the fiscal year end.
 
-**Credit issued in a different currency**: **use the original invoice's FX rate to preserve the offset,
-then post an FX gain / loss for any rate movement.** Flag it as an FX revaluation matter. The currency
-mismatch itself is **[auto]** to detect; the rate is **[manual]**.
+**Foreign-currency credit**: **issue it in the invoice currency. Apply it at the original invoice rate; the
+difference from the credit-date rate is a realised FX gain or loss on application.** A credit in a
+different currency from the invoice cannot be applied; flag it. The currency mismatch itself is **[auto]**
+to detect; the rate is **[manual]**.
 
 **Partial sales return with a restocking fee**: **the restocking fee is income; reduce the credit by the
 fee. Two-line treatment** — never a single net figure, or the fee income disappears.
 
 **Customer overpaid and is now owed a refund**: **not a credit memo — it's a customer deposit / refund of
-overpayment. Different posting (DR Customer Deposits, CR Cash). Flag for the user.** *Mosofin note*:
+overpayment. Different posting (DR Accounts Receivable — or Customer Deposits, if the overpayment was
+reclassified there — CR Cash). Flag for the user.** *Mosofin note*:
 distinguishable — an overpayment sits as an unapplied *payment*, not as a credit memo.
 
 **Vendor offers a credit as a discount on future bills (volume rebate)**: **this is a rebate, not a credit
@@ -35,7 +40,7 @@ cost. Capture the full credit to the customer, but bring inventory back at NRV. 
 write-down** (Loss on Returns / Inventory Write-Down). **[manual]** — the books cannot tell you the goods
 came back broken, and bringing damaged stock back at full cost overstates inventory.
 
-**A credit exceeds the invoice balance** — *Mosofin-specific and exactly checkable*. It needs management
+**A credit exceeds the amount originally invoiced, net of earlier credits** — *Mosofin-specific and exactly checkable*. It needs management
 approval. Report every instance found in the period, not only the one being processed — the historic ones
 were never approved either.
 

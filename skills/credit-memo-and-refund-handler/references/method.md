@@ -72,9 +72,10 @@ against an imaginary invoice.
 | **Vendor refund (cash received from vendor)** | Reduces AP and increases Cash | AP ↓, Cash ↑ |
 | **Sales return** | A specific kind of customer credit, **with inventory implications** | AR ↓, Inventory ↑ |
 | **Chargeback** | Customer-initiated reversal via a payment processor | AR varies + processor fee |
-| **Write-off (goodwill)** | Credit issued to maintain the relationship, no cash | AR ↓, Expense ↑ |
+| **Goodwill / courtesy credit** | Credit note issued to maintain the relationship, no cash — a price concession | AR ↓, Revenue ↓ (contra) |
+| **Bad-debt write-off** | Uncollectable balance written off, no document to the customer | AR ↓, Expense ↑ |
 
-**[gated]**: the *document* type recorded in the books is **[auto]** and narrows this considerably — a
+**[auto]** for the document type; **[manual]** for the reason. The *document* type recorded in the books narrows this considerably — a
 refund receipt is not a credit memo — but **the distinction between a sales return, a goodwill credit and
 a pricing correction is the reason, not the document**, and the reason is `[manual]`. Three of these rows
 can share an identical document and require three different entries.
@@ -84,8 +85,11 @@ can share an identical document and require three different entries.
 If the credit references an original invoice — **[auto]** for all four checks:
 
 - **Confirm the invoice exists in the system** (*`search_invoices`*, *`read_invoice`*)
-- **Confirm the credit amount ≤ the invoice balance.** **A credit larger than the outstanding amount needs
-  management approval** — and this check is exact, since the current balance is readable
+- **Confirm credits to date against the invoice (this one plus earlier ones) ≤ the original invoice
+  amount.** **Credits exceeding what was invoiced need management approval** — and this check is exact,
+  since the original amount and the linked credits are readable. The invoice's balance **before** this
+  credit decides whether it is **applied** (balance open) or becomes a **refund / credit on account**
+  (invoice already paid); neither is an exception unless credits exceed the original amount
 - **Confirm the period** — **credits dated after the original is fully closed may need different
   treatment, especially across fiscal years.** Compare against the fiscal year end from the profile
 - **Confirm the currency matches**
@@ -94,8 +98,8 @@ If the credit references an original invoice — **[auto]** for all four checks:
 the business reason.** **[auto]** to detect: a credit with no linked invoice is directly identifiable.
 
 Run these checks on **every** credit in the period, not only the one being processed. Credits already
-recorded that fail a check are exceptions worth surfacing — particularly a credit exceeding an invoice
-balance, which nobody approved.
+recorded that fail a check are exceptions worth surfacing — particularly credits exceeding the amount
+originally invoiced, which nobody approved.
 
 ## Step 3 — Compute the tax reversal
 
@@ -105,7 +109,8 @@ balance, which nobody approved.
 or 20% VAT, etc.), **the credit memo reverses that same tax amount proportionally.**
 
 - **For full credits** → reverse the full original tax
-- **For partial credits** → reverse proportional tax
+- **For partial credits** → reverse tax at the rate of the line(s) credited. Use pro-rata across rates
+  only when the credit is a whole-invoice percentage reduction, and say so
 
 **Capture the tax reversal as a separate line. Do not bundle it into the net amount.**
 
@@ -131,6 +136,18 @@ Memo: Credit memo [CM #] re: invoice [Inv #] — [reason]
 usually what management wants to see.
 
 #### Customer refund (cash returned)
+
+**Before proposing a refund entry, check whether a credit memo or unapplied payment for this customer
+already exists** (*`search_credit_memos`*, *`get_customer_balance`*). If so, the revenue and tax were
+already reversed (or never booked), and the refund only settles the balance on account:
+
+```
+DR  Accounts Receivable                            $gross
+    CR  Cash / Bank                                   $gross
+Memo: Refund of credit [CM #] / overpayment on account — [Customer]
+```
+
+**Direct refund with no prior credit memo** (a refund receipt):
 ```
 DR  Sales Returns & Allowances                     $net
 DR  Tax Payable / Output Tax                       $tax
@@ -149,7 +166,7 @@ Memo: Sales return [SR #] re: invoice [Inv #] — [reason]
 ```
 
 **The inventory portion uses original cost** (per the inventory costing policy: FIFO, LIFO or
-weighted average). **[gated]**: the item's cost is often readable
+weighted average). **[auto]** for the item's cost, which is often readable
 (*`read_item`*), but whether the goods came back saleable is not — see the damaged-return edge case.
 
 #### Vendor credit note (applied to future bill)
@@ -173,6 +190,20 @@ Memo: Vendor refund re: bill [Bill #] — [reason]
 ```
 
 #### Chargeback
+
+Ask which kind it is: **disputed** (representment in progress), **accepted** as a customer dispute, or a
+**fraud loss**. While disputed, do not reverse revenue:
+
+```
+DR  Chargeback Receivable (or Accounts Receivable)  $gross
+DR  Chargeback Fees Expense                        $fee
+    CR  Merchant Clearing                             $gross + fee
+```
+
+A fraud loss is a loss on a sale that did take place: `DR Bad Debt / Chargeback Loss $gross`,
+`DR Chargeback Fees Expense $fee`, `CR Merchant Clearing $gross + fee`, with the tax treatment **[manual]**
+as for a write-off. **Accepted** customer dispute:
+
 ```
 DR  Sales Returns / Chargebacks                    $net
 DR  Tax Payable / Output Tax                       $tax
@@ -182,16 +213,28 @@ Memo: Chargeback re: invoice [Inv #] / processor ref [Ref] — [reason]
 ```
 
 **If the original sale and the chargeback are in different periods, post the reversal to the period the
-chargeback occurred — do not restate the prior period unless materiality and policy demand it.**
+chargeback occurred — restate a prior period only to correct an error.**
 **[manual]** for the processor fee and reference unless a processor is connected.
 
-#### Goodwill / write-off credit
+#### Goodwill / courtesy credit (credit note issued)
 ```
-DR  Bad Debt Expense (or Goodwill Allowance)       $net
-DR  Tax Payable / Output Tax                       $tax (only if tax recoverable on write-off in jurisdiction)
+DR  Sales Returns & Allowances (or Sales Discounts) $net
+DR  Tax Payable / Output Tax                       $tax (mirrors original, as for any credit note)
     CR  Accounts Receivable                           $gross
-Memo: Goodwill write-off re: invoice [Inv #] — [reason]
+Memo: Goodwill credit [CM #] re: invoice [Inv #] — [reason]
 ```
+
+A concession granted to the customer reduces the transaction price, so it is contra-revenue, not bad debt.
+
+#### Bad-debt write-off (no credit note)
+```
+DR  Bad Debt Expense (or Allowance for Doubtful Accounts)  $gross
+    CR  Accounts Receivable                           $gross
+Memo: Bad-debt write-off re: invoice [Inv #] — [reason]
+```
+
+Only if the jurisdiction's bad-debt relief is claimed: reclassify the tax portion
+`DR Output Tax / CR Bad Debt Expense`.
 
 **Tax recoverability on write-offs varies by jurisdiction. Some jurisdictions require formal bad-debt
 relief procedures before reclaiming output tax. Flag for the user.** **[manual]**, always — never claim
@@ -217,13 +260,17 @@ For partial applications:
 - **Reduce the corresponding invoice by the same amount**
 - **Both remain open for any residual**
 
-**[auto]** and worth running every time — **the unapplied credit register, in both directions**:
+**[auto]** and worth running every time — **the unapplied credit register, in both directions**.
+Population = the A/R and A/P aging **detail** as of the period end, filtered to credit memos, vendor
+credits and unapplied payments (Mosofin: the aging detail capability, if listed at Gate 2; upload: A/R and
+A/P Aging Detail exports). Use date-bounded searches only to enrich rows. If no aging detail is available,
+label the register "credits dated in [period] only":
 
 - **Customer credits unapplied**, with their age. These overstate what customers owe you and eventually
   become refund requests
-- **Vendor credits unapplied**, with their age. **These are money you are owed and have not taken** — a
-  negotiated discount going unused. Present the total; it is frequently material and almost always a
-  surprise
+- **Vendor credits unapplied**, with their age. **These are credits recorded in your books and not yet
+  used — confirm with the supplier's statement before claiming**: some are duplicate entries or credits
+  already refunded. Present the total; it is frequently material and almost always a surprise
 
 ## Step 6 — Output
 
@@ -247,13 +294,14 @@ whether any figure rests on `mock` data.
 
 | Direction (customer / vendor) | Counterparty | Credit # | Date | Amount | Age | Suggested application |
 
-**Vendor credits appear first, sorted by value.** They are money the entity is entitled to.
+**Vendor credits appear first, sorted by value.** For every vendor credit older than one billing cycle,
+the first suggested action is "Confirm with vendor statement".
 
 **Sheet 5: Validation Exceptions — NEW, Mosofin-specific**
 
 | Credit # | Check failed | Detail | Action required |
 
-Covering the Step 2 checks — missing original, credit exceeding invoice balance, period mismatch,
+Covering the Step 2 checks — missing original, credits exceeding the original invoice amount, period mismatch,
 currency mismatch — and the Step 3 tax-mirroring check.
 
 **Sheet 6: Coverage — NEW, Mosofin-specific**

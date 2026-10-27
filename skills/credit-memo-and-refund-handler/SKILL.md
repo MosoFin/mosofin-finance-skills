@@ -11,7 +11,7 @@ quite differently underneath. It works out **which type** each credit is, **vali
 original** invoice or bill, checks that **the tax reversal mirrors the original tax**, proposes the
 entry, and tracks how the credit is used up.
 
-The mistakes it catches: a credit larger than the invoice balance that nobody approved, tax on a
+The mistakes it catches: credits larger than the original invoice that nobody approved, tax on a
 credit that does not mirror the original, a vendor credit posted to income instead of back to the
 original expense, a second journal proposed when a credit is merely applied, and **vendor credits
 sitting unused on account**, a discount already negotiated and not being taken.
@@ -52,13 +52,13 @@ Ask only what you cannot already see.
 | # | Ask | Why it matters | If unanswered |
 |---|---|---|---|
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
-| **B** | *What type is it: customer credit, customer refund, vendor credit, or chargeback?* | The accounting differs materially by type | **Never default it.** On the Mosofin path the recorded document type narrows it; **confirm it**. |
+| **B** | *What type is it: customer credit, customer refund, vendor credit, or chargeback? For a chargeback: still disputed, accepted, or a fraud loss?* | The accounting differs materially by type | **Never default it.** On the Mosofin path the recorded document type narrows it; **confirm it**. |
 | **C** | *The original invoice or bill: number, date, amount.* | Existence, balance, period and currency are then all checkable | **Required if applicable.** With no original, flag it and ask for the business reason. |
-| **D** | *The credit amount.* | Compared against the invoice balance | **Required.** |
-| **E** | *The reason: return, pricing dispute, goodwill, damage, error.* | A return hits inventory, a goodwill credit hits expense, a pricing error hits revenue | **Required. Never infer it.** |
+| **D** | *The credit amount.* | Compared, with earlier credits, against the original invoice amount | **Required.** |
+| **E** | *The reason: return, pricing dispute, goodwill, damage, error.* | A return hits inventory, a goodwill credit or pricing error reduces revenue, a write-off of an unpaid balance goes to bad debt | **Required. Never infer it.** |
 | **F** | *The tax jurisdiction, if the original carried tax.* | Drives the write-off recoverability question | **Required if tax was on the original.** The original's tax codes are read on the Mosofin path; confirm rather than ask. |
 | **G** | *Which period's credits to review?* | The Step 2 checks run on every credit in the period, not only the one being processed; the file is named for the month | Ask. |
-| **H** | *Who approves a credit that exceeds the invoice balance?* | Such a credit needs management approval | **Required if that check fails.** The check is `[auto]`; the approval is `[manual]`. |
+| **H** | *Who approves credits that exceed the original invoice amount?* | Such a credit needs management approval | **Required if that check fails.** The check is `[auto]`; the approval is `[manual]`. |
 
 **Then, depending on the answer to A:**
 
@@ -114,7 +114,7 @@ profile — and check every result for `mock: true`:
 ## Stage 4 — Identify the type, validate against the original, check the tax
 
 Identify the type, separating the document from the reason; run the four checks against the original
-on **every** credit in the period — existence, credit ≤ invoice balance, period, currency — and flag
+on **every** credit in the period — existence, credits ≤ original invoice amount, period, currency — and flag
 any credit with no original; compute the expected tax reversal from the original's tax codes and
 compare it with the tax on the credit: [`references/method.md`](references/method.md) Steps 1–3.
 Check [`references/edge-cases.md`](references/edge-cases.md) for cross-period and cross-currency
