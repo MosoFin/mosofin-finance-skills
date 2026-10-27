@@ -40,14 +40,17 @@ Typical opening batch, per in-scope entity:
   and clearing accounts — usually **[auto]**
 - *`search_employees`* — **the claimant list**, with departments where set up — usually **[auto]**
 - *`search_purchases`* / *`search_expenses`* / *`search_bills`* — **transactions already posted in the
-  period**, which is the duplicate-check population — usually **[auto]**
+  period, plus reimbursements to each claimant for expense dates in the prior 90 days** (bills / expenses
+  with the employee as payee), which is the duplicate-check population — usually **[auto]**
 - *`search_credit_card_charges`* or the card account in *`get_general_ledger`* — **corporate card
   activity** — usually **[auto]**
 - *`get_general_ledger`* on **Corporate Card Clearing** and **Employee Reimbursement Payable** — usually
   **[auto]**
 - *`get_balance_sheet`* — the **payable and Due-from-Employee balances** — usually **[auto]**
 - *`search_vendors`* — merchant recognition — usually **[auto]**
-- *`get_profit_and_loss`* by department / class — **historical coding patterns** — usually **[auto]**
+- *`get_general_ledger`* / *`search_purchases`* filtered by vendor — **historical coding patterns** per
+  merchant — usually **[auto]**; *`get_profit_and_loss`* by department / class only for which dimensions
+  are in use
 - *`search_departments`* / *`search_classes`* — the dimensions available for allocation — usually **[auto]**
 - *`get_company_info`* — legal name, **functional currency**, country — usually **[auto]**
 
@@ -183,17 +186,23 @@ against the parsed report:
 - **Family-member-named travel or accommodation**
 - **Recurring personal subscriptions**
 
-**Flag as "Policy violation — possible personal" for manager review.** *Mosofin note*: a recurring personal
+**Flag as "Possible personal — confirm business purpose" for manager review.** Use "Policy violation" only
+when a supplied policy rule is cited. *Mosofin note*: a recurring personal
 subscription often also appears in the ledger month after month (*`get_general_ledger`*), which turns a
 suspicion into a documented pattern with a start date.
 
 ### Duplicate detection
 
-- **Same vendor + amount + date submitted twice by the same employee** — `[auto]` within the report
+- **Same vendor + amount + date submitted twice by the same employee** — `[auto]` within the report, and
+  against this employee's reimbursements for expense dates in the prior 90 days (Mosofin: bills / expenses
+  with the employee as payee; upload: the last three reports or the employee's reimbursement history),
+  matched on merchant, amount and expense date — resubmission on a later report is the commonest duplicate
 - **Same expense claimed on both employee report and corporate-card reconciliation** — **`[auto]` against
-  the ledger, and this is the check the original could only describe.** Match each claim line against
-  posted card transactions on vendor, amount and a date window. **A claim for a charge the company already
-  paid is a double reimbursement**, and it is the highest-value finding this skill produces.
+  the ledger, and this is the check the original could only describe.** Run the against-the-books match on
+  **out-of-pocket lines only**, against posted card transactions on vendor, amount and a date window. **An
+  out-of-pocket claim for a charge the company already paid is a double reimbursement**, and it is the
+  highest-value finding this skill produces. For **company-paid lines**, a match is the expected link:
+  record it in **Already Posted?** as "matched — card charge" and use it to confirm coding.
 
 **Match tolerances**: exact amount and same merchant is a strong match; allow a **±3 day** window for
 posting lag, and treat a near-amount match (tip added later) as a **review**, not a reject. Where the
@@ -230,8 +239,9 @@ creating sub-accounts or using a class / department dimension.** **[auto]** to d
 the available dimensions and say which is actually available in this entity.
 
 **Mosofin addition — ground each mapping in history.** **[auto]**: before proposing an account, check how
-this entity has coded the same category, and the same merchant, previously (*`get_general_ledger`*,
-*`get_profit_and_loss`*). **Report the suggestion with its support** — "Travel — Airfare (6410); this
+this entity has coded the same category, and the same merchant, previously — from transaction-level reads
+(*`get_general_ledger`*, *`search_purchases`* filtered by vendor); a P&L summary cannot show per-merchant
+coding. **Report the suggestion with its support** — "Travel — Airfare (6410); this
 merchant coded there 12 of 12 times" — and **flag where history is inconsistent**, because an inconsistent
 history is itself worth knowing before the reviewer perpetuates it.
 
@@ -241,12 +251,15 @@ For each employee:
 
 | Component | Calculation |
 |-----------|-------------|
-| **Total claimed** | Sum of all approved lines |
-| **Less: Corporate-card-paid items** | Reduce reimbursement |
-| **Less: Policy violations / disallowed** | Removed |
+| **Total submitted** | Every line; mileage valued at distance × the supplied rate |
+| **Less: Company-paid lines** | Corporate / prepaid card — not owed to the employee |
+| **Less: Disallowed** | Per policy, with line refs |
 | **Less: Personal portion** | Allocated to employee |
-| **Plus: Mileage at provided rate** | Distance × rate |
-| **Net reimbursable to employee** | Sum |
+| **= Net reimbursable out-of-pocket** | |
+| **Less: Due from Employee offset** | Only if the policy allows netting — **ask**; never assume |
+| **= Amount to pay** | |
+
+**Net reimbursable must equal the sum of the reimbursable column in Sheet 2.**
 
 **[auto]** arithmetic; the rate and the policy calls behind it are `[manual]`.
 
@@ -254,10 +267,12 @@ For each employee:
 close, accounting system rate, or report-date rate from a stated provider. Do not assume a source.** The
 **functional currency itself is now `[auto]`** from the profile; the *rate source* is not.
 
-**Mosofin addition — reconcile to the payable.** **[auto]**: the proposed net reimbursable, added to the
-existing **Employee Reimbursement Payable** balance, should explain that account's movement once paid.
-**A payable balance that does not correspond to outstanding claims means either a claim was paid twice or
-one was never paid** — both worth surfacing.
+**Mosofin addition — reconcile to the payable.** **[auto]** where the reads exist. **Payable test:** the
+**Employee Reimbursement Payable** balance at the report date, by employee, = approved reports not yet
+paid (from the T&E tool's approved / unpaid list, or the open bills for employee vendors —
+*`search_bills`*). List each difference by employee. **A payable balance that does not correspond to
+outstanding claims means either a claim was paid twice or one was never paid** — both worth surfacing.
+Without the approved-but-unpaid list, report the test as not performed.
 
 ## Step 5 — Construct the GL posting
 
@@ -268,7 +283,10 @@ one was never paid** — both worth surfacing.
 - **Sum of expenses by GL account** (using the user's COA — **`[auto]`, real accounts**)
 - **Sum of input tax recoverable** (if the jurisdiction supports it and the user has provided the rule)
 - **Reimbursable amount** → **AP / Employee Reimbursement Payable**
-- **Corporate-card-paid amount** → **Corporate Card Clearing**
+- **Corporate-card-paid amount** → depends on how card charges are booked (intake I). Where charges sit in
+  **Corporate Card Clearing**, post DR Expense / CR Clearing. Where they are **coded to expense from the
+  bank feed**, the card-paid lines produce **no new entry** — only a recode proposal where the account
+  differs; a second DR Expense would double the expense and leave a credit in clearing
 
 **The JE skill produces the balanced entry. This skill provides the inputs.** **Mosofin does not post** —
 the entry is a proposal, whichever skill assembles it.
@@ -287,6 +305,8 @@ Deliver an `.xlsx` workpaper:
 - **Employee(s), report period**
 - **Total claimed / approved / rejected**
 - **Reimbursement amount**
+- **Approval:** per the report (approver named) / not evidenced — self-approval, or an approver junior to
+  the claimant, is a 🟡 Review
 - **Policy violations summary**
 - **Policy assumptions used** — if any were not explicit in the policy doc, **list them here for the user to
   confirm**
@@ -310,8 +330,9 @@ Severities:
 - 🟡 **Review** — Manager judgment required
 - 🟢 **Approve with Note** — Minor flag
 
-**A confirmed match against an already-posted card transaction is a 🔴 Reject**, not a review — the money
-has already left the company.
+**An out-of-pocket line confirmed as matching an already-posted card transaction is a 🔴 Reject**, not a
+review — the money has already left the company. A company-paid line matching its card charge is the
+expected link, not an exception.
 
 **Sheet 4: GL Posting Inputs** — pass-through to `journal-entry-builder`.
 

@@ -23,11 +23,13 @@ All of the original standards, plus the Mosofin ones.
   or from this file
 - **Coding is to real accounts from the connected COA**; placeholders appear only when the COA read is
   unavailable, and the degradation is stated
-- **Every claim line was checked against transactions already posted**, and matches are reported as
-  rejections with the matched transaction named
+- **Every out-of-pocket line was checked against transactions already posted**, and matches are reported as
+  rejections with the matched transaction named; company-paid lines show their matched card charge
+- **Net reimbursable equals the sum of the Sheet 2 reimbursable column**, and approval is stated as per the
+  report or not evidenced
 - **The match tolerances used** — date window and amount tolerance — **are stated**
 - **The Corporate Card Clearing residual is reported with its ageing**, and the Employee Reimbursement
-  Payable is reconciled to outstanding claims
+  Payable is tested by employee against approved-but-unpaid reports
 - **Each coding suggestion carries its historical support**, and inconsistent history is flagged rather
   than resolved silently
 - **Claimants with no employee record are flagged before coding**

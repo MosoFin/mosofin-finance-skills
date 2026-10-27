@@ -25,7 +25,7 @@ Typical evidence tools — **resolve real names and policies from your Gate 2 ca
 | **Clearing and payable movements and ageing** | `get_general_ledger` | `start_date`, `end_date`, `accounting_method`, `account` |
 | Payable and Due-from-Employee balances | `get_balance_sheet` / `get_trial_balance` | `start_date`, `end_date`, `accounting_method` |
 | Merchant recognition | `search_vendors` / `get_vendor` | `query`/`name`, `active_only`; `id` |
-| **Historical coding patterns** | `get_profit_and_loss` / `get_general_ledger` | `start_date`, `end_date`, `summarize_column_by` |
+| **Historical coding patterns** (per merchant) | `get_general_ledger` / `search_purchases` (filtered by vendor); `get_profit_and_loss` only for which dimensions are in use | `start_date`, `end_date`, `summarize_column_by` |
 | Dimensions available for allocation | `search_departments` / `search_classes` | `query`/`name`, `active_only` |
 | Legal name, **functional currency**, country | `get_company_info` | none (uses the connected company) |
 

@@ -29,6 +29,10 @@ duplicate tolerance rather than calling it a non-match.
 **Mileage without logged business purpose / start–end**: **insufficient documentation. Flag for additional
 info.**
 
+**Reimbursement that may be taxable pay**: if the policy's mileage rate or per-diem exceeds the rate the user
+says the tax authority allows, or a line lacks business purpose or a receipt where required, flag **"excess
+may be taxable pay — confirm with payroll"**. Ask for the tax-free rate; **never supply it**.
+
 **Corp card with personal charge**: **the employee owes the company. Code as Due from Employee, not
 expense.** *Mosofin note*: that balance is readable — **an ageing Due-from-Employee balance is money nobody
 chased.**

@@ -58,6 +58,8 @@ Ask only what you cannot already see.
 | **F** | *Mileage rate, per km or per mile.* | Mileage is distance × rate | **Required if mileage is claimed.** Never supplied from memory. |
 | **G** | *Per-diem table.* | Claims are compared to it | **Required if per-diems are claimed.** |
 | **H** | *FX rate source: central bank close, accounting system rate, or report-date rate.* | Converts foreign lines to the functional currency | **Required if multi-currency.** **Do not assume a source.** |
+| **I** | *How are company card charges booked — to a clearing account, or coded to expense from the bank feed?* | Decides whether card-paid lines need an entry or only a recode | **Required if any line is company-paid.** Never assume. |
+| **J** | *Has each report been approved, and by whom?* (an approval status column is enough) | A controller will not pay an unapproved or self-approved report | Recommended. Without it, approval is reported as **not evidenced**. |
 
 **Then, depending on the answer to A:**
 
@@ -82,6 +84,7 @@ Ask only what you cannot already see.
 | **Chart of accounts** | Recommended — without it every account is labelled **PLACEHOLDER — REMAP REQUIRED** | CSV or XLSX |
 | **Card charges and expenses posted** in the period | Recommended — enables the duplicate check against the books, not just within the report | CSV or XLSX |
 | **GL detail** for Corporate Card Clearing and Employee Reimbursement Payable | Recommended — the clearing test and the payable reconciliation | CSV or XLSX |
+| **Approved-but-unpaid expense reports / open employee bills**, and each employee's recent reimbursements | Recommended — the payable test and the cross-report duplicate check | CSV or XLSX |
 | Employee list; functional currency | Recommended | CSV, or type it in the chat |
 | Mileage rate, per-diem table, FX source, tax jurisdiction | **Required where they apply** | Type it in the chat, or a file |
 
@@ -128,7 +131,7 @@ reverse-charge VAT.
 
 Assemble the posting inputs — expenses by account, recoverable tax, the reimbursable amount and
 the card-paid amount — as a **proposal**, run the Corporate Card Clearing test with its oldest
-item, and build the workpaper with exceptions by severity (an already-posted match is a **Reject**)
+item, and build the workpaper with exceptions by severity (an out-of-pocket line matching a posted card charge is a **Reject**)
 and the coverage sheet: [`references/method.md`](references/method.md) Steps 5–6. Ask before
 creating the `.xlsx`. Before presenting, check it against [`references/output.md`](references/output.md).
 
