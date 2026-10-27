@@ -12,13 +12,16 @@ arithmetic** and can be scheduled once the calendar is stored.
 runs. Book per the register.** *Mosofin note*: **these will flag in the run comparison** — correctly, and
 they should be explained rather than suppressed.
 
-**Benefits-in-kind / non-cash compensation**: **taxable non-cash benefits increase the expense and the
-taxable / withholding base without a cash net-pay effect. Record per the register.**
+**Benefits-in-kind / imputed income**: **the benefit's cost was expensed when it was bought** (usually
+through AP). The imputed value is in the register's gross **only for tax purposes**: **do not debit it to
+wages again.** Book the extra withholding — which **reduces net pay** — and any employer tax on the benefit.
+Tie gross to the register *excluding* imputed income, or show imputed income as its own line with an equal
+non-cash offset.
 
 **Employer vs. employee split**: **the single most common error is mixing employer and employee
 contributions. Employee contributions reduce net pay — already in gross; employer contributions are
-additional expense. Keep them separate.** *Mosofin note*: **the gross = net + withholdings identity catches
-it**, and keeping the two entries separate makes it visible.
+additional expense. Keep them separate.** *Mosofin note*: **tying every line of the entry to the register's
+column totals catches it** (Step 7), and keeping the two entries separate makes it visible.
 
 **Garnishments and third-party deductions**: **create a payable to the third party — court, agency; clear
 when remitted. Don't net into tax accounts.** **Sensitive; report at account level.**

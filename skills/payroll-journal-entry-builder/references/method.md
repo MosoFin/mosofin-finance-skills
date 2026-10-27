@@ -39,13 +39,18 @@ Typical batch, per in-scope entity:
   net pay payable, clearing, accrued payroll** — usually **[auto]**. **The primary read**
 - *`search_departments`* / *`search_classes`* / *`search_locations`* — **the allocation dimensions** —
   usually **[auto]**
-- *`search_journal_entries`* **for prior payroll runs** — **the run-over-run comparison, and the entry
-  template actually in use** — usually **[auto]**
-- *`get_general_ledger`* on **the payroll liability and clearing accounts** — **current balances, and
-  whether the last accrual reversed** — usually **[auto]**
+- *`search_journal_entries`* **for prior payroll runs** — **the entry template actually in use** — usually
+  **[auto]**. Payroll run inside the platform (QuickBooks Payroll paychecks and tax payments, for instance)
+  posts as its own transaction types, not journal entries, so **the run-over-run comparison reads
+  *`get_general_ledger`* on the wage, payroll-liability and clearing accounts** instead
+- *`get_general_ledger`* on **the payroll liability and clearing accounts, and the accrued payroll
+  account(s)** — **current balances, prior runs, and whether the last accrual reversed** — usually
+  **[auto]**
 - *`get_profit_and_loss`* **by department, prior periods** — **payroll expense by department, for the
   comparison** — usually **[auto]**
-- *`search_employees`* — **headcount only**, as the denominator for the comparison — usually **[auto]**
+- **Headcount** for the comparison = **the number of employees paid, from the register total** — a count, not
+  personal data. *`search_employees`* is a cross-check only (with an outside provider the list is often
+  empty or stale, and active employees are not the people paid in this run); say which was used
 - *`get_company_info`* — legal name, **country**, currency — usually **[auto]**
 
 Handle the envelopes:
@@ -170,7 +175,8 @@ movement.**
 
 ## Step 6 — Period-end accrual (if needed)
 
-**If the pay period crosses the period-end** — employees earned wages not yet paid at month-end — **accrue**:
+**Only on an accrual basis.** **If any wages were earned on or before the period end and paid after it** —
+a pay period that crosses the period end, or one that ends before it and is paid after — **accrue**:
 
 ```
 DR  Wages Expense (earned, unpaid portion)      $accrued
@@ -182,6 +188,9 @@ coordinate with `accruals-and-deferrals`. **Pro-rate based on days / hours earne
 
 **[auto]** to determine whether an accrual is needed: **the pay period end and the pay date against the
 accounting period end** — pure date arithmetic. **[gated]** to compute: the pro-ration needs the register.
+**If the run covering those days has not been processed yet**, estimate from the last complete run — gross
+and employer costs per working day × unpaid working days — label it **ESTIMATE — from <run>**, and true it
+up through the reversal. This is the one estimate the skill makes, and it is always labelled as one.
 
 **And the employer-cost point is worth emphasising**: **an accrual covering only gross pay understates the
 liability by the employer's contributions**, which can be a fifth of the cost again. **[auto]** check: **the
@@ -190,10 +199,13 @@ accrual's ratio to the last full run's total cost** should be plausible.
 ## Step 7 — Validate the entries
 
 - **Each entry balances (debits = credits)** — **[auto]**
-- **Gross pay = net pay + total employee withholdings** — **[auto]**, ⭐ **and this is the check that
-  catches the employer/employee mixing error.** **If an employer contribution has been credited to an
-  employee withholding account, this identity breaks** — the entry still balances, but gross no longer
-  reconciles to net plus withholdings
+- **Each line ties to the register** — **[auto]**, ⭐ **and this is the check that catches the
+  employer/employee mixing error**: **gross debited = register gross; each withholding credited = that
+  register column; net credited = register net; each employer charge = that register column.** A
+  difference on any line is the mixing error or a mapping error. A balanced entry satisfies gross = net +
+  withholdings by construction, so that identity alone proves nothing about the entry
+- **Gross pay = net pay + total employee withholdings, in the register itself** — **[auto]**, a register
+  integrity check, not a test of the entry
 - **Total expense recognized = gross pay + employer costs** — **[auto]**, and **the mirror of the same
   test**: if employer costs were netted into gross, total expense will be right and the split will be wrong
 - **Liabilities created match amounts that will be remitted** — to tax authorities, retirement plans,
@@ -217,10 +229,11 @@ Deliver the journal entries plus a workpaper:
 
 **Sheet 1: Journal Entries** — **ready-to-post entries** — gross / withholding entry, employer cost entry,
 accrual if needed, clearing entries — **each balanced, with account, debit, credit, memo.** **Marked
-PROPOSED — NOT POSTED**, with the entity by `display_name`.
+PROPOSED — NOT POSTED**, with the entity by `display_name`. Per entry: **Prepared by / date; Reviewed by /
+date; Support: register file and run ID.**
 
-**Sheet 2: Gross-to-Net Reconciliation** — **gross → withholdings → net, tying to the payroll register
-total.** **State whether the register was read or supplied.**
+**Sheet 2: Gross-to-Net Reconciliation** — **gross → withholdings → net, every component tying to the
+payroll register's column total.** **State whether the register was read or supplied.**
 
 **Sheet 3: Employer Cost Breakdown** — **each employer cost and its liability.**
 
@@ -230,7 +243,7 @@ prior-run comparison.
 **Sheet 5: Liability Summary** — **each payable created, amount, and to whom / when remitted** — feeds
 the payroll tax filings.
 
-**Sheet 6: Validation — NEW, Mosofin-specific** — the six original checks plus the four Mosofin ones, each
+**Sheet 6: Validation — NEW, Mosofin-specific** — every Step 7 check, each
 with its result and the evidence.
 
 **Sheet 7: Run Comparison — NEW, Mosofin-specific** — this run against the prior three, by component and per

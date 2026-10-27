@@ -125,7 +125,7 @@ books now answer**:
 | **Pay period and pay date** | **Required** | **Both**, since the accrual in Step 6 depends on the gap. |
 | ~~Chart of accounts mapping~~ | **Now [auto]** | **Real accounts.** Confirm which account holds which liability. |
 | ~~Department / cost center allocation~~ | **Now [gated]** | **The dimensions are `[auto]`; the allocation basis is `[manual]`.** |
-| ~~Accounting basis~~ — cash or accrual | **Now [auto]** | Readable from the reads; **whether a period-end accrual is needed follows from the dates.** |
+| **Accounting basis** — cash or accrual | **Required — Ask**, not readable from the books | **Only on an accrual basis** does Step 6 apply; then **whether a period-end accrual is needed follows from the dates.** |
 | **Funding / payment details** — bank account, timing | Recommended — **[gated]** | **The bank accounts are `[auto]`;** the timing is the user's. |
 | **Employer contribution details** | **Required for full cost — [gated]** | **In the register if connected; `[manual]` otherwise.** |
 | **Whether a payroll clearing account is used** | **Required — Mosofin addition** | It changes Step 5 and feeds `payroll-clearing-reconciliation`. |

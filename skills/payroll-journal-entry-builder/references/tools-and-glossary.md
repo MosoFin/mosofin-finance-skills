@@ -20,10 +20,10 @@ Typical evidence tools — **resolve real names and policies from your Gate 2 ca
 |---|---|---|
 | **The chart: wages, withholdings, employer costs, clearing — the primary read** | `search_accounts` / `get_account` | `query`/`name`, `active_only`; `id` |
 | **The allocation dimensions** | `search_departments` / `search_classes` / `search_locations` | `query`/`name`, `active_only` |
-| **Prior payroll runs — the comparison and the template in use** | `search_journal_entries` / `get_journal_entry` | `start_date`, `end_date` (required); `id` |
-| **Liability and clearing balances; whether the last accrual reversed** | `get_general_ledger` | `start_date`, `end_date`, `accounting_method`, `account` |
+| **Prior payroll runs — the template in use** (the comparison reads the GL; see Step 0) | `search_journal_entries` / `get_journal_entry` | `start_date`, `end_date` (required); `id` |
+| **Liability, clearing and accrued payroll accounts; prior runs; whether the last accrual reversed** | `get_general_ledger` | `start_date`, `end_date`, `accounting_method`, `account` |
 | **Payroll expense by department, prior periods** | `get_profit_and_loss` | `start_date`, `end_date`, `summarize_column_by`, `department` |
-| Headcount, as the comparison denominator | `search_employees` | `query`/`name`, `active_only` |
+| Headcount cross-check only — the denominator is the count of employees paid, from the register | `search_employees` | `query`/`name`, `active_only` |
 | Legal name, **country**, currency | `get_company_info` | none (uses the connected company) |
 
 **Where a payroll platform is a connected datasource**, its register and component tools appear in **its
@@ -40,7 +40,8 @@ envelopes. Where this table and the live description disagree, the live descript
 
 - **Payroll register** — the detailed output of a payroll run: every employee, every component. **The
   journal's source, and where the personal data stays.**
-- **Gross pay** — the full cost of employing someone before anything is deducted. **The expense.**
+- **Gross pay** — what the employee earned before anything is deducted. **The wage expense**; the
+  employer's own costs come on top.
 - **Withholding / deduction** — money taken from gross pay and owed to somebody else: tax, pension,
   insurance, a court. **Never the employer's money.**
 - **Net pay** — what actually reaches the employee. **A liability until it is paid.**
@@ -53,8 +54,9 @@ envelopes. Where this table and the live description disagree, the live descript
 - **Accrued payroll** — wages earned before the period end but paid after it.
 - **Reversing entry** — undoing an accrual next period so the real payroll does not double-count.
 - **Retroactive pay** — an adjustment for an earlier period, paid now.
-- **Benefit in kind** — non-cash compensation that is still taxable. **Increases expense and the withholding
-  base without affecting net pay.**
+- **Benefit in kind** — non-cash compensation that is still taxable. **Its cost was already expensed when
+  bought**; the imputed value raises the withholding base (which reduces net pay) and any employer tax, not
+  the wage expense.
 - **Capitalised labour** — wages that become part of an asset rather than an expense, because the work built
   something lasting.
 - **Cost centre / department allocation** — splitting labour cost across the parts of the business that used

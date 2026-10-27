@@ -25,8 +25,8 @@ All of the original standards, plus the Mosofin ones.
   or from this file
 - **Every account was confirmed to exist in the live chart**, and a missing account is a hard stop; where
   the chart could not be read, the placeholder fallback is stated
-- **The gross-to-net and total-expense identities were tested**, and the employer / employee mixing error
-  reported if either fails
+- **Every line of the entry was tied to the register's column totals**, and the employer / employee mixing
+  error reported on any difference; the register's own gross-to-net identity was checked
 - **The employer entry is kept separate from the employee entry**, and any shared-account limitation stated
 - **Every register component maps to an account**, and unmapped components or unused accounts are flagged
 - **The run was compared to prior runs** by component and per head, with material movements reported for
