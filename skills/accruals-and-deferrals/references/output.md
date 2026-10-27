@@ -5,7 +5,9 @@
 All of the original standards, plus the Mosofin ones.
 
 - Every accrual has a computation, its supporting data, and its expense / revenue account
-- Reversals dated the first day of the next period
+- Reversals dated the first day of the next period **where the stated policy is auto-reverse**;
+  otherwise the output states that invoices settle against the accrual account and no reversal
+  is drafted
 - Roll-forwards by category present
 - Tax components broken out
 - Materiality applied transparently — including the cumulative total of excluded items

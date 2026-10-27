@@ -13,8 +13,8 @@ others allow carry-forward. The vacation liability reflects the actual unused ba
 rate — so the policy has to be confirmed before the number means anything.
 
 **Multi-currency accruals**: accrue in the functional currency at the period-end FX rate. The
-reversal uses the same rate, or the current rate, per policy; the revaluation
-itself is an FX revaluation task. If the connected books hold only one currency but the
+reversal mirrors the accrual at the same rate; any revaluation is a separate FX revaluation
+task. If the connected books hold only one currency but the
 underlying obligation is in another, that conversion is **[manual]**; say so.
 
 **Bonus / commission with deferral or clawback features**: only the **vested** portion is a
@@ -31,14 +31,16 @@ the employer-side payroll tax accrual. Add a separate line to the JE rather than
 in the gross figure.
 
 **Catch-up / true-up of prior period accruals**: when the actual amount comes in differently
-from what was accrued, true it up in the current period. If the variance is material and
-relates to a prior period, consider whether a **restatement** is needed.
+from what was accrued, true it up in the current period. An estimate that turns out different
+is a **change in estimate**, recognised in the current period (ASC 250 / IAS 8). **Restatement**
+is only for an **error**, such as an omitted or miscalculated accrual.
 
 **Reclass of deferred revenue between current and non-current**: at each period end, the
 portion expected to be earned within twelve months is current; beyond that is non-current.
 
 **Accruals that may turn out not to be owed**: e.g. an expected vendor service that never
-happens. Reverse it without an expense — do not leave it sitting on the balance sheet.
+happens. Release it against the account it was charged to, in the period you learn it is not
+owed — do not leave it sitting on the balance sheet.
 
 **Stock-based comp expense**: accrued via the entity's vesting schedule — separate from this
 skill; it is an equity compensation accounting task.

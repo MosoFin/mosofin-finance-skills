@@ -14,8 +14,8 @@ post.
 
 It covers what AP cutoff does not: bonus, commission, vacation and payroll accruals, interest,
 utilities and services, professional fees, accrued revenue and deferred revenue. The mistake it
-watches for is the accrual balance that **keeps climbing** — a reversal that never posted, or an
-accrual booked twice — and the accrual with **no underlying basis**.
+watches for is the accrual balance that **climbs past what is owed** — a reversal that never
+posted, or an accrual booked twice — and the accrual with **no underlying basis**.
 
 **Works with or without Mosofin.** With Mosofin connected, it reads the chart of accounts, the
 trial balance, the ledger detail behind the accrual and deferred-revenue accounts, last period's
@@ -57,7 +57,7 @@ Ask only what you cannot already see.
 | **B** | *Which company — or, for a group, which entities?* | Each entity runs separately and every accrual carries its name | **Never default the entity.** On the Mosofin path, ask **by name**. |
 | **C** | *Which period? Exact start and end dates.* | Sets every read, the cutoff and the reversal date | **Never default the period.** |
 | **D** | *Which categories are in scope — compensation, interest, utilities and services, revenue, deferred revenue, professional fees, tax?* | Decides what is looked for | **Required.** Offer the Step 1 and Step 2 lists as a checklist, not an open question. |
-| **E** | *The supporting data for each category — bonus pool, commission plan, pay rates, loan rate and day-count, contract terms, time sheets, engagement letters.* | Most amounts depend on it, and it is not in the ledger | **Required per category.** Ask only for what the books cannot show, and say which is which. A gap stays a named gap. |
+| **E** | *The supporting data for each category — bonus pool, commission plan, pay rates, payroll register and pay calendar, loan rate and day-count, contract terms, time sheets, engagement letters.* | Most amounts depend on it, and it is not in the ledger | **Required per category.** Ask only for what the books cannot show, and say which is which. A gap stays a named gap. |
 | **F** | *Do accruals reverse automatically on day one of the next period, or does the incoming invoice post straight against the accrual?* | Both are valid; the answer changes the reversing entries | **Required.** State the policy in the output. |
 | **G** | *Are the books kept on an accrual or a cash basis?* | A cash-basis ledger may legitimately carry no accruals at all | **Never default it.** On a cash basis, say so rather than "no accruals found", and ask whether you are converting. |
 | **H** | *What materiality threshold applies?* | Items below it can be skipped, but their cumulative total is still tracked | Recommended. **Do not invent one**; if declined, accrue everything found and say so. |
@@ -79,10 +79,10 @@ Ask only what you cannot already see.
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **Supporting data per category in scope** — bonus plan and pool, commission plan, payroll or vacation balances, loan agreements, customer contracts, time sheets, engagement letters | **Required per category** | PDF, CSV or XLSX |
+| **Supporting data per category in scope** — bonus plan and pool, commission plan, payroll register and pay calendar, vacation balances, loan agreements, customer contracts, time sheets, engagement letters | **Required per category** | PDF, CSV or XLSX |
 | **Chart of accounts** — the accrual, deferred-revenue and expense accounts to post to | **Required** | CSV or XLSX |
 | Period, entity, categories in scope, reversal policy, accrual or cash basis | **Required** | Type it in the chat |
-| **Trial balance** at period end and **GL detail** for the accrual and deferred-revenue accounts, including last period's accruals and reversals | Needed for the roll-forward and the reversal check | CSV or XLSX |
+| **Trial balance** at period end and **GL detail** for the accrual and deferred-revenue accounts, including last period's accruals and reversals; last period's closing schedule | **Required for the roll-forward and reversal check** — without it Sheets 5–6 are not produced and the output says so | CSV or XLSX |
 | Vendor bills or billing history for utilities and services; customer receipts in advance | Recommended — utility estimates and deferred revenue from the books | CSV or XLSX |
 | Materiality threshold; reporting framework; tax jurisdiction | Recommended | Type it in the chat |
 
@@ -115,9 +115,9 @@ expenses go to the prepaid skill: [`references/method.md`](references/method.md)
 
 ## Stage 4 — Compute each accrual and deferral
 
-Apply each category's basis — bonus pool × year-to-date fraction × payout probability plus
-employer payroll tax; commission per the plan's booking, billing or collection trigger; vacation
-at earned days × pay rate; interest on the loan's own day-count convention; utilities from the
+Apply each category's basis — best-estimate bonus payout × months elapsed ÷ 12 plus employer
+payroll tax; commission per the plan's booking, billing or collection trigger; vacation at the
+unused balance × pay rate; payroll for the partial pay period; interest on the loan's own day-count convention; utilities from the
 last invoice's daily rate, the contract, or last year; revenue from unbilled hours, milestones or
 subscriptions; professional fees from engagement letters:
 [`references/method.md`](references/method.md) Step 3. Check
@@ -127,10 +127,12 @@ owed, stock-based compensation and pensions.
 
 ## Stage 5 — Propose the entries, reversals and roll-forward, and present
 
-Draft each accrual and deferral entry in the real account names, with output tax split out of
-deferred revenue at receipt; draft the reversing entries dated the first day of the next period
-per the stated policy, and check last period's reversals actually posted; roll forward each
-category and **investigate any balance that grows beyond the current accrual**; apply materiality
+Draft each accrual and deferral entry in the real account names — deferred revenue as a
+reclass of receipts already in the books, never a re-booked receipt; draft the reversing entries
+dated the first day of the next period where the policy is auto-reverse, and check last period's
+reversals actually posted; roll forward each category from opening balances agreed to last
+period's schedule, and **investigate any balance above its expected figure** — this period's
+accrual if reversing, the computed obligation if cumulative; apply materiality
 and total the excluded items: [`references/method.md`](references/method.md) Steps 4–8. Before
 presenting, check it against [`references/output.md`](references/output.md).
 

@@ -106,8 +106,8 @@ books (*`search_bills`*, *`get_vendor_expenses`*, *`get_general_ledger`*):
 
 **Revenue accruals** (earned but not invoiced) — **[auto]** where the work is tracked in the
 connected books (*`search_time_activities`* for unbilled hours, *`search_estimates`* for
-contracted work, *`search_invoices`* to see what has already been billed), **[gated]** where
-the earned fraction is a judgment:
+contracted work, *`search_invoices`* to see what has already been billed), **[manual]**
+(judgment) where the earned fraction is a judgment:
 
 - Service performed but invoice not yet issued
 - Subscription services consumed but billed in arrears
@@ -120,7 +120,7 @@ the earned fraction is a judgment:
 - **Audit fees** — services rendered through period-end, invoice may arrive after close
 - **Legal fees** — services rendered, invoice may not arrive
 - **Professional fees** in general
-- **Tax accruals** — income tax, property tax accrued
+- **Tax accruals** — income tax, property tax accrued (basis in Step 3)
 
 ## Step 2 — Identify deferral categories
 
@@ -150,24 +150,27 @@ For each item, use the relevant basis. The arithmetic is **[auto]** once the inp
 the verdict below is about where the *inputs* come from.
 
 **Bonus accrual** — **[manual]** inputs:
-- Annual target bonus pool × the year-to-date portion of the year ÷ 12 (or per the bonus
-  plan's own structure)
-- Apply the **payout probability** if the plan is performance-based — management's best
-  estimate of how likely the bonus is to be paid
-- Apply **employer-side payroll taxes** that will be paid along with the bonus
+- Cumulative bonus accrual = **management's best estimate of the year's payout** (the amount
+  expected to be paid, not discounted by its likelihood — ASC 450/710, IAS 19) × (months
+  elapsed in the bonus year ÷ 12), or per the bonus plan's own earning pattern; the estimate's
+  owner is named
+- This period's entry = that figure − the balance already accrued
+- Apply **employer-side payroll taxes** on the same basis
 
-**Commission accrual** — **[gated]**: closed deals through period-end are visible in the
-books (*`search_invoices`*, *`get_customer_sales`*), the plan's terms are not:
+**Commission accrual** — **[auto]** for closed deals through period-end, which are visible in
+the books (*`search_invoices`*, *`get_customer_sales`*); **[manual]** for the plan's terms:
 - Commissions earned per the commission plan on deals closed through period-end
 - Track whether commissions are payable on **booking** (deal signed), **billing** (invoice
   issued), or **collection** (cash received) — the plan decides, and it changes the amount
 
 **Vacation / PTO accrual** — **[manual]**:
-- For each employee: earned vacation days × daily pay rate
+- For each employee: **unused vacation balance at period end** (earned − taken, after any cap
+  or forfeiture) × current pay rate, plus employer taxes — ASC 710-10-25 accrues rights earned
+  and not yet used
 - Some entities have payroll software compute this automatically; others track it separately
 - The liability typically also includes the payroll taxes due when the vacation is paid out
 
-**Interest accrual** — **[gated]**: balance **[auto]**, terms **[manual]**:
+**Interest accrual** — balance **[auto]**, terms **[manual]**:
 - For loans with monthly interest payments, accrue interest from the last payment date to
   period end:
   - `Interest = Principal × Annual Rate × (Days since last interest period ÷ Days in year)`
@@ -195,6 +198,17 @@ books:
 - Estimate based on engagement letters and work done
 - For ongoing matters, ask the provider how much work has been done
 
+**Payroll accrual (partial pay period)** — **[manual]** unless the payroll platform is
+connected:
+- Gross pay for the pay period straddling period end × (workdays in the period up to period
+  end ÷ workdays in the pay period), plus employer taxes and benefits
+- Source: the payroll register for that pay run and the pay calendar
+
+**Tax accruals** — **[manual]**:
+- Property tax: the annual assessment ÷ 12 per month, from the assessment notice
+- Income tax: take the provision figure from the user or the tax preparer; computing it
+  (ASC 740 / IAS 12) is out of scope
+
 ## Step 4 — Construct the JEs (hand off to journal-entry-builder)
 
 A **journal entry (JE)** is the two-sided record that moves the numbers. `DR` is a debit and
@@ -206,9 +220,15 @@ these** — it drafts them for a human.
 DR  Expense account                                  $accrual amount
     CR  Accrued Liabilities (BS, per user's COA)        $accrual amount
 Memo: Accrue [category] for [period]
+
+Compensation accruals only:
+DR  Payroll tax expense                              $employer tax
+    CR  Accrued payroll taxes (BS)                      $employer tax
 ```
 
-Reverses on the first day of the next period.
+Where the stated policy is auto-reverse, a **reversing** accrual reverses on the first day of
+the next period; under a direct-settlement policy no reversal is drafted. Cumulative accruals
+(Step 6) are adjusted to the computed balance instead.
 
 **Accrual (revenue)**:
 ```
@@ -217,15 +237,16 @@ DR  Accrued Revenue / Unbilled Receivables           $accrual amount
 Memo: Accrued revenue for [service/period]
 ```
 
-Reverses on the first day of the next period (or the entry is cleared when the invoice is
-issued). *Unbilled receivables* = work you've done and can bill for, but haven't yet.
+Reverses on the first day of the next period where the stated policy is auto-reverse (or
+the entry is cleared when the invoice is issued). *Unbilled receivables* = work you've done and can bill for, but haven't yet.
 
-**Deferral (revenue)**:
+**Deferral (revenue)** — the receipt is already in the books; **never re-book it**:
 ```
-At receipt:
-DR  Cash / AR                                        $gross
-    CR  Deferred Revenue (BS, per user's COA)           $net (excl. tax)
-    CR  Output Tax Payable (if applicable)               $tax
+(a) Receipt already posted to income — period-end adjustment:
+DR  Revenue                                          $unearned (net of tax)
+    CR  Deferred Revenue (BS, per user's COA)           $unearned (net of tax)
+
+(b) Receipt already posted to Deferred Revenue — no receipt entry.
 
 Each period as earned:
 DR  Deferred Revenue                                 $period revenue
@@ -234,7 +255,7 @@ Memo: Recognize earned portion — [contract] — [period]
 ```
 
 *Output tax* is sales tax / VAT / GST you collected on the customer's behalf — it was never
-your revenue, so it is split out at receipt.
+your revenue. **Check the tax split on the existing receipt**; it is not re-booked here.
 
 This is typically built as a schedule (similar to prepaid amortisation but on the revenue
 side). ASC 606 / IFRS 15 compliance itself is a revenue recognition task.
@@ -244,8 +265,10 @@ Use the **real account names from the connected chart of accounts** (*`search_ac
 
 ## Step 5 — Reversing entries
 
-Most accruals **reverse** on the first day of the next period — the entry is undone so that
-when the real invoice arrives it can post normally without double-counting.
+**Reversing** accruals reverse on the first day of the next period — the entry is undone so
+that when the real invoice arrives it can post normally without double-counting. **Cumulative**
+accruals (bonus, PTO, interest accrued but not yet due, severance) are adjusted to the computed
+balance instead.
 
 When the actual invoice / payment arrives in the new period, it posts cleanly to the expense
 or revenue account, cancelling against the reversal.
@@ -267,6 +290,9 @@ the proof that nothing is stuck.
 For each accrual category — **[auto]** where the accrual account is identifiable in the
 ledger (*`get_general_ledger`*, *`get_trial_balance`*, *`search_journal_entries`*):
 
+**Agree each opening balance to last period's closing schedule** (or state that none exists);
+differences go to exceptions.
+
 ```
 Opening accrual balance
 + Current period accrual booked
@@ -279,12 +305,13 @@ Opening accrual balance
 A **true-up** is the correction you make when the real amount turns out different from what
 you estimated.
 
-The closing balance should equal the current period accrual, assuming reversals and
-settlements cleared the prior balance.
+For **reversing** accruals, the closing balance should equal this period's accrual. For
+**cumulative** accruals (bonus, PTO, interest accrued but not yet due, severance), the closing
+balance should equal the obligation computed at period end (ASC 710 / IAS 19), and the period's
+entry is the change.
 
-**If the closing balance grows beyond just the current period's accrual, investigate —
-accruals shouldn't compound.** A balance that keeps climbing usually means a reversal never
-posted, or an accrual is being booked twice.
+**A balance above that expected figure means a reversal did not post or an item was booked
+twice: investigate.**
 
 ## Step 7 — Materiality
 
@@ -301,7 +328,7 @@ Offer an `.xlsx` workpaper: ask the user whether they want it as an Excel file, 
 
 **Sheet 1: Summary**
 
-| Category | Period Accrual | Reversal of Prior | Net Period Impact | Closing Balance |
+| Category | Reversing / Cumulative | Period Accrual | Reversal of Prior | Net Period Impact | Closing Balance |
 
 Add a header block: workspace name; each in-scope company file by `display_name`; each
 excluded company file and why; whether any figure rests on `mock` data.
@@ -325,6 +352,8 @@ All reversing entries for the next period.
 **Sheet 5: Deferred Revenue Roll-Forward**
 
 Specifically for deferred revenue, which often has a structured schedule.
+
+| Contract | Customer | Received | Service start | Service end | Earned to date | Unearned at period end | Current / non-current |
 
 **Sheet 6: Roll-Forward by Category**
 
@@ -370,7 +399,7 @@ On an explicit yes, persist the **decisions**:
 - The account mapping: which specific accrued-liability, accrued-revenue, deferred-revenue
   and expense accounts each category posts to, by their real names in the chart of accounts
 - The computation basis chosen per category (e.g. "utilities: last invoice's daily rate";
-  "bonus: 1/12 of pool per month at 80% probability"), including the day-count convention
+  "bonus: best-estimate payout × months elapsed ÷ 12"), including the day-count convention
   used for interest
 - Recurring items that accrue every period, so they are proposed automatically next time
 - Standing exclusions and why
