@@ -12,6 +12,7 @@
 - Step 6 — Construct the JE (hand off to journal-entry-builder)
 - Step 7 — Output
 - Step 8 — Evolve the skill (Mosofin-specific, final step)
+- Review mode (payments already recorded)
 - Both entity scenarios
 
 
@@ -88,6 +89,12 @@ For each open invoice — **[auto]**:
 **Use the open balance, not the original amount**, for matching. An invoice part-paid last month
 will never match on its original figure.
 
+**Before matching a supplied file**, compare each row to recorded payments and deposits — **[auto]**
+(*`search_payments`*, *`search_deposits`*): same customer or payer, amount, date ±3 days,
+reference. Bank-feed rules and payment apps often record some of a day's receipts already. Rows
+already recorded move to the review population and get no new entry — a second entry would
+double-credit A/R and double the cash. Report how many were removed.
+
 ## Step 2 — Match payments to invoices
 
 **Match hierarchy (stop at the highest-confidence match).** Record which level produced each match —
@@ -100,7 +107,8 @@ a level-1 and a level-5 match are not the same claim.
 first whether two open invoices share that amount; if so this is not unambiguous.
 
 **3. Payer name + amount matches the sum of multiple open invoices** → **lump payment, apply to
-those invoices (oldest first by default unless the customer specified).** **[auto]** to find
+those invoices (oldest first if the user confirmed FIFO at intake; otherwise present the candidate
+allocation for approval).** **[auto]** to find
 combinations; **[gated]** to choose, because several combinations can sum to the same total. Report
 the combination selected and whether another existed.
 
@@ -134,13 +142,20 @@ re-solved every month.
 When a customer pays less than the invoice total, the reason determines the accounting. Guessing
 wrong either hides a dispute or writes off money you were entitled to.
 
+**Test the residual against the tolerance first** (intake D). If |residual| ≤ tolerance, propose a
+small-balance adjustment — short: DR [discounts allowed / bad debt, per the user's policy], CR A/R;
+over: DR A/R, CR [other income or customer credit, per the user's policy] — and mark it **"within
+tolerance"**. Ask which account the user's policy uses; never choose one. Above tolerance, use the
+reason table. With no tolerance supplied, every residual is above it.
+
 | Reason | Treatment |
 |--------|-----------|
 | **Customer-claimed deduction** (damage, shortage) | Apply payment, leave residual open as **"Disputed"** pending investigation |
 | **Early-pay discount taken** | Apply payment + book **Sales Discount** for the difference **if terms allowed it** |
 | **Bank fee deducted** (cross-border wires often deduct) | Apply payment + book **Bank Fee** for the difference |
 | **Withholding tax deducted** (cross-border) | Apply payment + book **Withholding Tax Receivable** for the difference, **pending tax certificate** |
-| **Rounding / FX difference** | Apply payment + book **FX Gain/Loss** for the difference |
+| **FX difference on a foreign-currency invoice** | Handled in Step 5 (invoice rate vs receipt rate) → **FX Gain/Loss** |
+| **Customer's conversion shortfall or rounding on a base-currency invoice** | Not FX — the entity had no exchange exposure. Leave the residual open, or, if within the user's tolerance, propose a small-balance write-off (DR [Bad debt / Discounts allowed, per the user's policy], CR A/R) for approval |
 | **Unknown reason** | Apply payment, leave residual open, **flag for collections follow-up** |
 
 **Distinguish carefully — short pays without explanation are different from short pays with a
@@ -192,15 +207,25 @@ invoice.
 Per payment:
 
 ```
-DR  Cash / Bank                             $payment amount
-    CR  Accounts Receivable                    $applied to invoices
+DR  Cash / Bank (or Undeposited Funds)       $payment amount
+DR  Sales Discount (if discount taken)
+DR  Bank Fee (if fee withheld)
+DR  Withholding Tax Receivable (if WHT)
+DR/CR  FX Gain/Loss (if multi-currency)
+    CR  Accounts Receivable — invoice amounts settled (= cash + discount + fee + WHT ± FX)
     CR  Customer Credit / Unapplied (if overpay) $overpay
-    DR  Sales Discount (if discount taken)
-    DR  Bank Fee (if fee withheld)
-    DR  Withholding Tax Receivable (if WHT)
-    DR/CR  FX Gain/Loss (if multi-currency)
 Memo: Cash application — [Customer] — [Reference]
 ```
+
+Unidentified (level 6):
+
+```
+DR  Bank (or Undeposited Funds)              $payment amount
+    CR  Unapplied cash — unidentified
+```
+
+Where receipts are deposited in batches, debit **Undeposited Funds / Payments to deposit**, so the
+bank deposit matches the statement.
 
 **Every sub-component appears on its own line.** Netting a bank fee into the cash line hides a real
 cost; netting a discount into A/R hides a real margin reduction. Use the **real account names from
@@ -217,6 +242,9 @@ Offer an `.xlsx` workpaper: ask the user whether they want it as an Excel file, 
 - Total parked as customer credit / unapplied
 - Total in unidentified deposits
 - Short-pay residuals open
+- **Control tie-out:** total payments (= file control total or deposit total) = applied to A/R −
+  discounts − fees − WHT ± FX + customer credit + unidentified. The difference must be 0, shown
+  even when nil
 
 Add a header block: workspace name; each in-scope company file by `display_name`; each excluded one
 and why; **which population was processed — recorded payments or a supplied file**; whether any
@@ -300,6 +328,22 @@ workspace's.**
 
 On later runs, match stored entity names against Gate 1's live list. An entity in preferences that
 is no longer connected is **flagged** — never silently dropped, never applied elsewhere.
+
+---
+
+## Review mode (payments already recorded)
+
+When intake B chose payments already recorded and applied, this is a **review** of how they were
+applied, not a proposal to apply them — all **[auto]** where the reads are enabled:
+
+1. List customers carrying both unapplied payments / credits and open invoices
+   (*`search_payments`*, *`search_credit_memos`*, *`get_aged_receivables`*) — propose the application.
+2. For each recorded payment, re-run levels 1–3 of Step 2 against the invoices it was applied to,
+   and flag disagreements (wrong invoice, wrong customer).
+3. Check discounts against terms (Step 3, second check bullet).
+4. Age unapplied cash and unidentified deposits (*`get_general_ledger`*).
+
+Report it as a review in the summary header; proposed corrections follow Step 6.
 
 ---
 

@@ -66,8 +66,8 @@ whose invoices were therefore not available to match against. Surface any `recon
 matching logic but must never drive a real application against a named customer.
 
 **The payments are already recorded and applied** — *Mosofin-specific*. This becomes a **review** of
-how they were applied, not a proposal to apply them. Say which of the two you did; they carry
-different assurance.
+how they were applied, not a proposal to apply them — follow Review mode in `method.md`. Say which
+of the two you did; they carry different assurance.
 
 **A stored payer alias is wrong or stale** — *Mosofin-specific*. An alias that has changed will
 credit the wrong customer. Re-confirm when the match it produces is contradicted by amount or

@@ -33,10 +33,10 @@ Background: [`references/overview.md`](references/overview.md).
   that fits several customers or two same-amount invoices is reported, not chosen; where several
   invoice combinations fit, the one selected is named along with the alternative.
 - **Never absorbs a short or over pay.** A residual with no explanation stays open for
-  collections, never written off; an excess is customer credit, never revenue, and is checked
+  collections, unless within the user's tolerance, when a small-balance adjustment is proposed; an excess is customer credit, never revenue, and is checked
   for a duplicate payment first.
-- **Never defaults the FX rate, the tolerance or the entity**, and never applies one entity's
-  receipt to another entity's invoice.
+- **Never defaults the FX rate or the entity, and never invents a tolerance** — with none
+  supplied, it matches exact and says so; never applies one entity's receipt to another's invoice.
 
 Full wording: [`references/mosofin-protocol.md`](references/mosofin-protocol.md). **Read it before
 the first tool call.**
@@ -53,7 +53,7 @@ Ask only what you cannot already see.
 | # | Ask | Why it matters | If unanswered |
 |---|---|---|---|
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
-| **B** | *Which payments — ones already recorded in the books, or a file not yet entered (deposit listing, lockbox file, processor export)? As of what date for the open invoices?* | They are different jobs: payments already applied make this a **review** of how they were applied, not a proposal | **Required.** Ask which population; the output states which one was processed. |
+| **B** | *Which payments — ones already recorded in the books, or a file not yet entered (deposit listing, lockbox file, processor export)? As of what date for the open invoices?* | They are different jobs: payments already applied make this a **review** of how they were applied (Review mode in `references/method.md`), not a proposal; a file is first checked against payments already recorded | **Required.** Ask which population; the output states which one was processed. |
 | **C** | *Any remittance advices, and where are they?* | The single biggest driver of match quality | Recommended. Without them, matching rests on references and payer names, and an amount that fits several customers stays unresolved. |
 | **D** | *What tolerance for short and over pays — an amount or a %?* | Decides what counts as a short or over pay at all | **Never invent one.** Match exact and say that is what you did. |
 | **E** | *Apply oldest invoice first (FIFO), or another order?* | Lump payments and partial payments both depend on it | Recommended. **Confirm rather than assume.** |

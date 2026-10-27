@@ -124,7 +124,7 @@ answered:
 | **Open A/R invoices** | **Required — usually [auto]** | Normally pulled. Confirm the as-of date. |
 | **Remittance advice** — if separate from the payment data | Recommended — **[manual]** | The single biggest driver of match quality. Ask whether any exist and where. |
 | **Customer master** — helps fuzzy-match payer names | Recommended — usually **[auto]** | Pulled. Ask only for known payer aliases the books do not hold. |
-| **Tolerances for short / over pay** — currency amount or % | Optional — **[manual]** | **Default exact** if not supplied, and say that is what you did. |
+| **Tolerances for short / over pay** — currency amount or % | Optional — **[manual]** | Never invent one; with none supplied, match exact and say so. |
 | **Tax jurisdiction** | Optional — **[manual]** | Needed only where withholding at source applies. |
 | **FX rates** at the receipt date | Required if currencies differ — **[manual]** | No accounting connector supplies a rate; ask for the rate and its source. |
 | **Application order default** — oldest-first (FIFO) or otherwise | Recommended | Step 2 level 3 and 4 both depend on it. Confirm rather than assuming. |
@@ -132,8 +132,8 @@ answered:
 | **Confirm any profile contradiction** | **Required if one appears** | |
 | **Confirm manual evidence** | **Required if Gate 2 produced any [manual]** | Remittances, FX rates and tax certificates will be among them. |
 
-Ask as **one short batch**. Propose defaults where reasonable — but **never** default the FX rate,
-the tolerance, or the entity.
+Ask as **one short batch**. Propose defaults where reasonable — but **never** default the FX rate or
+the entity, and never invent a tolerance; with none supplied, match exact and say so.
 
 **On later runs**, read stored preferences first (Step 8), confirm in one line, and ask only what is
 new, changed, or contradicted. The payer-alias map and the tolerance should not be re-asked daily.
