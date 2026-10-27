@@ -3,11 +3,12 @@
 # Financial Statement Builder (Mosofin)
 
 Assembles a complete set of financial statements from a **trial balance** — **Balance Sheet**, **Income
-Statement**, and **Statement of Cash Flows**. Adds comparatives, applies proper classification, and ties
+Statement**, **Comprehensive Income** (where OCI exists), **Statement of Cash Flows** and **Changes in
+Equity**. Adds comparatives, applies proper classification, and ties
 everything together.
 
 **In plain words:** the accounting system holds a long list of account balances. This turns that list into
-the three statements a bank, an investor or an auditor expects to see — in the order, the groupings and the
+the five statements a bank, an investor or an auditor expects to see — in the order, the groupings and the
 wording their framework requires — and then proves the statements agree with each other.
 
 This skill is **framework-aware** (US GAAP, IFRS, local GAAP). **The TB drives the content; the framework

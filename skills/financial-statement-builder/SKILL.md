@@ -53,8 +53,8 @@ Ask only what you cannot already see.
 | # | Ask | Why it matters | If unanswered |
 |---|---|---|---|
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
-| **B** | *Which reporting framework: US GAAP, IFRS or a local GAAP?* | Decides ordering, terminology and format throughout | **Required. Ask first; never default.** |
-| **C** | *Which period end, and which comparative periods?* | Sets both reads; comparatives must be on the same basis | **Required.** Confirm the period. |
+| **B** | *Which reporting framework: US GAAP, IFRS, a local GAAP, or a special-purpose basis (income tax, cash / modified cash, FRF for SMEs)? And the entity's legal form?* | Decides ordering, terminology, format and statement titles throughout; legal form decides the equity section | **Required. Ask first; never default.** |
+| **C** | *Which period (month, quarter, year) and which columns — month, YTD, prior year, budget?* | Sets every read; a month-end TB is YTD, not the month; comparatives must be on the same basis | **Required.** Confirm the period. |
 | **D** | *For a group: consolidated statements, or separate entity statements?* | Entirely different deliverables | **Required** whenever more than one company file is in scope. |
 | **E** | *The prior-year financial statements as issued.* | The check that catches unposted audit adjustments (tie-out 6) | Recommended. Without them, tie-out 6 is marked `[manual]`, not passed. |
 | **F** | *How is the current portion of debt and leases determined — the amortization schedules?* | No ledger account knows what falls due within twelve months | Recommended. **Never default the split**; name the source required. |
@@ -84,7 +84,9 @@ Ask only what you cannot already see.
 | **Trial balance** at each comparative period end, on the same basis | **Required for comparatives** | CSV or XLSX |
 | **Prior-year financial statements as issued** | Recommended — tie-out 6 | PDF or XLSX |
 | **Debt and lease amortization schedules** | Recommended — the current portion | CSV, XLSX or PDF |
-| **P&L or GL activity** for the period | If the TB is post-closing, with every P&L account at zero | CSV or XLSX |
+| **P&L or GL activity** for the period | If the TB is post-closing, with every P&L account at zero, or for a month's figures | CSV or XLSX |
+| **Balance sheet (or TB) at the start of the period** — last month end for a monthly package | **Required for cash flows** | CSV or XLSX |
+| **GL detail for fixed asset, loan and equity accounts** | **Required for cash flows and changes in equity** | CSV or XLSX |
 | Share count, segment data, disposal-group details | If applicable | Type it in the chat, or a file |
 | Framework, period, rounding, consolidated or separate, entity legal name and currency | Required (rounding recommended) | Type it in the chat |
 
@@ -131,8 +133,8 @@ comparatives, going concern, specialised industry formats and parent-only statem
 
 Run the **seven cross-statement tie-outs**, each pass or fail with its difference; apply rounding
 and presentation, with a footer naming the entity, source, currency, rounding and `mock` status;
-run the quality checks; and build the workpaper, with reclassifications listed as proposals and the
-coverage sheet: [`references/method.md`](references/method.md) Steps 8–11. Ask before creating the
+run the quality checks; and build the workpaper, with each reclassification marked presentation only
+or a proposed entry, and the coverage sheet: [`references/method.md`](references/method.md) Steps 8–11. Ask before creating the
 `.xlsx` or a PDF render. Before presenting, check it against
 [`references/output.md`](references/output.md).
 

@@ -44,7 +44,10 @@ Typical opening batch, per in-scope entity:
 - *`get_balance_sheet`* current and comparative — usually **[auto]**
 - *`get_profit_and_loss`* current and comparative — usually **[auto]**
 - *`get_cash_flow_statement`* where the platform offers one — usually **[auto]**
-- *`get_general_ledger`* — for the movement detail behind any line that needs analysis — usually **[auto]**
+- *`get_general_ledger`* — for the movement detail behind any line that needs analysis — usually **[auto]**;
+  for the cash flow and equity statements, on the **fixed asset, loan and equity accounts**
+- *`get_balance_sheet`* at the **start of the period** (for a monthly package, last month end — not the
+  prior-year comparative) — the opening side of every cash flow movement — usually **[auto]**
 - *`get_company_info`* — **legal name, currency, year-end** — usually **[auto]**
 
 **Pull both periods on the same basis.** Where the platform offers an `accounting_method` argument
@@ -75,6 +78,10 @@ Before building statements — **[auto]** throughout:
 - **Every BS account is on the BS side**
 - **No type mismatches** — a liability with a perpetual debit balance, and so on
 
+- **Clearing and suspense accounts** — list any non-zero balance in uncategorised, suspense, Ask My
+  Accountant, Undeposited Funds or Opening Balance Equity accounts as an **exception before mapping**. Ask
+  the user how to treat each, and do not bury them in an "Other" line
+
 **If the TB is unbalanced, fix that first via `closing-entries-and-trial-balance` review.** *Mosofin note*:
 a TB pulled from a live double-entry platform **will balance**, so this check is a formality on
 platform-sourced data and a real check on anything supplied by hand. **The type-mismatch test is the one
@@ -82,7 +89,9 @@ that still earns its place** — a liability account sitting in debit is a genui
 happily report.
 
 **If the period is mid-year** — P&L accounts hold **YTD balances**, no closing yet — **build statements
-directly from those YTD balances.** **If post-closing**, all P&L accounts are zero **and you need the
+directly from those YTD balances.** Those are **year-to-date**, not the month: **the month's activity =
+*`get_profit_and_loss`* for the month** (upload: the P&L for the month, or the TB at the prior month end to
+difference), with YTD alongside where the user asked for it. **If post-closing**, all P&L accounts are zero **and you need the
 period's activity elsewhere** — *`get_profit_and_loss`* for the period, or *`get_general_ledger`*.
 
 **[auto]** to detect which case you are in: read the P&L accounts. All zero at a year-end date means
@@ -156,6 +165,7 @@ EQUITY
   Common stock (par value)
   Additional paid-in capital
   Retained earnings
+  Current-year net income (pre-closing — shown separately until the year is closed)
   Treasury stock (contra)
   Accumulated other comprehensive income / (loss)
   Total Equity attributable to shareholders of the parent
@@ -164,6 +174,10 @@ EQUITY
 
   TOTAL LIABILITIES AND EQUITY
 ```
+
+For an **LLC, partnership or sole proprietor**, equity is **owner's / members' / partners' capital**
+instead: opening capital, capital contributions, current-year net income, distributions / draws, ending
+capital — per member where capital is kept per member.
 
 **Validation: Total Assets = Total Liabilities + Total Equity, to the penny.** **Prove this on the
 statement you built**, after reclassification — not on the platform's report, which balances by
@@ -258,6 +272,8 @@ checks:
 ## Step 5 — Add the Statement of Comprehensive Income
 
 **Required under both US GAAP (ASC 220) and IFRS (IAS 1). Can be:**
+*Not required under a special-purpose framework (income tax, cash / modified cash basis, FRF for SMEs)
+unless the user asks; title each statement with the basis used.*
 
 - **A single statement of Profit or Loss AND OCI together**
 - **Or two statements**: P&L, then a separate Statement of Comprehensive Income
@@ -287,9 +303,20 @@ required** — do not present a movement you cannot explain.
 
 ## Step 6 — Build the Statement of Cash Flows
 
-**Build it by the indirect method, which is a full procedure of its own. The result fits in the package
-as the third primary statement.** **[gated]** — the balance-sheet movements it needs are `[auto]`, the
-non-cash and financing detail often is not.
+**Build it by the indirect method. The result fits in the package as the third primary statement.**
+**[gated]** — the balance-sheet movements it needs are `[auto]`, the non-cash and financing detail often is
+not. Under a special-purpose framework it is not required unless the user asks; title it with the basis.
+
+- **Operating (CFO)** = net income + depreciation and amortisation ± loss / gain on disposal ± the change in
+  each working-capital account (AR, inventory, prepaids, AP, accruals, deferred revenue), between the
+  balance sheets at the **start** and the **end** of the period
+- **Investing (CFI)** = fixed-asset and investment purchases, and sale proceeds, from the GL — **gross**
+- **Financing (CFF)** = debt proceeds and repayments **shown gross, never netted**; owner contributions; and
+  distributions / dividends
+- **The net change must equal the change in cash between the opening and closing balance sheets without a
+  plug.** A difference is reported, not absorbed into operating
+- **Non-cash investing and financing** — an asset bought on a loan, debt converted to equity — is **listed
+  separately**, never shown as cash
 
 Where the platform offers its own cash flow report (*`get_cash_flow_statement`*), **it is a useful
 cross-check, not a substitute** — platform cash flow reports classify by their own rules and frequently
@@ -297,8 +324,9 @@ misclassify financing and investing items.
 
 ## Step 7 — Build the Statement of Changes in Equity / Statement of Stockholders' Equity
 
-**Prepare it as a procedure of its own. This shows the roll-forward of each equity component.**
-**[gated]** — the balances are `[auto]`, the movements need attribution.
+**This shows the roll-forward of each equity component.** **[gated]** — the balances are `[auto]`, the
+movements need attribution from the equity GL. For each component: **opening + net income / OCI +
+contributions − distributions ± other = closing**, agreed to the balance sheet.
 
 ## Step 8 — Cross-statement validations
 
@@ -308,9 +336,12 @@ misclassify financing and investing items.
 1. **Balance Sheet balances** — **Assets = Liabilities + Equity.** *On your statements, post-reclassification.*
 2. **Net Income on IS = Net Income line on Cash Flow Statement** — the start of operating activities under
    the indirect method
-3. **Net Income + OCI on Statement of CI = Net Income on Statement of Equity Changes**
-4. **Cash at end of period on Cash Flow Statement = Cash on Balance Sheet**
-5. **Closing Retained Earnings on Statement of Equity = Retained Earnings on BS**
+3. **Net income on the IS = net income in the RE column of the equity statement; OCI on the SCI = movement
+   in AOCI on the equity statement**
+4. **Opening cash + net cash from operating, investing and financing (each computed, none plugged) = closing
+   cash on the BS**, with the same definition of cash on both (including restricted cash where held)
+5. **Closing Retained Earnings on Statement of Equity = Retained Earnings + current-year net income on BS**
+   (the platform shows them as separate lines until the year is closed)
 6. **Comparative period figures = prior year's filed financials** — or restated comparatives if
    reclassified, **with disclosure**. *This is the `[manual]` one, and the one most often skipped.*
 7. **Inter-statement currency consistency** — if reporting in USD, **every statement says USD**
@@ -375,8 +406,9 @@ provenance: the tool call, the entity `display_name`, the as-at date and the acc
 **Sheet 7: Cross-Statement Tie-Outs** — **the 7 critical validations from Step 8**, each with its computed
 difference.
 
-**Sheet 8: Reclassifications and Restated Prior Period** — if applicable. **Every reclassification listed
-as a proposal**, since Mosofin posts nothing.
+**Sheet 8: Reclassifications and Restated Prior Period** — if applicable. **Each reclassification says
+whether it is presentation only** (a grouping change or a current-portion split — no entry needed) **or a
+proposed correcting entry** for the user to post, since Mosofin posts nothing.
 
 **Sheet 9: Coverage — NEW, Mosofin-specific**
 
