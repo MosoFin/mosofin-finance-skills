@@ -20,7 +20,8 @@ All of the original standards, plus the Mosofin ones.
 - The capability map was discovered **this run** via Gate 2 — never recalled from a previous conversation
   or from this file
 - **Whether the subledger is a separate system is established and stated**, and where it is not, the
-  GL-to-subledger leg is reported as **nil by construction** rather than as agreement
+  GL-to-subledger difference is still computed — **nil by construction** if zero, rather than agreement;
+  if not zero, the postings that bypassed the item module are listed
 - **The date of the last physical count is stated in the header**, and its absence is reported as the
   headline finding
 - **The physical count is recorded as `[manual]` with an owner**, and no ledger evidence is presented as

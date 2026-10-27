@@ -58,7 +58,9 @@ Opening reserve
 account.
 
 **GL and subledger are the same system** — *Mosofin-specific, and the central point*. **They agree by
-construction.** Report it as nil by construction, not as a reconciliation.
+construction** — unless the inventory account was posted to directly (journal entries, account-coded bills
+or expenses, opening balances). Compute the difference anyway: zero is reported as nil by construction, not as
+a reconciliation; non-zero is investigated per Step 3.
 
 **A clean reconciliation with no recent count** — *Mosofin-specific*. **The two systems may have been
 agreeing about stock that is not there.** The count date belongs in the header.

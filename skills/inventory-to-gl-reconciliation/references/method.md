@@ -42,7 +42,10 @@ Typical opening batch, per in-scope entity:
 - *`get_balance_sheet`* / *`get_trial_balance`* — **the GL balances by inventory account** — usually
   **[auto]**
 - *`search_items`* / *`search_products`* — **quantity on hand, unit cost, extended value, location** —
-  usually **[auto]**
+  usually **[auto]**. **Read book quantities and values as at the count date and as at period end** (an
+  inventory valuation report with an as-of date). An item search returns *current* quantity on hand; if the
+  catalog only offers that, mark the subledger leg `[manual]` and ask for an *Inventory Valuation
+  Summary / Detail as of [count date] and [period end]* export
 - *`get_general_ledger`* on the **inventory, reserve, shrinkage and variance accounts** — **movements, and
   the reserve roll-forward** — usually **[auto]**
 - *`search_invoices`* / *`search_purchases`* / *`search_bills`* **around the period boundary** — **the
@@ -53,7 +56,8 @@ Typical opening batch, per in-scope entity:
 
 **Pull the cut-off population deliberately**: **transactions dated in the last days of the period and the
 first days of the next, plus anything posted after the period end regardless of its date.** That second
-group is where most cut-off errors actually live.
+group is where most cut-off errors actually live. Use the entry-created date where the read returns one;
+otherwise mark the "posted after period end" test `[manual]`.
 
 Handle the envelopes:
 
@@ -72,9 +76,10 @@ a reconciliation**, and inventory is frequently the largest asset on the balance
 
 **Run before Step 1**, and put the answer in the workpaper header.
 
-1. **Is the subledger a separate system?** **[manual]** to confirm, **[gated]** to corroborate: if the item
+1. **Is the subledger a separate system?** **[manual]** to confirm, **[auto]** to corroborate: if the item
    module and the GL are one platform, **the extended value of all items should equal the inventory account
-   exactly.** **If it does, that is construction, not agreement.**
+   exactly.** **If it does, that is construction, not agreement.** If it does not, the difference is real —
+   see Step 3.
 2. **When was the last physical count?** **[manual]**. **If the answer is "never" or "some years ago", that
    is the headline finding** — the GL and subledger may have been agreeing with each other about
    non-existent stock for a long time.
@@ -98,7 +103,8 @@ For each inventory category / location — **[auto]** on the GL side:
 - **Inventory reserve (contra)**
 
 **Subledger side:**
-- **Sum of (qty × unit cost) per SKU / location** — **[gated]**, per Step 0b
+- **Sum of (qty × unit cost) per SKU / location** — mixed: **[auto]** where the valuation is readable at the
+  date, **[manual]** otherwise, per Steps 0 and 0b
 
 **[auto]** structural check: **does the chart actually separate these categories?** Many do not — a single
 "Inventory" account covering raw materials, WIP and finished goods **makes category-level reconciliation
@@ -111,7 +117,8 @@ assets and liabilities**, and it is one of the commonest inventory errors — se
 
 **For a robust reconciliation, ideally:**
 
-1. **GL ← compare to → Subledger** — **[gated]**, and **possibly meaningless per Step 0b**
+1. **GL ← compare to → Subledger** — mixed: **[auto]** where both are readable at the date, and **possibly
+   nil by construction per Step 0b**
 2. **Subledger ← compare to → Physical count** — **[manual]**, **and the leg that matters**
 3. **Confirm GL ↔ Subledger ↔ Physical (transitively)**
 
@@ -119,13 +126,15 @@ assets and liabilities**, and it is one of the commonest inventory errors — se
 Recommend a physical count cadence.**
 
 **Mosofin emphasis**: that last sentence is the crux. **Where the subledger and GL are one system, leg 1 is
-not merely partial — it is vacuous**, and the reconciliation reduces to leg 2, which the workspace cannot
+not merely partial — when it agrees, it is vacuous** (when it does not, Step 3 lists the direct postings),
+and the reconciliation reduces to leg 2, which the workspace cannot
 perform. **Say this plainly rather than presenting a complete-looking three-way schedule with one leg
 missing.**
 
 ## Step 3 — Reconcile GL to Subledger
 
-For each inventory account — **[gated]**:
+For each inventory account — mixed: **[auto]** where both sides are readable at the date, **[manual]**
+otherwise:
 
 ```
 GL balance                                           $X
@@ -149,31 +158,39 @@ readable where multi-currency is in use — though note inventory is a **non-mon
 historical rates, so a genuine FX revaluation of inventory is usually an error rather than a reconciling
 item.
 
-**Report the difference including zero** — and where the systems are one, **report it as "nil by
-construction"** rather than as a reconciliation result.
+**Report the difference including zero.** Where the systems are one, **still compute** GL balance − item
+valuation at the same date. If zero, report it as **"nil by construction"** rather than as a reconciliation
+result. If not zero, list the inventory-account postings that bypass the item module — journal entries,
+bills or expenses coded to the account rather than to an item, opening-balance entries — read from the
+inventory account's GL by transaction type (*`get_general_ledger`*, *`search_journal_entries`*). Those are
+the reconciling items, usually needing a matching item adjustment.
 
 ## Step 4 — Reconcile Subledger to Physical Count
 
 **For full counts: every SKU is counted. For cycle counts: a subset of SKUs is counted**, typically rotating
 per **ABC stratification**.
 
-**For each counted SKU** — **[gated]**: the subledger quantity and unit cost are `[auto]`, **the counted
-quantity is `[manual]`**:
+**For each counted SKU** — mixed: the subledger quantity and unit cost **at the count date** are `[auto]`
+where readable at that date, **the counted quantity is `[manual]`**:
 
 ```
-Subledger qty
+Subledger qty (at the count date)
 Counted qty
 Difference (in units)
 × Unit cost
 = Value of variance
 ```
 
+**If the count date is not the period end, roll forward:** count quantity + receipts − shipments between
+the count date and period end = period-end physical quantity. List the roll-forward movements.
+
 **Classify the variance:**
 
 - **Shrinkage**: physical < subledger — **theft, damage, miscount, spoilage**
 - **Overage**: physical > subledger — **count error, returned goods not booked, found inventory**
 - **Cut-off**: **receipt or shipment posted in the wrong period** — **[auto]** to corroborate from the
-  boundary population
+  boundary population; invoices and bills show billing dates, so corroborate against shipping and
+  receiving records (`[manual]`)
 - **Wrong location**: **inventory moved but not transferred in system** — **[gated]** where locations are
   tracked
 - **Damaged but still in subledger**: **needs write-down** — **[manual]**; condition is physical
@@ -199,7 +216,8 @@ does, the accrual is wrong — which points at `ap-accrual-cutoff` rather than a
 
 ## Step 6 — Investigate variances
 
-For each material variance — **[gated]**, and the split is instructive:
+For each material variance — above the threshold from intake I; without one, list all variances ranked by
+value and say no threshold was applied — mixed, and the split is instructive:
 
 1. **Look at recent transactions on the SKU** — **[auto]**
 2. **Check for posting cutoffs** — **[auto]**
@@ -216,7 +234,8 @@ from.** A variance investigation that stops after step 4 will produce a classifi
 
 ## Step 7 — Compute shrinkage
 
-**For genuine shrinkage — loss confirmed, not just a count error** — **[gated]**:
+**For genuine shrinkage — loss confirmed, not just a count error** — mixed: `[manual]` to confirm, `[auto]`
+to compute:
 
 - **Total shrinkage value = sum of confirmed shortages × unit cost**
 - **Shrinkage % = shrinkage value / average inventory value or revenue** — **[auto]** on both denominators
@@ -234,7 +253,13 @@ number lacks.
 ## Step 8 — Construct cleanup JEs
 
 **Hand off to `journal-entry-builder`.** `DR` is a debit, `CR` a credit. **Mosofin does not post** — these
-are proposals:
+are proposals.
+
+**If the subledger is the platform's own item module**, propose the count result as a **per-SKU quantity
+adjustment** (SKU, new quantity, adjustment account, count date) for the user to enter in the item module,
+not a journal entry — a journal entry to the inventory account changes the GL but not item quantities, and
+next month shows a new GL-to-item difference. Use journal entries only for a separate-system subledger, the
+reserve and the NRV write-down:
 
 **Inventory shrinkage / write-down**:
 ```
@@ -246,9 +271,12 @@ Memo: Period shrinkage — physical count [date]
 **Inventory overage** (rare; usually count error correction):
 ```
 DR  Inventory                                       $overage value
-    CR  Inventory Adjustments / Other Income           $overage value
+    CR  Inventory Shrinkage / Adjustments (cost of sales)  $overage value
 Memo: Period overage — physical count [date]
 ```
+
+Use the same account the shrinkage entry debits, so the net count result shows in one place within cost of
+sales.
 
 **Write-down to NRV** (lower of cost or net realizable value):
 ```
@@ -283,7 +311,8 @@ performed**; whether any figure rests on `mock` data.
 
 | GL Account | GL Balance | Subledger Balance | Difference | Reason | Action |
 
-**Marked "nil by construction" where the systems are one.**
+**Marked "nil by construction" where the systems are one and the difference is zero**; a non-zero
+same-system difference lists the postings that bypassed the item module.
 
 **Sheet 3: Physical Count Variances** (if applicable)
 

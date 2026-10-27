@@ -28,8 +28,8 @@ or title terms, or the warehouse team's explanation**, so it always asks for the
 - **Reads nothing until Stage 1 is answered** and you have confirmed the read-back.
 - **Never writes, updates or deletes anything, in any system.** Every entry it produces is a
   proposal for a person to post.
-- **Never presents a same-system agreement as a reconciliation.** Where subledger and GL are one, that
-  leg is reported as **nil by construction**.
+- **Never presents a same-system agreement as a reconciliation.** Where subledger and GL are one, the
+  difference is still computed: zero is **nil by construction**; non-zero is investigated.
 - **Never presents ledger evidence as proof the goods exist**, and calls a difference **shrinkage only
   where a count supports it**.
 - **Never defaults a count result, a title determination or a variance explanation**, and never
@@ -57,6 +57,7 @@ Ask only what you cannot already see.
 | **F** | *Any stock in transit or on consignment, in or out — quantity, value and the title terms?* | Ownership turns on the contract, not the location field | Recommended. **Never default a title determination.** |
 | **G** | *Is any stock held by a 3PL? If so, its statement for the period.* | The 3PL's stock is reconciled to its statement | Ask whenever a 3PL holds stock; the statement is `[manual]`. |
 | **H** | *The reserve / write-down policy, and the standard cost variance absorption policy if you use standard cost.* | Write-downs need a policy basis; variance balances are readable, the policy is not | Recommended, `[manual]`. |
+| **I** | *Above what amount (per SKU, and in total) should a count variance be investigated?* | Step 6 investigates material variances | Recommended. Without it, list all variances ranked by value and say no threshold was applied. |
 
 **Then, depending on the answer to A:**
 
@@ -76,7 +77,7 @@ Ask only what you cannot already see.
 | Upload | Needed? | Format |
 |---|---|---|
 | **GL inventory balances** at period end, by account — a trial balance works | **Required** | CSV or XLSX |
-| **Inventory subledger / item listing** — SKU, quantity on hand, unit cost, extended value, location | **Required** for the GL-to-subledger leg | CSV or XLSX |
+| **Inventory subledger / item listing as of the count date and the period end** — SKU, quantity, unit cost, extended value, location | **Required** for the GL-to-subledger leg | CSV or XLSX |
 | **Physical count results** — counted SKUs, quantity, location, count date | **Required for the count comparison** — the only test of existence | CSV, XLSX or count sheets (PDF / image) |
 | **GL detail** for the inventory, reserve, shrinkage and variance accounts | Recommended — movements, the reserve roll-forward, the shrinkage trend | CSV or XLSX |
 | **Sales, purchases and bills around the period boundary**, plus anything posted after period end | Recommended — the cut-off test | CSV or XLSX |
@@ -88,7 +89,7 @@ Ask only what you cannot already see.
 
 > *Reconciling **Northbrook Trading**'s inventory at **30 September**, with the GL and item listing read
 > from **your Mosofin connection**. The item listing is the **same platform's items module**, so the
-> GL-to-subledger leg will be reported **nil by construction**, not as a reconciliation. Count: **the A-item
+> GL-to-subledger difference is computed — **nil by construction** if zero, investigated if not. Count: **the A-item
 > cycle count of 26 September you uploaded**; last full count **31 December**. Stock at **the Midlands
 > 3PL** checked against **its September statement**. Shall I go ahead?*
 
@@ -116,7 +117,7 @@ them in the header, and capture balances by category, checking for consignment-i
 ## Stage 4 — Reconcile the three legs and investigate
 
 Compare GL, subledger and count; reconcile GL to subledger — **"nil by construction"** where the systems
-are one — and subledger to count, classifying each variance and saying whether it was **corroborated
+are one and the difference is zero — and subledger to count, classifying each variance and saying whether it was **corroborated
 from data or needs fieldwork**. Work through the common reconciling items, investigate material
 variances (the last two checks need people, and are where causes come from), and compute shrinkage only
 on a count: [`references/method.md`](references/method.md) Steps 2–7. Check
