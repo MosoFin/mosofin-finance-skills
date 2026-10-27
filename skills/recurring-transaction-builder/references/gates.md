@@ -35,7 +35,7 @@ Call `get_agent_datasources` for the confirmed workspace.
 
 | Scenario | What it means here |
 |---|---|
-| **No datasource connected** | The **computation** still works in full — dates, escalations, memos, calendar rolls. **The validation does not.** No account check, no duplicate check, no discovery, no run audit. Say precisely that: the schedule is arithmetically sound and has been checked against nothing. |
+| **No datasource connected** | The **computation** still works in full — dates, escalations, memos, calendar rolls. **The validation runs only on what the user uploads** — the chart of accounts, contact lists, the recurring-template list and transaction history (Steps 2b–2d and 5b), each labelled user-supplied. A check whose export was not supplied is not performed; say precisely which, and never call the schedule validated against the books. |
 | **Exactly one company file** | Confirm the `display_name` before reading. |
 | **Several company files** | Ask which, **by `display_name`** — the schedule is validated against one chart and is not portable to another. |
 | **Connected but stale or broken** | A `reconnect_url` means the connection needs the user. The computation can proceed; **say clearly that it is unvalidated**, because an unvalidated schedule looks identical to a validated one. |
