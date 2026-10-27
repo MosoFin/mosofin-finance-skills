@@ -50,7 +50,7 @@ Typical opening batch, per in-scope entity:
 - *`search_employees`* — **headcount only**, for scale — usually **[auto]**
 - *`get_company_info`* — legal name, **country**, currency — usually **[auto]**
 
-**Pull several prior periods.** **The behaviour test in Step 0b needs the pattern**, not one balance.
+**Pull the prior twelve months.** **The behaviour test in Step 0b needs the pattern**, not one balance.
 
 Handle the envelopes:
 
@@ -73,7 +73,9 @@ actually behaving as intended. **[auto]**, and this is the skill's strongest con
 
 **1. Age every payroll account balance.** **[auto]** from the account history: **how long has each component
 of the closing balance been sitting there?** Report by band — current period, 1–2 periods, 3–6 periods,
-**over 6 periods**.
+**over 6 periods**. Age by **FIFO** (remittances settle the oldest accruals first) unless the remittance memo
+identifies the period it pays; **state the convention on the workpaper** — a liability account is a running
+balance, not an open-item ledger.
 
 **2. Test the behaviour against the cadence.** For each liability account, given its remittance cadence:
 
@@ -83,8 +85,12 @@ of the closing balance been sitting there?** Report by band — current period, 
 | **Peaks at one period's withholdings** | **A balance that only ever grows** |
 | **Returns to nil after the cycle** — clearing and suspense accounts | **A permanent balance in a clearing account** |
 
-**3. Identify the never-clearing residual.** **[auto]**: **the minimum balance the account has reached over
-the last twelve periods** is, in effect, **a permanent balance masquerading as a payroll liability.** **That
+**3. Identify the never-clearing residual.** **[auto]**: for a liability account, **the lowest balance reached
+immediately after each remittance** (the trough of each cycle) over the last twelve cycles, **less any amount
+the cadence says should still be carried**; for a clearing or suspense account, which should reach nil, **the
+lowest running balance** from GL detail, not period-end balances. A month-end balance on a monthly-remitted
+account is the month's withholdings, not a residual. What remains is, in effect, **a permanent balance
+masquerading as a payroll liability.** **That
 figure is the finding**, and it is usually the sum of several old items nobody has looked at.
 
 **Report all three before anything else.** A reconciliation that explains this period's movement while a
@@ -187,13 +193,15 @@ movement pattern rather than requiring investigation.** **Classify first from th
 
 ## Step 5 — Reconcile to bank disbursements
 
-For each payroll cycle — **[gated]**:
+Net pay for each payroll cycle; tax and benefit remittances **per deposit period set by the cadence (input
+D)**, not per pay run — **[gated]**:
 
 - **Net pay disbursed** (per payroll register) **= sum of cash disbursements to employees + any direct
   deposits** — **[auto]** for the disbursements, `[manual]` for the register figure
-- **Tax remittances = sum of withholdings + employer share, by tax authority** — **[auto]** for the
-  payments, by payee
-- **Benefit remittances = sum of withholdings + employer share, by provider** — **[auto]** for the payments
+- **Tax remittances = sum of withholdings + employer share accrued for the deposit period, by tax
+  authority** — **[auto]** for the payments, by payee
+- **Benefit remittances = sum of withholdings + employer share accrued for the deposit period, by
+  provider** — **[auto]** for the payments
 - **Total payroll cash impact = above sums** — **[auto]**
 
 **Compare to the bank statement entries for the period. Differences here are typically timing** — e.g.
@@ -214,13 +222,16 @@ the bank statement proves the money left.** **State which was performed** — th
 
 **Mid-year, the YTD reconciliation is a preview; year-end is the formal one.**
 
-**[auto]** contribution: **cumulative accruals per the ledger against cumulative remittances per the
-ledger**, which **should differ by exactly the outstanding liability.** That identity holds without the
-register, and **a YTD difference that is not explained by the outstanding balance is a genuine break.**
+**[auto]** contribution: **YTD remittances per payments ≥ opening liability + YTD accruals − closing
+liability** — the opening balance matters, since December's withholdings remitted in January open nearly
+every withholding account. Then tie **YTD withholdings per the register** to **YTD remittances + closing
+liability − opening liability**: a real two-source test. **Without the register, say that the YTD test
+proves only ledger arithmetic** — both sides then come from the same ledger.
 
 ## Step 7 — Investigate stale balances
 
-**Any payroll clearing balance aged > 60 days warrants investigation.** **[auto]** — **and this is the step
+**Any clearing or suspense balance over 60 days, and any liability amount older than one full remittance
+cycle plus its due-date lag, warrants investigation.** **[auto]** — **and this is the step
 the workspace performs best.**
 
 **Common causes:**
@@ -238,8 +249,8 @@ the workspace performs best.**
 
 **Three points worth emphasising in a Mosofin run:**
 
-**The ageing is exact.** **[auto]**: not "this looks old" but **"£4,180 has been in this account since March
-2023, comprising nine items."** That specificity is what moves a stale balance from a note to an action.
+**The ageing is specific, by the stated convention.** **[auto]**: not "this looks old" but **"£4,180 has been
+in this account since March 2023, comprising nine items (FIFO)."** That specificity is what moves a stale balance from a note to an action.
 
 **Escheatment is a legal obligation, not housekeeping.** **Unclaimed wages are unclaimed property**, and
 jurisdictions with such laws impose **reporting deadlines and penalties for failing to remit.** **Writing
@@ -262,6 +273,11 @@ the state. **Flag it as a compliance matter and name the determination as `[manu
 
 **For timing differences: document but do not adjust.**
 
+**Before proposing a write-off on a withholding, employer-contribution or benefit account**, obtain the
+authority's or provider's **statement of account** for the period — `[manual]`. A credit residual it does not
+explain is a **remittance to make**; a debit residual is a **refund or credit to claim**. **Neither is written
+off.** A liability is removed only when it is paid or the creditor releases it.
+
 **Two cautions**: **do not write off what is owed to a person** — see escheatment above; **and a residual
 that recurs every period is not immaterial**, however small each instance is. **[auto]** to detect: **the
 same small write-off proposed repeatedly is a process fault**, and writing it off again treats the symptom.
@@ -277,6 +293,8 @@ Deliver an `.xlsx` workpaper, **one tab per account**:
 - **Expected balance** (formula and inputs)
 - **Difference**
 - **Status** (tied / within tolerance / investigating)
+- **Opening agreed to prior reconciliation** — Y/N, difference, and the carried items
+- **Prepared by / date; Reviewed by / date** — `[manual]`
 
 **Add the Mosofin rows**: **the ageing profile**, **the never-clearing residual**, and **the basis of the
 expected balance** — register or payroll journal proxy.
@@ -313,7 +331,7 @@ expected balance** — register or payroll journal proxy.
 
 Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
 
-**File naming:** `Payroll_Recs_[YYYY-MM].xlsx`
+**File naming:** `Payroll_Recs_[YYYY-MM]_[EntityName].xlsx`
 
 Every file states which datasource and `display_name` it covers.
 

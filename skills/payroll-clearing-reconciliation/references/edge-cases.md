@@ -44,8 +44,9 @@ saw-tooth pattern this creates is readable**, and it should not be mistaken for 
 **Direct deposit reversals**: **an employee account closed, deposit returns. Track the return and the
 re-issuance.** **The returned amount is owed to the employee** — see escheatment.
 
-**A clearing account that never reaches nil** — *Mosofin-specific, and the headline finding*. **The minimum
-balance over twelve periods is a permanent residual** wearing a payroll liability's name.
+**A clearing account that never reaches nil** — *Mosofin-specific, and the headline finding*. **The lowest
+running balance over twelve cycles is a permanent residual** wearing a payroll liability's name; for a
+withholding account, the trough after each remittance, less what the cadence says it should carry.
 
 **A withholding account that only grows** — *Mosofin-specific*. Remittances are not happening, or not all of
 them. **A serious finding**, since the money belongs to a tax authority.

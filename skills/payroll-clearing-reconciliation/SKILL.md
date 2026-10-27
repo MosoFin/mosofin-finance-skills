@@ -57,9 +57,10 @@ Ask only what you cannot already see.
 | **B** | *Which entity, and which payroll accounts — clearing, suspense, each withholding and employer liability?* | One reconciliation per account; the clearing account is per entity | On the Mosofin path, **read the chart and present the payroll accounts found** for the user to confirm. Never auto-pick an entity. |
 | **C** | *Which period is being reconciled?* | Sets every read and every roll-forward | **Required.** |
 | **D** | *The remittance cadence for each liability — monthly, semi-weekly, quarterly?* | The expected-balance pattern depends on it entirely | **Required. Never default it** — without it the behaviour test has no benchmark. |
-| **E** | *The payroll register(s) for the period.* | The "accrued" half of each roll-forward | **Required.** Read if a payroll platform is connected. Otherwise the payroll journal's posting is used as a proxy, **stated as one** — and the comparison then proves only that the account moved as the journals say. |
+| **E** | *The payroll register(s) for the period.* | The "accrued" half of each roll-forward | **Required.** Read if a payroll platform is connected; **otherwise ask the user to upload it**. Only if they cannot, the payroll journal's posting is used as a proxy, **stated as one** — and the comparison then proves only that the account moved as the journals say. |
 | **F** | *The bank statement for the period.* | Tying to the statement proves the money left; tying to recorded disbursements proves the bookkeeping | The tie-out is to recorded disbursements, and the output says so. |
 | **G** | *Your materiality threshold for write-offs, and who approves one.* | Separates a small residual from one that needs correction | **Never default a write-off.** |
+| **H** | *The tax authority, pension or benefit provider statement of account, if you will want any balance cleared.* | An unexplained residual on a withholding or contribution account is usually a remittance to make or a refund to claim, not a write-off | Recommended; **required before any write-off** on those accounts. |
 
 **Then, depending on the answer to A:**
 
@@ -71,13 +72,14 @@ Ask only what you cannot already see.
   which steps therefore rely on supplied data.
 - Propose the payroll account list from the chart, and **confirm it with the user**.
 - Remittances are read from payments; the **authority's acknowledgement is not**. Still ask for the
-  cadences (D), the bank statement (F) and any benefit provider statements.
+  cadences (D), the register (E) if no payroll platform is connected, the bank statement (F) and the
+  statements of account (H).
 
 **Upload path — hand over one checklist.**
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **GL detail for each payroll account** — clearing, suspense, every liability — for the period and several prior periods, plus balances at this and the prior period end (a trial balance works) | **Required** — the prior periods give the ageing and the behaviour test their pattern | CSV or XLSX |
+| **GL detail for each payroll account** — clearing, suspense, every liability — for the period and the **prior twelve months**, plus balances at this and the prior period end (a trial balance works) | **Required** — the prior periods give the ageing and the behaviour test their pattern | CSV or XLSX |
 | **Payroll register(s)** for the period | **Required** — without it, the payroll journal posting is the stated proxy | CSV, XLSX or PDF |
 | **Remittance / payment records** — payee, date, amount | **Required** | CSV or XLSX |
 | Entity name, country or region, base currency; the period; the **account list**; the **remittance cadence per liability** | Required | Type it in the chat |
@@ -114,17 +116,18 @@ path, go straight to Stage 3.
 Batch the reads — accounts, both period-end balances, the general ledger on each payroll account,
 payments out, payroll journals — across **several prior periods**, and check the `mock` flag. Then,
 **before anything else**, age every balance by band, test each account's behaviour against its
-cadence, and identify **the never-clearing residual**: the minimum balance over the last twelve
-periods. Then confirm the account list, flagging accounts with payroll movement that are not on it:
+cadence, and identify **the never-clearing residual**: the trough after each remittance over twelve
+cycles, less what the cadence carries — or the lowest running balance of a clearing account. Then confirm the account list, flagging accounts with payroll movement that are not on it:
 [`references/method.md`](references/method.md) Steps 0–1.
 
 ## Stage 4 — Roll forward, compare, itemise and investigate
 
 For each account: expected closing = opening + accrued − remitted, **with its basis stated**; the
 difference to the GL reported for every account, including zero; reconciling items classified from
-the movement pattern, then confirmed; the bank tie-out per payroll cycle; the YTD identity —
-cumulative accruals less cumulative remittances equals the outstanding liability; and every balance
-over **60 days** investigated with its exact age, item count and probable cause:
+the movement pattern, then confirmed; the bank tie-out — net pay per cycle, remittances per deposit period; the YTD test, with the opening
+balance and against the register; and every clearing balance over **60 days**, and every liability
+amount older than one remittance cycle plus its lag, investigated with its age by the stated
+convention, item count and probable cause:
 [`references/method.md`](references/method.md) Steps 2–7. Check
 [`references/edge-cases.md`](references/edge-cases.md) for garnishments, severance, benefits in
 arrears, direct deposit reversals, a mid-year system change and group payrolls.

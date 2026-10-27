@@ -6,7 +6,7 @@ All of the original standards, plus the Mosofin ones.
 
 - **Every payroll account has GL balance, expected balance, and explained difference**
 - **YTD figures verified against payroll register**
-- **Bank tie-out for each payroll cycle**
+- **Bank tie-out: net pay for each payroll cycle; tax and benefit remittances per deposit period**
 - **Stale balances flagged with age and proposed treatment**
 - **Multi-jurisdiction breakdown if applicable**
 - **File naming consistent**
@@ -29,9 +29,10 @@ All of the original standards, plus the Mosofin ones.
 - **The basis of every expected balance is stated** — payroll register, or payroll journal proxy — and where
   the proxy was used, **what the comparison proves is stated**
 - **The bank tie-out states whether it was to recorded disbursements or to the bank statement**
-- **The YTD identity was tested** — cumulative accruals less cumulative remittances equals the outstanding
-  liability
-- **Stale balances carry exact ages, item counts and probable causes**, and **escheatment is flagged as a
+- **The YTD test was run with the opening balance** — register withholdings tied to remittances + closing
+  − opening liability, or stated to prove only ledger arithmetic without the register
+- **Stale balances carry ages by the stated convention (FIFO unless memos say otherwise), item counts and
+  probable causes**, and **escheatment is flagged as a
   compliance obligation** rather than a write-off option
 - **Unclaimed pay is not proposed for write-off to income**
 - **Recurring small write-offs are reported as a process fault**, not as immaterial residuals
