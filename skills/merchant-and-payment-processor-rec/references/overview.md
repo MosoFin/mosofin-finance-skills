@@ -37,8 +37,8 @@ can be compared to anything.
 **And the error this skill should test for every time:**
 
 > **Revenue recorded net of processor fees.** Step 7 names it: *"A common error is recognizing revenue net
-> of processor fees — wrong."* **It is also detectable.** **[auto]**: if **revenue for the period
-> approximates net payouts rather than gross charges**, and **the merchant processing fee account carries
+> of processor fees — wrong."* **It is also detectable.** **[auto]**: if **revenue recorded from the
+> processor approximates net payouts rather than gross charges**, and **the merchant processing fee account carries
 > little or nothing** while a processor is clearly in use, **revenue is being recorded net.**
 >
 > **This understates revenue and understates expense by the same amount** — so profit is right and **every

@@ -39,7 +39,9 @@ Typical opening batch, per in-scope entity:
 - *`search_accounts`* — **processor clearing, revenue, merchant processing fees, refunds / sales returns,
   chargebacks, output and input tax accounts** — usually **[auto]**
 - *`get_general_ledger`* on **the clearing account** — **the roll-forward and the ageing** — usually
-  **[auto]**
+  **[auto]**. **Identify the clearing account from where the processor sales land, not from its name**:
+  in QuickBooks it is often Undeposited Funds / Payments to deposit, or whatever account the
+  processor's sync app posts to
 - *`get_balance_sheet`* / *`get_trial_balance`* — the clearing balance at both period ends — usually
   **[auto]**
 - *`get_profit_and_loss`* **by month** — **revenue, fees, refunds and chargebacks: the net-revenue test** —
@@ -111,8 +113,8 @@ is against fixture activity** and proves nothing.
 | **Adjustments** | Manual processor adjustments |
 | **Payouts / settlements** | Bank deposits from processor to merchant |
 
-**The processor's accounts payable to the entity = gross collected − fees − refunds − chargebacks −
-holds. Settlements pay down this balance.**
+**The amount the processor owes the entity (the clearing balance) = gross collected − fees − refunds −
+chargebacks − holds. Settlements pay down this balance.**
 
 **[gated]**: **`[auto]` where the processor is connected**, `[manual]` from an export otherwise. **Read the
 processor's own definitions** of available, pending and reserve — **they differ by processor and the
@@ -123,18 +125,22 @@ difference lands directly in Step 4's comparison.**
 For the period, capture:
 
 ```
-Gross customer charges                              $A
+Gross customer charges (tax included)               $A
 Less: Refunds processed                             ($B)
 Less: Chargebacks                                   ($C)
 Less: Processor fees                                ($D)
-Less: Tax / VAT collected (depending on processor)  ($E if reportable separately)
-Plus: Adjustments (refunds of fees, etc.)           +$F
-Equals: Net settled to entity                       = $A − B − C − D − E + F
+Plus/less: Adjustments (refunds of fees, etc.)      ±$F
+Equals: Net settled to entity                       = $A − B − C − D ± F
 ```
+
+**Gross means the amount charged to customers, tax included.** Ordinary processors (Stripe, Square,
+PayPal and similar) pay the tax out to the merchant, who remits it — so tax stays inside the settled
+amount. **Deduct tax only for transactions where the processor or marketplace remits it**
+(marketplace-facilitator sales — see the edge case), and list those separately.
 
 **Compare to actual bank deposits (payouts).**
 
-**[gated]** on the processor side; **[auto]** on the ledger side — **each of A through F has a
+**[gated]** on the processor side; **[auto]** on the ledger side — **each component has a
 corresponding GL account**, so **the same decomposition can be built from the books and the two compared.**
 **That comparison is the reconciliation**, and where the processor is not connected it is still worth
 building the GL-side decomposition, because **it is what reveals a missing component** — no chargeback
@@ -168,12 +174,13 @@ the processor to the entity.**
 
 ```
 Opening clearing balance
-+ Gross customer charges (revenue recognized)
-+ Tax collected (if applicable)
++ Gross customer charges (revenue recognized)   } = gross charged to customers
++ Tax collected (if applicable)                 }   (Step 2's $A)
 - Refunds
 - Chargebacks
 - Processor fees
-- Adjustments
+± Adjustments
+- Transferred to reserve receivable / + released from reserve
 - Payouts received in bank
 = Closing clearing balance
 ```
@@ -193,7 +200,9 @@ it:
 3. **Age the clearing balance.** **[auto]**: **amounts sitting beyond the normal payout window** are the
    Step 9 exception, and ageing is what finds them.
 
-**Where no clearing account exists at all**, that is a structural finding: **the entity is almost certainly
+**Before concluding there is no clearing account**, check Undeposited Funds / Payments to deposit and
+any account the processor's sync app posts to — the clearing account is wherever the processor sales
+land. **Where no clearing account exists at all**, that is a structural finding: **the entity is almost certainly
 posting the net payout straight to revenue or to cash**, which is the error in Step 7.
 
 ## Step 5 — Tie payouts to bank deposits
@@ -253,7 +262,7 @@ from memory.
 
 | Signal | What it suggests |
 |---|---|
-| **Revenue ≈ net payouts** rather than gross charges | **Revenue is being recorded net** |
+| **Revenue recorded from processor deposits / sales receipts** (the clearing account's credits, or deposits from the processor payee) **≈ processor net payouts** rather than processor gross charges — compare this population, not total P&L revenue, and say which population was used | **Revenue is being recorded net** |
 | **Merchant processing fee account near zero** while a processor is in use | Same |
 | **No clearing account exists** | Same, and no reconciliation is possible |
 | **Refunds netted against revenue** rather than shown as contra-revenue | Related presentation error |
@@ -307,12 +316,24 @@ transaction-level visibility in GL but simpler reconciliation.**
 ```
 DR  Cash / Bank                                  $net payouts
 DR  Merchant Processing Fees                     $fees
-DR  Sales Returns / Refunds                      $refunds
+DR  Sales Returns / Refunds                      $refunds (net of tax)
+DR  Output Tax Payable                           $tax on refunds
 DR  Chargebacks                                  $chargebacks
+DR/(CR)  Processor Clearing                      increase/(decrease) in the amount owed by the
+                                                 processor this period
     CR  Revenue                                     $gross sales (net of tax)
     CR  Output Tax Payable                          $tax on sales
-    CR  Processor Clearing                          $remaining balance change
 ```
+
+**Correcting a net-revenue posting** (the Step 7 finding; per period, fees from the processor report):
+```
+DR  Merchant Processing Fees                     $fees
+    CR  Revenue                                     $fees
+If refunds were netted in revenue:
+DR  Sales Returns & Allowances                   $refunds
+    CR  Revenue                                     $refunds
+```
+**Flag the output-tax review separately; do not propose a tax entry without the filed returns.**
 
 **Declare which approach is in use** — the original's own quality standard — **and note that `[auto]`
 verification differs by approach**: the per-transaction method leaves a clearing entry per sale and is
@@ -354,7 +375,8 @@ whether any read returned `mock` data.
 - **Unsettled charges still in clearing past expected payout window** — **[auto]** from the ageing
 - **Chargebacks without disputed status** — **[gated]**
 - **Refunds with no original transaction** — **[gated]**
-- **Fees that don't match processor's stated rate** — **[auto]** as a rate check
+- **Effective fee rate by period (trend)** — **[auto]**
+- **Fees vs contracted rate** — **[manual]**, only if the user supplied the contracted rate (intake F)
 - **Payouts to bank with no corresponding processor record** — **[gated]**
 
 **Sheet 5: GL Posting** — pass-through to `journal-entry-builder`, marked as **proposals**.

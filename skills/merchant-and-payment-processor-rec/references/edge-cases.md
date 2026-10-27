@@ -20,8 +20,11 @@ or contra-Fee per policy.**
 **Multi-entity setups**: **one processor account serving multiple entities of a group. Each transaction must
 be attributed to the correct entity; the clearing account is per entity.**
 
-**Disputed transactions still open at period end**: **not yet a chargeback, not yet revenue. Some entities
-reserve for likely losses; others wait. Document.**
+**Disputed transactions still open at period end**: **the sale remains revenue** — an open dispute does not
+reverse recognition. Most processors withdraw the disputed amount and the dispute fee **when the dispute is
+opened**; where that has happened, propose DR Disputes Receivable (or Chargebacks) / DR Chargeback Fee
+Expense, CR Processor Clearing, reversed if the dispute is won. Whether to carry a refund liability for
+expected losses is the entity's policy — ask, and document. List open disputes in the roll-forward.
 
 **Subscription billing through processor**: **each renewal is a new charge; ensure recognition timing matches
 the service period, not the billing event** (a revenue recognition question, outside this reconciliation).
@@ -45,12 +48,14 @@ a reserve.
 clearing balance can balloon. Investigate and resolve.** *Mosofin note*: **the ageing and the lag trend catch
 this early**, before the balance is large.
 
-**Revenue recorded net of fees** — *Mosofin-specific test, and the most valuable one here*. Revenue ≈ net
-payouts, a near-empty fee account, or no clearing account at all. **Understates revenue and expense equally,
+**Revenue recorded net of fees** — *Mosofin-specific test, and the most valuable one here*. Processor-channel
+revenue ≈ net payouts, a near-empty fee account, or no clearing account at all. **Understates revenue and expense equally,
 so profit hides it.**
 
-**No clearing account exists** — *Mosofin-specific*. The net payout is going straight to revenue or cash.
-**No reconciliation is possible until one is created.**
+**No clearing account exists** — *Mosofin-specific*. First check Undeposited Funds / Payments to deposit and
+any account the processor's sync app posts to (Step 4) — that is often the clearing account under another
+name. If none, the net payout is going straight to revenue or cash. **No reconciliation is possible until one
+is created.**
 
 **Comparing the wrong balance definitions** — *Mosofin-specific*. Available versus pending versus reserve.
 **The difference is definitional, not an error** — state which pair was compared.
