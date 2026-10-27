@@ -66,7 +66,7 @@ Where the coverage dates are unknown, say **unknown**. Put the item on the sched
 
 *(A Mosofin addition. There is no equivalent step in the original, because the original had no ledger to look at.)*
 
-Before building or checking any schedule, pull the prepaid account's full transaction detail for at least twenty-four months, along with the account list. This is one batched read and it decides how the rest of the run goes.
+Before building or checking any schedule, pull the prepaid account's full transaction detail back to the oldest item still carried in the balance — at least twenty-four months — along with the account list, and the client's existing prepaid schedule if there is one. Confirm that the identified items sum to the opening GL balance; any unexplained remainder is a named exception. This is one batched read and it decides how the rest of the run goes.
 
 **Test 0a — Does the account ever come down?** `[auto]`
 
@@ -186,7 +186,7 @@ Each of these needs a date that exists on a contract, not in a ledger. So:
 Default method: **straight-line over the coverage period.**
 
 ```
-Monthly amortization = Total prepaid amount / Total months of coverage
+Monthly amortization = Prepaid amount (net of recoverable tax) / Total months of coverage
 ```
 
 For partial months at the start or end:
@@ -198,7 +198,7 @@ Partial month amortization = (Monthly amortization x Days in partial month) / Da
 Or, more simply, prorate on calendar days throughout:
 
 ```
-Daily amortization = Total prepaid amount / Total days of coverage
+Daily amortization = Prepaid amount (net of recoverable tax) / Total days of coverage
 Period amortization = Daily amortization x Days in that period
 ```
 
@@ -246,13 +246,13 @@ Memo: Prepayment to [vendor] for [service] covering [start - end]
 
 The memo line matters more here than almost anywhere else in accounting, because it is the **only place the coverage period will ever be recorded inside the accounting system.** Everything this skill has said about coverage dates not being in the ledger is true only because people leave this memo blank. Write it properly and next year's run gets easier.
 
-**If the entire amount was already expensed in error, reverse the expense to set up the prepaid asset.** `[auto]` to detect — this is precisely what Step 1's lumpiness scan finds — and `[auto]` to draft the correcting entry. Posting remains the user's.
+**If the entire amount was already expensed in error, draft DR Prepaid / CR the expense account for the unexpired portion at the correction date only** — a $12,000 annual premium expensed in March and found in September sets up $6,000, not $12,000. **If the original charge fell in a prior closed year, ask the user whether the amount is material:** if not, correct through current-year expense; if it is, refer it to the accountant as a prior-period adjustment (ASC 250 / IAS 8). `[auto]` to detect — this is precisely what Step 1's lumpiness scan finds — and `[auto]` to draft the correcting entry. Posting remains the user's.
 
 **Tax, and a real finding available here** `[auto]`:
 
 In a jurisdiction with recoverable VAT/GST, the tax should come out at payment and be recovered in full then — **not amortized over the coverage period**. The original states this in its edge cases and it is worth pulling forward, because the ledger will tell you whether it happened.
 
-Read the prepaid debits against the gross invoice amounts on the corresponding bills. **If the prepaid additions equal the gross figures in a jurisdiction that allows recovery, recoverable tax is sitting inside the asset and is being amortized into expense.** That is a cash-flow error and a P&L error at once, it recurs every year, and it is one comparison to find. Raise it with the figures.
+Read the prepaid debits against the gross invoice amounts on the corresponding bills. **If the prepaid additions equal the gross figures in a jurisdiction that allows recovery, and the bill carries a recoverable tax code or tax amount, recoverable tax is sitting inside the asset and is being amortized into expense.** Exempt, out-of-scope and non-recoverable tax (e.g. insurance premium tax, or a vendor not registered for VAT/GST) belongs in the asset — prepaid = gross is then correct. That is a cash-flow error and a P&L error at once, it recurs every year, and it is one comparison to find. Raise it with the figures.
 
 ---
 
@@ -280,6 +280,8 @@ Memo: Monthly prepaid amortization - [period]
 ```
 
 Hand the drafted entry to `journal-entry-builder` for formatting and validation.
+
+**Catch-up entries**, drafted separately from the monthly entry, each with the months covered: **missed amortization months** (from Test 0a) and **expired residue** (from Test 0d, once the items are identified on the schedule). Each is a proposal.
 
 **On the recurring entry.** The original says: *Recurring JE: hand off to `recurring-transaction-builder`.* That handoff is preserved and the cross-reference stands — but be honest about the boundary. **Mosofin cannot create a recurring transaction.** The gateway is read-only; it does not write to the accounting system, and a recurring template is a write. So:
 
@@ -352,10 +354,12 @@ If a prepaid item is cancelled mid-period — an insurance policy cancelled with
 - The difference is an expense (if the refund is less) or income (if it exceeds, which is rare)
 
 ```
-DR  Cash / AR for refund                           $refund
+DR  Cash, or vendor receivable / vendor credit     $refund
+    (if not yet received)
 DR  Expense account (if refund < unamortized)      $diff
     CR  Prepaid Expense                              $unamortized balance
-    CR  Other Income (if refund > unamortized)       $diff
+    CR  Original expense account                     $diff
+        (if refund > unamortized, unless the policy says otherwise)
 Memo: Cancel prepaid [item] - refund [date]
 ```
 
@@ -367,10 +371,10 @@ Memo: Cancel prepaid [item] - refund [date]
 
 ### Step 10 — Output
 
-Deliver an `.xlsx` workpaper. The original's five sheets are kept in order, with two Mosofin additions.
+Offer an `.xlsx` workpaper (see below). The original's five sheets are kept in order, with two Mosofin additions.
 
 **Sheet 1: Prepaid Schedule Master**
-| Item ID | Vendor | Description | Payment Date | Total Amount | Currency | Coverage Start | Coverage End | Months | Monthly Amort | Expense Account |
+| Item ID | Vendor | Description | Payment Date | Total Amount (gross, reference) | Prepaid Amount (net of recoverable tax) | Currency | Coverage Start | Coverage End | Months | Monthly Amort | Current portion (next 12 months) | Non-current portion | Expense Account |
 
 Add a **Source** column: `ledger` for fields read live, `user` for coverage dates supplied in the interview, `unknown` for the flagged gaps from Step 3. A reader should never have to guess which figures came from the books and which came from a conversation.
 
@@ -383,7 +387,7 @@ For each item, the monthly amortization across the coverage period.
 Every column except **Schedule Sum** is `[auto]`. Mark the header so that is visible. And repeat the Step 8 caution on the sheet itself: the variance that matters is against the schedule, not between two readings of the ledger.
 
 **Sheet 4: Monthly JE**
-The current period's aggregate amortization entry, formatted for handoff to `journal-entry-builder`. Marked, unambiguously, **PROPOSED — NOT POSTED**.
+The current period's aggregate amortization entry, formatted for handoff to `journal-entry-builder`, plus the catch-up entries from Step 7 (missed months, expired residue) and any Step 6 correcting entry, each with the months covered. Marked, unambiguously, **PROPOSED — NOT POSTED**.
 
 **Sheet 5: Cancellations / Modifications Log**
 | Item | Original Schedule | Change | New Schedule | Impact |

@@ -53,7 +53,7 @@ Ask only what you cannot already see.
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which company — or, for a group, which entities?* | Several company files means several schedules, each labelled, never merged | On the Mosofin path, ask **by name**. Never auto-pick. |
 | **C** | *Which account, or accounts, are prepaid?* | Many books have several — and an "Other Current Assets" that has become a drawer | On the Mosofin path, read the chart first, then **confirm**. |
-| **D** | *The coverage start and end date for each open item.* | The one thing the ledger cannot supply, and what makes it a schedule | **Required.** Ask item by item; where unknown, the item goes on the schedule with dates **blank and flagged**. Never inferred. |
+| **D** | *The coverage start and end date for each open item — and your existing prepaid schedule, if there is one.* | The one thing the ledger cannot supply, and what makes it a schedule | **Required.** Ask item by item; where unknown, the item goes on the schedule with dates **blank and flagged**. Never inferred. |
 | **E** | *Your materiality threshold — below which an item is expensed, not scheduled.* | Decides what is scheduled | **Your call; never set by the skill.** It can show what a proposed threshold does in aggregate. If unstated, the coverage sheet says so. |
 | **F** | *Whole-month or daily proration?* | Both are defensible; mixing them in one schedule is not | Observe which convention the existing entries follow, then **confirm rather than assume**. |
 | **G** | *Is recoverable tax (VAT/GST) split out at payment, and in which jurisdiction?* | Where recoverable, the tax comes out at payment and is not amortized | The policy is yours to state; the ledger test for tax inside the asset still runs. |
@@ -73,12 +73,13 @@ Ask only what you cannot already see.
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **Prepaid account transaction detail** — at least 24 months, for the ledger tests — with vendor, description, reference, amount and payment date per item | **Required** | CSV or XLSX |
+| **Prepaid account transaction detail** — back to the oldest item still in the balance, at least 24 months — with vendor, description, reference, amount and payment date per item | **Required** | CSV or XLSX |
 | **Coverage start and end dates** per item — from the contracts, policy schedules or invoices | **Required** — unknown dates stay blank and flagged | PDF, CSV, XLSX, or typed in the chat |
 | **Chart of accounts** — prepaid asset and expense accounts | **Required** | CSV or XLSX |
 | Functional currency; currency per item if multi-currency | **Required** (per item: if multi-currency) | Type it in the chat |
 | **The existing prepaid schedule**, if there is one | Needed for a reconciliation — without it the tie-out is a roll-forward only, and says so | XLSX or PDF |
-| **Expense ledger** for the period | Recommended — the scan for prepaids expensed in one hit | CSV or XLSX |
+| **Expense ledger (GL detail)** for the last 12–24 months | Recommended — without it the expensed-in-one-hit scan is not performed | CSV or XLSX |
+| **Bills behind each prepaid addition**, with tax lines; **vendor credits and receipts** from prepaid vendors | Recommended — the tax test and cancellation detection; tests not run are named on the coverage sheet | CSV, XLSX or PDF |
 | Materiality threshold; tax jurisdiction; amortization frequency | Recommended (frequency optional) | Type it in the chat |
 
 **Read back before starting, then wait for a yes:**
@@ -103,7 +104,7 @@ interviewing. On the upload path, go straight to Stage 3.
 
 ## Stage 3 — Read the shape of the account, and find the candidates
 
-Before building anything, read at least 24 months of the prepaid account and run the four ledger tests:
+Before building anything, read the prepaid account back to its oldest open item (at least 24 months), confirm the items explain the opening balance, and run the four ledger tests:
 does it ever come down, what the credits look like, what odd items live there, and whether the
 balance exceeds twelve months of additions. Then rank expense accounts by **lumpiness** to find
 prepaids expensed in one hit, and flag what is **not** prepaid — deposits, equipment, inventory,
@@ -123,8 +124,9 @@ and auto-renewals.
 
 ## Stage 5 — Propose the entries, tie out, and present
 
-Draft the initial booking with the coverage period in the memo, any reversal of a prepaid expensed
-in error, and the monthly amortization entry — **setting it up as a recurring entry is yours**;
+Draft the initial booking with the coverage period in the memo, the correction of a prepaid
+expensed in error (unexpired portion only), catch-up entries for missed months and expired
+residue, and the monthly amortization entry — **setting it up as a recurring entry is yours**;
 the skill checks next period that it ran. Roll forward the GL and tie it **three ways**, naming the
 shape of any variance, settle cancellations against the refund, and apply modifications prospectively:
 [`references/method.md`](references/method.md) Steps 6–10. Every entry is marked **PROPOSED — NOT
