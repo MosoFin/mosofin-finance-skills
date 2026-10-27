@@ -51,8 +51,9 @@ Ask only what you cannot already see.
 |---|---|---|---|
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which period?* | Sets the movements, the charge and the roll-forward | **Required.** |
-| **C** | *Your existing fixed asset register — asset, class, cost, in-service date, life, salvage, method, location.* | **The core gap.** Asset-level depreciation needs it | Recommended. Without it, movements can still be reconciled and the threshold tested, but **no asset-level depreciation is computed.** |
-| **D** | *Useful life and method for each asset class.* | Drives every depreciation figure | **Required. Never assume a life.** |
+| **C** | *Your existing fixed asset register — asset, class, cost, in-service date, life, salvage, method, location.* | **The core gap.** Asset-level depreciation needs it | Recommended. Without it, offer a **draft register derived from the GL**, to be confirmed (Step 5). |
+| **D** | *Useful life, method and salvage policy for each asset class (salvage nil is a valid answer, but it is yours).* | Drives every depreciation figure | **Required. Never assume a life or salvage.** |
+| **D2** | *Do you book depreciation per your own policy, or post the figure from your tax return / accountant?* | If the latter, the accountant's schedule is the register source and no separate charge is computed | **Required.** |
 | **E** | *What is the capitalization threshold?* | Step 2b's expense scan depends on it | **Required, and never defaulted.** Ask early. |
 | **F** | *Which first / last period convention — half-month, full month or pro-rata?* | Changes every number | **Required, and never defaulted.** |
 | **G** | *Which reporting framework — US GAAP, IFRS or local GAAP?* | Decides componentization, revaluation and impairment reversal | **Required.** |
@@ -80,7 +81,7 @@ Ask only what you cannot already see.
 |---|---|---|
 | **Trial balance or balance sheet** — gross cost and accumulated depreciation by account, opening and closing | **Required** | CSV or XLSX |
 | **GL detail** for the asset, accumulated depreciation, depreciation expense and gain / loss on disposal accounts | **Required** — the additions and disposals population | CSV or XLSX |
-| **Fixed asset register** | Recommended — without it, no asset-level depreciation | CSV or XLSX |
+| **Fixed asset register** (or the accountant's depreciation schedule) | Recommended — without it, a draft register is derived from the GL, to be confirmed | CSV or XLSX |
 | **GL detail for repairs, maintenance, small tools, equipment and computer expense** | Recommended — the capitalization threshold scan | CSV or XLSX |
 | **Purchase invoices** behind the period's additions | Recommended — the cost build-up, freight and installation | PDF or image |
 | Period, entity name, functional currency, year-end; framework; class lives and methods; threshold; convention | **Required** | Type it in the chat |
@@ -122,7 +123,7 @@ Test acquisitions against the policy and the cost build-up, flag freight or inst
 capitalized invoice, and run the **threshold scan both ways** (Step 2b). Apply the method and convention,
 compute the period's charge — never past cost less salvage — and compare the **implied rate** with the
 policy life; say whether depreciation was posted at all. Draft the depreciation entry for
-`journal-entry-builder`, a capitalization entry only for items the scan found wrongly expensed, and
+`journal-entry-builder`, a reclassification (crediting the expense, not Cash / AP) only for items the scan found wrongly expensed, and
 disposal entries — all **proposals** — and check every disposal for the **half-entry** error: [`references/method.md`](references/method.md) Steps 2–8. Check
 [`references/edge-cases.md`](references/edge-cases.md) for land, CIP, composite assets, leasehold
 improvements, foreign currency, held for sale, trade-ins and software.

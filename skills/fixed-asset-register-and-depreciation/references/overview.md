@@ -27,19 +27,20 @@ system at all** — they live in a fixed-asset module, a spreadsheet, or nobody'
 So the register itself is **`[manual]`**. But that is not the end of the story, because **the movements are
 readable**, and that inverts the usual reconciliation into something more useful:
 
-1. **Additions can be derived independently.** **Debits to the fixed asset accounts during the period are
-   the capitalizations** (*`get_general_ledger`*, *`search_purchases`*). You do not have to ask for a list
+1. **Additions can be derived independently.** **Debits to the fixed asset cost accounts during the period,
+   less transfers between cost accounts and reversals, are the capitalizations** (accumulated depreciation
+   accounts excluded — see Step 0) (*`get_general_ledger`*, *`search_purchases`*). You do not have to ask for a list
    of acquisitions — you can read them, and then compare. **A debit to the asset account that is not in the
    register is an unrecorded asset; a register entry with no matching debit is a phantom.** Reconciling
    both directions is the whole game, and here both directions are available.
-2. **Disposals likewise.** **Credits to the asset accounts, and any movement on gain-or-loss-on-disposal
-   accounts**, are the disposal population.
+2. **Disposals likewise.** **Credits to the asset cost accounts that are not transfers or reversals, and any
+   movement on gain-or-loss-on-disposal accounts**, are the disposal population.
 3. **The capitalization threshold can be tested against the expense accounts.** **[auto]**, and this is the
    check auditors actually perform: scan repairs, maintenance, equipment and small-tools expense for
    **individual items at or above the threshold**. **Capital items hide in repairs and maintenance**, and
    finding them is one query.
-4. **Depreciation can be sanity-checked without the register.** Recorded depreciation divided by gross cost
-   gives an **implied rate**; compare it to the policy useful lives. **A rate far from policy means wrong
+4. **Depreciation can be sanity-checked without the register.** Recorded depreciation divided by the cost of
+   depreciable assets in service gives an **implied rate** — an indicator, not an error; compare it to the policy useful lives. **A rate far from policy means wrong
    lives, missed assets, or depreciation that stopped running.**
 5. **Fully depreciated assets are visible** — where accumulated depreciation equals cost. **Assets still in
    use at zero net book value** are a register-hygiene finding and often an impairment or replacement

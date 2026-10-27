@@ -118,8 +118,8 @@ already answer:
 | What to confirm | Required? | Notes |
 |---|---|---|
 | **Existing FA register** | Recommended — **[manual]** | **The core gap.** Without it, you can still reconcile movements and test the threshold, but not compute asset-level depreciation. |
-| ~~New acquisitions for the period~~ | **Now [auto]** | **Derived from debits to the FA accounts.** Confirm rather than request. |
-| ~~Disposals for the period~~ | **Now [auto]** | Derived from credits and gain/loss accounts. Confirm the reason and proceeds. |
+| ~~New acquisitions for the period~~ | **Now [auto]** | **Derived from debits to the FA cost accounts, net of transfers and reversals** (Step 0). Confirm rather than request. |
+| ~~Disposals for the period~~ | **Now [auto]** | Derived from credits to cost accounts that are not transfers or reversals, and gain/loss accounts. Confirm the reason and proceeds. |
 | **Asset class policies** — useful life and method per class | **Required — [manual]** | Never assume a life. The table in Step 1 is a range, not a policy. |
 | **Reporting framework** — US GAAP / IFRS / local GAAP | **Required — [manual]** | Decides componentization, revaluation and impairment reversal. |
 | **Capitalization threshold** | **Required — [manual]** | **Ask for it early** — Step 2b's expense scan depends on it. |

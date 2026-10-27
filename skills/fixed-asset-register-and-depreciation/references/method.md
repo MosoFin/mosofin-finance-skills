@@ -44,8 +44,13 @@ Typical opening batch, per in-scope entity:
   disposal, and repairs and maintenance accounts** — usually **[auto]**
 - *`get_balance_sheet`* / *`get_trial_balance`* — **gross cost and accumulated depreciation by account**,
   opening and closing — usually **[auto]**
-- *`get_general_ledger`* on the **FA accounts** — **every debit and credit, which is the additions and
-  disposals population** — usually **[auto]**
+- *`get_general_ledger`* on the **FA cost accounts** — **every debit and credit, which is the additions and
+  disposals population** — usually **[auto]**. **Cost accounts only:** exclude accounts whose detail type or
+  name is accumulated depreciation (on QuickBooks Online these are Fixed Asset-typed, and the default asset
+  setup creates "Original cost" and "Depreciation" sub-accounts under one parent), and map sub-accounts to
+  their parent asset. **Additions** = debits to cost accounts **less** transfers from CIP or other cost
+  accounts (matched pairs within one entry) and less reversals. **Disposals** = credits to cost accounts that
+  are not transfers or reversals. Show each excluded pair on the roll-forward's transfers line
 - *`get_general_ledger`* on **accumulated depreciation and depreciation expense** — the recorded charge and
   its pattern — usually **[auto]**
 - *`search_purchases`* / *`search_bills`* — **the acquisition documents behind the debits**, with vendor and
@@ -192,8 +197,10 @@ Period depreciation = Units produced × per-unit rate
 **Book depreciation and tax depreciation often differ — this creates deferred tax differences**, which
 the tax provision accounts for.
 
-**For book purposes, apply the entity's policy method. For tax depreciation specifically, hand off to the
-tax return prep skills.**
+**For book purposes, apply the entity's policy method. For tax depreciation specifically, hand off to your
+tax preparer.** Where the entity books the depreciation from its tax return or accountant (intake D2 — common
+with Section 179 / bonus / MACRS), take the accountant's depreciation schedule as the register source, tie
+the GL to it, and do not compute a separate charge.
 
 ## Step 4 — Convention for the first and last periods
 
@@ -205,7 +212,9 @@ tax return prep skills.**
 
 **Most entities use full month or half-month. Apply consistently. Document.**
 
-**Same logic for the disposal period.**
+**For the disposal period** — **[manual]**, ask which applies: **full month** — no depreciation in the month
+of disposal (or a full month, as elected); **half-month** — half a month; **pro-rata** — to the disposal
+date.
 
 *Mosofin note*: **the convention is invisible in the ledger but visible in the first month's charge.** Where
 a register exists, check that the first period's depreciation matches the stated convention — a mismatch
@@ -222,11 +231,20 @@ For each asset in service — **[gated]**: the arithmetic is `[auto]`, but it ne
 
 **Verify: cumulative depreciation never exceeds (Cost − Salvage).**
 
+**No register?** Offer to draft one from the GL history of each cost account since inception: one row per
+addition, less disposals, with in-service date = posting date unless the user says otherwise, and life and
+method from the class policy. Label it **draft register — derived from GL, to be confirmed**, and compute
+depreciation from it. Agree accumulated depreciation to the GL and report the difference rather than
+forcing it.
+
 **Mosofin addition — the implied-rate check, which runs without a register.** **[auto]**: divide the
-period's recorded depreciation by gross cost per class and annualize. **Compare the implied life to the
-policy life.** A machinery class on a 10-year policy showing an implied 3-year rate, or a 40-year rate,
+period's recorded depreciation by the **cost of depreciable assets in service** and annualize — exclude
+land, CIP and (where a register exists) fully depreciated assets, and deduct salvage. Run it per class only
+where depreciation is posted per class; otherwise run it in total and say so. **Compare the implied life to
+the policy life.** A machinery class on a 10-year policy showing an implied 3-year rate, or a 40-year rate,
 means something is wrong — wrong lives applied, assets missing from the schedule, or a recurring journal
-that no longer matches the register. **It is a coarse check, and it still finds real errors.**
+that no longer matches the register. **It is a coarse check — an indicator, not an error — and it still
+finds real errors.**
 
 Also **[auto]**: **has depreciation been posted at all this period?** A zero or absent charge in a month
 where assets exist is worth surfacing before anything else.
@@ -248,6 +266,8 @@ others have one consolidated. Match the COA structure.** **[auto]** to determine
 
 ## Step 7 — Capitalization JE for new acquisitions
 
+**New acquisition not yet recorded:**
+
 ```
 DR  Fixed Asset (specific asset class)                $capitalized cost
 DR  Input Tax Recoverable (if applicable)             $tax
@@ -255,9 +275,22 @@ DR  Input Tax Recoverable (if applicable)             $tax
 Memo: Capitalize [asset description] — placed in service [date]
 ```
 
-*Mosofin note*: **for assets already posted, this entry has happened** — the value of Step 2 is checking it
-was right and complete, not re-proposing it. Propose the entry only for items the threshold scan surfaced
-as wrongly expensed.
+**Correction of an item expensed this fiscal year** (the purchase already credited Cash / AP):
+
+```
+DR  Fixed Asset (specific asset class)                $capitalized cost
+    CR  Repairs & Maintenance (or the account originally charged)   $capitalized cost
+DR  Depreciation Expense                              $catch-up from the in-service date, per the convention
+    CR  Accumulated Depreciation                        $catch-up
+Memo: Reclassify [asset description] to fixed assets — placed in service [date]
+```
+
+**Expensed in a closed prior year:** do not propose. Flag it for the accountant as a prior-period
+correction (ASC 250 / IAS 8).
+
+*Mosofin note*: **for assets already posted, the acquisition entry has happened** — the value of Step 2 is
+checking it was right and complete, not re-proposing it. Propose a correction only for items the threshold
+scan surfaced as wrongly expensed — never a second credit to Cash / AP.
 
 ## Step 8 — Disposals
 
@@ -267,10 +300,11 @@ as wrongly expensed.
 Compute gain or loss on disposal:
 Gain/loss = Proceeds − (Cost − Accumulated depreciation at disposal date)
          = Proceeds − Net book value at disposal date
+(Proceeds are net of output tax.)
 ```
 
 ```
-DR  Cash / AR                                         $proceeds (if any)
+DR  Cash / AR                                         $proceeds plus output tax (if any)
 DR  Accumulated Depreciation                          $accumulated depreciation at disposal
 DR  Loss on Disposal (if loss)                        $loss
     CR  Fixed Asset                                     $original cost
@@ -296,13 +330,13 @@ Opening Cost
 + Capitalizations
 - Disposals (at original cost)
 +/- Transfers / reclassifications
-+/- FX revaluation (foreign-currency assets)
++/- Translation difference (group presentation currency only — never posted in the entity's books)
 = Closing Cost
 
 Opening Accumulated Depreciation
 + Period depreciation
 - Disposals (accumulated depreciation removed)
-+/- FX revaluation
++/- Translation difference (group presentation currency only — never posted in the entity's books)
 = Closing Accumulated Depreciation
 
 Net Book Value = Closing Cost − Closing Accumulated Depreciation
@@ -322,6 +356,11 @@ Net Book Value = Closing Cost − Closing Accumulated Depreciation
    assets and understating expense, and nothing else in the close will catch it.
 
 **Report both difference lists separately.** They have different causes and different owners.
+
+**For each GL → register item**, compute depreciation from the in-service date under the policy and
+convention. Propose the current-year portion as DR Depreciation Expense / CR Accumulated Depreciation. Flag
+any prior-year portion as a prior-period correction for the accountant (ASC 250 / IAS 8), not a
+current-period expense.
 
 ## Step 10 — Impairment review
 
