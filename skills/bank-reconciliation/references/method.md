@@ -39,7 +39,9 @@ Typical opening batch, per in-scope entity:
   **[auto]**
 - *`get_trial_balance`* / *`get_balance_sheet`* — the GL cash ending balance — usually **[auto]**
 - *`get_general_ledger`* on each cash account for the period — every book-side movement, the core
-  of this skill — usually **[auto]**
+  of this skill — usually **[auto]**. If no prior reconciliation report is supplied, read from the
+  last reconciled date (or as far back as the user agrees) so older uncleared payments and deposits
+  are candidates too
 - *`search_deposits`* / *`get_deposit`* — money banked, and the deposit-in-transit candidates —
   usually **[auto]**
 - *`search_bill_payments`* / *`get_bill_payment`* — supplier payments, the outstanding-cheque
@@ -79,9 +81,20 @@ error: an entity with several accounts at the same bank, or a foreign-currency a
 the base currency, will produce a bridge that can never balance. State the account name, the
 currency, and the date on both sides before going further.
 
-If the statement balance is not available, **stop and say so here** — do not proceed to build a
-bridge with one side missing and present it as a reconciliation. Continue instead with the
-book-side preparation described at the top of this file, clearly labelled.
+**Agree the opening** — **[gated]**: the statement's opening balance must equal the statement
+ending balance on the prior reconciliation, and statement opening + statement lines must equal
+statement ending. Load the prior reconciliation's outstanding cheques and deposits in transit as
+**brought-forward items** — they are matched first in Step 3.
+
+**Check the closed period is unchanged** — **[auto]** for the GL side: read the GL cash balance as
+of the last reconciled date and compare it to the book (ending) balance on the prior
+reconciliation report. Any difference is a change to a closed period — an edit, deletion or
+back-dated entry. List the GL rows dated on or before that date that differ from the prior report,
+and log them as an exception before matching.
+
+If the statement balance is not available, say so here, then continue with the book-side
+preparation only, clearly labelled. Do not build the two-ladder bridge, and never present the
+result as a reconciliation.
 
 ## Step 2 — Build the reconciliation bridge
 
@@ -115,15 +128,22 @@ Book balance (GL ending balance)
   without the statement, since by definition they are not in the books. This is the same blind
   spot a dedicated bank-fee and interest review has: the books cannot show what only the
   statement knows.
-- **Errors on books** — **[auto]** and the strongest automated contribution here: duplicates,
-  wrong amounts, wrong dates, wrong accounts, all detectable in the ledger alone.
+- **Errors on books** — the strongest automated contribution here. Duplicates and wrong-account
+  postings are **[auto]** from the ledger alone. Wrong amounts and wrong dates are **[gated]**: they
+  are proven only against the statement line or source document; the ledger can only flag
+  candidates (round-number or transposition patterns, dates outside the period).
+
+**Confirm against subsequent activity** — **[gated]**: with the first days of the next period's
+statement or online bank activity (recommended upload), label each deposit in transit and
+outstanding cheque **"cleared on [date] per subsequent activity"** or **"not yet cleared"**.
 
 ## Step 3 — Match transactions (bank vs GL)
 
 Work down the methods; record which one produced each match, because a level-1 match and a level-4
 match carry very different confidence.
 
-Matching process — **[gated]**, requiring both sides:
+Matching process — **[gated]**, requiring both sides. Match statement lines against the
+**brought-forward items** from Step 1 first, then against the current period's entries:
 
 1. **Exact amount + date window match** (same day to ± 3 business days) — the strongest.
 2. **Exact amount + fuzzy description match** — for when the bank's wording differs from yours.
@@ -149,6 +169,7 @@ bank knows:
   holding back a reserve
 - **Loan payments (principal / interest)** — often taken automatically by direct debit
 - **FX gains / losses** (if applicable)
+- **Prior-period item cleared this period** — a brought-forward cheque or deposit; no entry
 - **Unknown (needs research)** — an honest category; give it an owner and a date
 
 **Unmatched GL items** — **[auto]** to list, **[gated]** to classify:
@@ -156,9 +177,11 @@ bank knows:
 - **Deposits in transit**
 - **Outstanding checks**
 - **Timing differences**
-- **Book errors** — duplicate entry, wrong account, wrong amount, wrong date. **[auto]** to detect
-  all four from the ledger alone (*`get_general_ledger`*, *`search_journal_entries`*), which makes
-  this the part of Step 4 that can be completed before the statement arrives
+- **Book errors** — duplicate entry, wrong account, wrong amount, wrong date. Duplicates and wrong
+  accounts are **[auto]** from the ledger alone (*`get_general_ledger`*, *`search_journal_entries`*),
+  which makes them the part of Step 4 that can be completed before the statement arrives; wrong
+  amounts and dates are **[gated]** — candidates only until checked against the statement or
+  source document
 
 ## Step 5 — Propose corrections / journal entries
 
@@ -179,10 +202,38 @@ DR Cash (Bank Account)              XXX
     CR Interest Income                  XXX
 ```
 
+**Returned item / NSF** — reverses the customer's receipt; it is not an expense
+```
+DR Accounts Receivable (customer)   XXX
+    CR Cash (Bank Account)               XXX
+```
+The bank's NSF fee, if any, is a separate bank-fee entry.
+
+**Loan direct debit** — split per the lender's statement or amortisation schedule
+```
+DR Loan Payable (principal)         XXX
+DR Interest Expense                 XXX
+    CR Cash (Bank Account)               XXX
+```
+A loan split without lender evidence is **not proposed** — mark it `[manual]` and name the
+missing statement.
+
+**Processor reserve held** — an asset, not a fee
+```
+DR Processor Reserve Receivable     XXX
+    CR Cash (Bank Account) / Clearing    XXX
+```
+
+**Chargeback**
+```
+DR Accounts Receivable or Chargeback Losses (per the entity's policy — ask)   XXX
+    CR Cash (Bank Account)                                                     XXX
+```
+
 Use the **real account names from the connected chart of accounts** (*`search_accounts`*,
 **[auto]**) rather than the generic labels above, and say which you chose. Every proposed entry
-names the statement line that evidences it — an entry proposed without that evidence is a guess
-at what the bank did.
+names its evidence: the statement line for bank-originated items, and the GL rows and source
+document for book errors — an entry proposed without that evidence is a guess.
 
 ## Step 6 — Close out and document
 
@@ -272,7 +323,8 @@ that is no longer connected is **flagged** — never silently dropped, never app
 - Every task carries its verdict (`[auto]` / `[gated]` / `[manual]`), the tool used, and that
   tool's policy, in the coverage sheet
 - Every matched item records the matching method that produced it
-- Every proposed entry names the statement line that evidences it
+- Every proposed entry names its evidence — the statement line for bank-originated items, the GL
+  rows and source document for book errors
 - Account names in every proposed JE are the **real names from the connected chart of accounts**
 - `mock` status is reported wherever it applies, and **no reconciliation is signed off on mock
   data**

@@ -8,6 +8,8 @@
 2. **Matched transaction list** — each with the matching method (1–4) that produced it.
 3. **Unmatched lists with classification** — bank side and book side, per Step 4.
 4. **Exception log with recommended next actions** — each with an owner and a target date.
+5. **Proposed entries** — marked as proposals, each with its evidence.
+6. **Sign-off block** — preparer and reviewer, two different people, left blank.
 
 **Coverage sheet — NEW, Mosofin-specific.**
 

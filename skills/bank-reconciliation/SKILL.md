@@ -1,6 +1,6 @@
 ---
 name: bank-reconciliation
-description: "Reconciles a bank account to the books for a period: builds the bridge from the statement ending balance and the GL cash balance, matches transactions, classifies what is unmatched (deposits in transit, outstanding cheques, fees, interest, bounced items) and proposes correcting entries, each tied to a statement line. Reads the books through a connected Mosofin workspace when the user agrees, or works from uploaded exports — the bank statement, the GL cash activity and a trial balance. Always asks for the bank statement, which no accounting connection can supply, and labels a run without one as a book-side preparation, never a reconciliation. Use when the user asks to reconcile a bank account, tie out cash, investigate a reconciliation difference, or uploads a bank statement. Do not use for a card processor's payouts (use merchant-and-payment-processor-rec) or a credit-card statement (use credit-card-reconciliation). Read-only: produces the bridge, proposed entries and a coverage sheet, and posts nothing."
+description: "Reconciles a bank account to the books for a period: builds the bridge from the statement ending balance and the GL cash balance, matches transactions, classifies what is unmatched (deposits in transit, outstanding cheques, fees, interest, bounced items) and proposes correcting entries, each tied to its evidence. Reads the books through a connected Mosofin workspace when the user agrees, or works from uploaded exports — the bank statement, the GL cash activity and a trial balance. Always asks for the bank statement, which no accounting connection can supply, and labels a run without one as a book-side preparation, never a reconciliation. Use when the user asks to reconcile a bank account, tie out cash, investigate a reconciliation difference, or uploads a bank statement. Do not use for a card processor's payouts (use merchant-and-payment-processor-rec) or a credit-card statement (use credit-card-reconciliation). Read-only: produces the bridge, proposed entries and a coverage sheet, and posts nothing."
 ---
 
 # Bank ↔ books reconciliation
@@ -66,6 +66,7 @@ Ask only what you cannot already see.
 | Your books: **GL activity for the cash account(s)** — date, description, amount, counterparty, reference — plus the **ending balance** (a trial balance works) | Required | CSV or XLSX |
 | Account name(s), masked identifier, base currency | Required | Type it in the chat |
 | **Prior month's reconciliation** report, or the last reconciled date | Recommended — sets the opening outstanding items | PDF, CSV or a date |
+| **Next period's opening activity** — the first days of the next statement or online bank activity | Recommended — confirms deposits in transit and recent cheques have since cleared | PDF, CSV or screenshot |
 | **Cutoff policy** — posting cutoffs, deposit processing, cheque clearing windows | Recommended — sets the matching windows and escalation ages | Type it in the chat |
 
 **Read back before starting, then wait for a yes:**
@@ -92,8 +93,9 @@ Stage 3.
 
 Pull the book side in one batch, then capture the statement ending balance and the GL ending
 balance for the same account, currency and date: [`references/method.md`](references/method.md)
-Steps 0–1. **If the statement balance is not available, stop here and say so** — continue with
-the book-side preparation, clearly labelled, and never present it as a reconciliation.
+Steps 0–1 — including agreeing the opening balance and bringing forward last period's outstanding
+items. **If the statement balance is not available, say so**, then continue with the book-side
+preparation only, clearly labelled; do not build the bridge, and never present it as a reconciliation.
 
 ## Stage 4 — Build the bridge, match, and classify
 
@@ -106,7 +108,7 @@ deposits, foreign-currency accounts, shared accounts and stale items.
 ## Stage 5 — Propose entries and present the result
 
 Construct the correcting entries as **proposals**, in the real account names from the chart of
-accounts, each naming the statement line that evidences it; then the summary, the lists, the
+accounts, each naming its evidence (the statement line, or the GL rows for a book error); then the summary, the lists, the
 exception log and the coverage sheet: [`references/method.md`](references/method.md) Steps 5–6.
 Before presenting, check it against [`references/output.md`](references/output.md). The sign-off
 line names two different people; the skill fills in neither.
