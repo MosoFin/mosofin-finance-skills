@@ -28,7 +28,8 @@ availability vary by workspace and by company file**:
 - **`search_payments`, `search_credit_memos`, `search_refund_receipts`** — reconciliation
   diagnostics. All require `start_date` and `end_date`.
 - **`get_customer_balance`** — total owed per customer. Useful for a tie-out; **not an aging**.
-- **`get_customer_sales`** — sales by customer, for concentration and for a credit-sales basis.
+- **`get_customer_sales`** — sales by customer, for concentration. It includes sales receipts
+  (cash sales), so it is usable as a credit-sales basis only when filtered to invoices.
 - **`search_customers` / `get_customer`** — customer master, for fuzzy-name resolution and
   contact fields.
 - **`get_balance_sheet`** — the A/R control balance, for a true GL tie-out.
@@ -60,6 +61,8 @@ the `reconnect_url`.
 - **Open balance** — what is still owed after payments and credits, as opposed to the original
   invoice amount.
 - **Current** — not yet overdue.
+- **Aging method** — the date lateness is counted to: the as-of date (*Report date*, used by
+  this skill) or today (*Current*, not used). Not the same as the Current bucket.
 - **DSO (days sales outstanding)** — the average number of days it takes to get paid.
 - **Credit sales** — sales made on credit (invoiced), as opposed to paid on the spot. The
   correct denominator for DSO.

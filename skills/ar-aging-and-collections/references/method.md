@@ -39,7 +39,9 @@ enrichment query do not depend on each other. Never serialize them. The server i
    request the export named in the input plan.
 4. **Invoke detail for the chosen date**, with invoice-only filtering when supported.
 5. **Invoke unfiltered summary for the same date** — this is the independent total used in
-   Step 3.
+   Step 3. On both the summary and the detail, pass the as-of date **and `aging_method =
+   Report_Date`** (aged to the as-of date, not to today) — a month-end aging run weeks later
+   is otherwise aged weeks too old.
 6. **Use invoice search only for selected enrichment** (*`search_invoices`*). **Its
    recent-date default can omit old unpaid invoices**, so it is an enrichment tool here, never
    the population.
@@ -72,7 +74,10 @@ presenting an unsupported breakdown.
 ## 3. Reconcile
 
 **Compare invoice-detail totals with the A/R aging summary, by customer and in total** —
-**[auto]** where both capabilities exist.
+**[auto]** where both capabilities exist — **and by bucket, not only by customer total.** A
+bucket-level difference with matching totals means the report was aged to a different date;
+re-pull before going further. The `Days Past Due` recomputed in Step 2 from due dates is the
+authority over the report's own bucket labels.
 
 - **Combine 91-120 and Over 120 before comparing** with a summary's single `91+` bucket.
 - **If totals differ, pull detail again without invoice-only filtering** and identify the
@@ -83,6 +88,12 @@ presenting an unsupported breakdown.
   tested.** The **general ledger control balance** is the single A/R total in the books
   (*`get_balance_sheet`*, **[auto]**); testing against it is a stronger check and deserves the
   stronger name only when it was actually done.
+- **Then tie to the A/R control account.** Pull the A/R balance from the balance sheet as of
+  the same date and on the same basis (*`get_balance_sheet`*, **[auto]**; upload path: the
+  trial balance). Agree the **net** aging total to it at 0.01, listing each A/R account
+  separately. Any difference goes to Exceptions with an amount and a likely cause (journal
+  entry to A/R, a second A/R account, FX). Only when this agrees may the output say
+  "reconciled to the general ledger".
 
 ## 4. Ask for material gaps
 
@@ -98,16 +109,25 @@ Example:
 
 ## 5. Analyze
 
-Calculate when supported — **[auto]** arithmetic over the pulled data:
+Calculate when supported — **[auto]** arithmetic over the pulled data. Compute Total A/R,
+overdue %, over-90 and DSO on the **net** open balance that ties to the summary; show gross
+invoices and unapplied credits / payments as separate lines above it. Customers with a **net
+credit balance** go to Exceptions as "credit balance — refund or reclassify" (it is owed to
+the customer, not a receivable) and are left out of the collection plan and concentration
+ranking. The Collection Plan ranks on each customer's balance net of unapplied items.
 
 - **Total A/R, overdue total, overdue percentage, and amount / percentage over 90 days**
 - **Weighted average days past due** — weighting by open balance and **flooring current
-  invoices at zero**, so invoices paid early do not mask late ones
+  (not-yet-due) invoices at zero**, so invoices not yet due do not offset late ones
 - **Top-five customer concentration** — how much of the total is owed by the largest five.
   Concentration is a risk measure: one customer at 40% of A/R is a different business from
   fifty at 2% each
 - **`DSO = ending A/R / credit sales for period × days in period`** — **days sales
-  outstanding**, the average number of days it takes to get paid
+  outstanding**, the average number of days it takes to get paid. **Credit sales** on the
+  Mosofin path = invoices dated in the period less credit memos dated in the period
+  (*`search_invoices`*, *`search_credit_memos`* with the period dates) — **[auto]**; show the
+  derivation. Upload path: ask for an Invoice List or Sales by Customer **filtered to
+  transaction type Invoice** for the period
 
 **If total accrual-basis income substitutes for credit sales, label it `Approximate DSO
 (total-income proxy)`** — **[gated]**: total income (*`get_profit_and_loss`*, **[auto]**)
@@ -137,12 +157,14 @@ Return the requested subset, or a workbook containing:
 
 1. **Run Context** — workspace and company by name, as-of date, accounting basis, extraction
    time, sources, missing fields. **Add:** each in-scope company file by `display_name`, each
-   excluded one and why, and whether any figure rests on `mock` data
+   excluded one and why, and whether any figure rests on `mock` data; and "Prepared by (agent
+   run, date) · Reviewed by ____ · Date ____"
 2. **Aging Summary** — customers, buckets, totals, metrics, next action
 3. **Aging Detail** — normalized invoice rows
 4. **Collection Plan** — ranking, reason, owner / status blanks, next action
 5. **Drafts** — review-only reminder text, every one marked `REVIEW REQUIRED - NOT SENT`
-6. **Exceptions** — credits, missing dates / currency, disputes, and reconciliation variance
+6. **Exceptions** — credits, net credit balances, missing dates / currency, disputes, and
+   reconciliation variance, with columns Item | Amount | Cause | Proposed action | Owner | Due
 7. **Coverage — NEW, Mosofin-specific** — one row per task in Steps 1–5:
 
 | Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used | Policy (enabled / permission / disabled) | `mock` | Gap — what could not be verified and what the user must supply |

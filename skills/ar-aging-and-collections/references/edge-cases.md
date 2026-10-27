@@ -5,7 +5,10 @@
 *Drawn from the original's rules, guardrails and fixture conditions, plus the ones Mosofin's
 workspace model introduces. The full scenario list is in Validation scenarios above.*
 
-**Cash basis requested but the connector's aging is accrual-only** — explain the limitation and
+**Cash basis requested but the connector's aging is accrual-only** — an aging is an
+accrual-basis schedule by nature (on a true cash basis there is no receivable), so only DSO and
+income figures depend on basis. Do not raise it unprompted; if the user explicitly asks for a
+cash-basis aging, explain the limitation and
 **ask whether accrual basis is acceptable before reading data**. Do not read first and caveat
 after; the user may not want the accrual view at all.
 

@@ -53,8 +53,8 @@ Ask only what you cannot already see.
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *As of which date?* | Every bucket is counted from it: days past due = as-of date − due date | Ask only if ambiguous, and pass a concrete date. **Never silently default it.** |
 | **C** | *What do you need: the aging alone, a collection plan, DSO, reminder drafts? All customers, or one?* | Decides which inputs are material. Core aging needs no dispute flags, payment history, DSO or policy | For one customer, resolve the name against the customer master and **state the match**. |
-| **D** | *Accrual or cash basis?* | The connector's aging may be accrual-only | If cash is wanted and only accrual is available, explain and **ask whether accrual is acceptable before reading data**. |
-| **E** | *For DSO: credit sales and the measurement period.* | The correct DSO denominator; total income includes cash sales | Only if DSO is wanted. **Require credit sales**; offer `Approximate DSO (total-income proxy)` only with approval. |
+| **D** | *State, don't ask:* an aging lists unpaid invoices, so it is always on invoices issued (accrual), even if you file on a cash basis; only DSO and any income figure depend on basis | Avoids promising a "cash" aging that does not exist | If the user explicitly asks for a cash-basis aging, explain and **ask whether accrual is acceptable before reading data**. |
+| **E** | *For DSO: the measurement period (and, on the upload path, credit sales).* | The correct DSO denominator; total income includes cash sales | Only if DSO is wanted. On the Mosofin path credit sales are derived from invoices less credit memos (Step 5); otherwise **require credit sales**; offer `Approximate DSO (total-income proxy)` only with approval. |
 | **F** | *Any disputes, credit holds, strategic tiers or payment history?* | They change ranking and tone, and route disputes away from collection pressure | Only when the prioritisation needs them. **Never infer**; omit and disclose. |
 | **G** | *Your collection policy: approved wording, payment contact, escalation ladder.* | Drafts apply only supplied terms | Only if drafts are wanted. Use neutral language with no fees or threats. |
 
@@ -77,7 +77,7 @@ question** (Step 4).
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **A/R Aging Detail** as of the date — one row per open invoice, with due date and open balance | **Required** — the invoice population | CSV or XLSX |
+| **A/R Aging Detail** as of the date — one row per open invoice, with due date and open balance, exported with **Aging method: Report date** and the as-of date set | **Required** — the invoice population | CSV or XLSX |
 | **A/R Aging Summary** for the same date | Recommended — the independent tie-out; without it, totals come from the detail and the output says there was no independent tie-out | CSV, XLSX or PDF |
 | **A/R control balance** (balance sheet or trial balance) | Recommended — needed before the tie-out may be called a GL reconciliation | CSV, XLSX or PDF |
 | **Unapplied credits and payments**, or a full detail export | Only if detail and summary do not reconcile | CSV or XLSX |

@@ -143,7 +143,7 @@ DSO, or collection policy.
 | **Credits / payments** | A/R detail without a transaction-type filter, or payment / credit search tools | Pull only when invoice detail does not reconcile | Ask for unapplied credits / payments or a full detail export |
 | **Invoice enrichment** | Invoice search / single-invoice read | Query selected IDs or document numbers only | Leave unavailable enrichment fields blank |
 | **Currency** | Report / invoice response | **Preserve each currency separately** | Ask before presenting unlabeled consolidated totals |
-| **Exact DSO denominator** | Credit sales and period | **Require explicit credit sales** | Ask the user; offer a labeled total-income proxy only with approval |
+| **Exact DSO denominator** | Credit sales and period — invoices less credit memos dated in the period, where invoice and credit-memo search are listed | **Require explicit credit sales** | Ask the user; offer a labeled total-income proxy only with approval |
 | **Disputes, credit holds, strategic tier, payment history** | Not reliably exposed by aging reads — **[manual]** | **Never infer** | Ask only when needed for the requested prioritization |
 | **Collection policy / brand voice** | User-provided policy — **[manual]** | Apply only supplied terms | Use neutral language without fees or threats |
 | **Confirm scope** | — | Read back in-scope and excluded company files by `display_name` | — |
