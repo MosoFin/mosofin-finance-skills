@@ -14,10 +14,11 @@ accident.
 amount, the credit applied, and the net open amount — not just the net, or the tie-out to the
 control balance will not be checkable.
 
-**Partial payments already in flight**: reduce the open amount by any in-process payment. Flag
-if it has not yet cleared the bank. **[gated]**: the books show payments *recorded*; whether
-one has actually cleared is a bank fact, and an uncleared payment recorded twice is a genuine
-double-payment risk.
+**Partial payments already in flight**: payments recorded in the books are already in the
+open amount — do not deduct them again. Ask for payments **scheduled or released outside the
+books** (bill-pay platform, bank portal, cheques written but not entered) and deduct those,
+labelled user-supplied. **[manual]**: no tool sees a payment that is not yet recorded, and
+paying a bill that is already on its way is a genuine double-payment risk.
 
 **Vendors with multiple billing entities**: group by **remit-to entity**, not just by vendor
 name. Two vendor records with the same trading name may be different legal payees, and one
@@ -45,7 +46,9 @@ the top payment-fraud vector**, and a convincing email asking to update bank det
 most common way businesses lose money. Flag it and require user confirmation through a
 channel the vendor did not supply. *Mosofin note*: Mosofin is read-only and cannot change,
 verify, or transmit bank details, and this skill must never carry them into an output or a
-stored preference.
+stored preference. Each vendor the user names at intake (question E) is flagged on Sheet 3:
+"Hold until confirmed by phone on a number from your records, not from the request." If the
+user did not answer, Sheet 3 states "bank-detail changes not screened".
 
 **A company file is connected but not active** — *Mosofin-specific*. Name it as excluded and
 say whose payables are therefore missing. Surface any `reconnect_url`.

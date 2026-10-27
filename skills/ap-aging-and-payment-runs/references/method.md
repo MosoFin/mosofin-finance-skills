@@ -70,11 +70,13 @@ top and mark the payment run as illustrative only.
 
 Get every bill into a consistent shape before you sort anything.
 
-For each open bill — **[auto]**:
+For each open item — **[auto]**:
 
-- **Confirm open amount > 0** (skip fully paid or fully credited bills)
-- **Compute days outstanding = (As-of date) − (Due date)**
-  - **Negative = not yet due**
+- **Keep every open item with a non-zero open amount.** Bills are positive. Unapplied vendor
+  credits and unapplied payments are negative and appear in the vendor's row (bucketed by
+  their own date). Drop only items with an open amount of exactly zero
+- **Compute days past due = (As-of date) − (Due date)**
+  - **Negative or zero (due today) = not yet due**
   - **Positive = overdue**
 - **Normalize currency labels**
 
@@ -87,8 +89,10 @@ bucket downstream.
 - **Open amount > original amount** (a data error)
 - **Bill date after due date** (likely a terms entry error)
 - **Bill dated in the future** (capture but flag)
-- **Same vendor + same amount + same date appearing twice** (a possible duplicate — see
-  `duplicate-invoice-detection`)
+- **Possible duplicates** — same vendor and same bill number (ignoring punctuation and
+  leading zeros); or same vendor and same amount on dates close together that do not fit the
+  vendor's normal billing cycle. Flag both; never pay a flagged pair until the user confirms
+  (see `duplicate-invoice-detection`)
 
 ## Step 2 — Build the aging buckets
 
@@ -131,18 +135,24 @@ For each bill with a discount opportunity — **[auto]** arithmetic:
 Implied return formula:
 
 ```
-Discount % × (365 / (Net days − Discount days))
+Discount % / (1 − Discount %) × (365 / (Net days − Discount days))
 ```
 
-Example: 2/10 Net 30 → 2% × (365 / 20) = ~36.5% annualized. **This is essentially always
+Example: 2/10 Net 30 → 2% / 98% × (365 / 20) = ~37.2% annualized (the simpler
+2% × 365 / 20 = 36.5% is an approximation). **This is essentially always
 worth taking if cash allows** — few uses of cash return 36% a year.
+
+**Where a discount is taken**, the payment line shows Bill open amount, Discount and Cash
+paid. The discount is recorded with the payment — a discount line or vendor credit to the
+entity's purchase-discount account, named from the chart of accounts — so the bill closes in
+full and does not come back in the next run.
 
 **Flag any discount where the deadline is within the payment-run horizon.** Use the entity's
 time zone from the profile when a deadline falls on the run date itself.
 
 ## Step 4 — Identify late-pay penalties
 
-**[gated]**: if the terms specify a late fee or interest, compute the accruing penalty for
+**[manual] (judgment)**: if the terms specify a late fee or interest, compute the accruing penalty for
 overdue bills. Terms text is usually readable (*`get_term`*, **[auto]**), but penalty clauses
 often live in the contract rather than the terms record — where that is so, the penalty is
 **[manual]**.
@@ -154,7 +164,7 @@ interest can outrank a larger one that is not.
 
 When there isn't enough cash for everything, the order matters more than the total.
 
-Rank in this default order (override if the user specifies) — **[gated]**, since the ranking
+Rank in this default order (override if the user specifies) — **[manual] (judgment)**, since the ranking
 mixes ledger facts with business judgment:
 
 1. **Vendors marked critical** — services that stop without payment: utilities, the payroll
@@ -168,7 +178,10 @@ mixes ledger facts with business judgment:
 6. **Already paid / not yet due / discretionary — defer** — **[auto]** for paid and not-due,
    **[manual]** for discretionary
 
-**Constraint check: sum of proposed payments ≤ cash available. Stop adding payments when cash
+**Net each vendor's credits.** A vendor's proposed payment is its selected bills less its
+open credits. If the credits exceed the bills, propose no payment and flag the debit balance.
+
+**Constraint check: sum of cash paid ≤ cash available. Stop adding payments when cash
 runs out. Show what's left unpaid.** The unpaid remainder is not a footnote — it is the part
 the user has to make a decision about, and it belongs on the face of the output.
 
@@ -178,7 +191,7 @@ never phrase a line as though a payment has been made or scheduled.
 ## Step 6 — Multi-currency handling
 
 If bills are in multiple currencies and the entity pays from a single-currency bank —
-**[gated]**:
+**[manual] (judgment)**:
 
 - **Convert to the functional currency** at a user-provided FX rate or a stated source
   (e.g. the bank's wire rate today). **[manual]**: no accounting connector supplies a live
@@ -207,15 +220,20 @@ reconstructed**; whether any figure rests on `mock` data.
 
 **Sheet 3: Proposed Payment Run**
 
-| Vendor | Bill # | Payment Amount | Payment Method | Reason in Run | Discount Captured | Net to Pay |
+| Vendor | Bill # | Bill Open Amount | Payment Method | Reason in Run | Discount Captured | Cash Paid | Bank-detail change? |
 
 With:
-- Total proposed payment
+- Total proposed payment (sum of **Cash paid** — this is what counts against cash available)
 - Cash available (input)
 - Remaining cash after run
 - Bills deferred to next run
 
-Headed clearly: **proposal — no payment has been made or scheduled.**
+Headed clearly: **proposal — no payment has been made or scheduled.** Ends with "Prepared by /
+date — Approved by / date" (left blank for the approver).
+
+**Sheet 3b: Held and Disputed**
+
+| Vendor | Bill # | Amount Held | Reason | Date Opened | Owner |
 
 **Sheet 4: Discount Opportunities**
 

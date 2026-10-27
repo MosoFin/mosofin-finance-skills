@@ -55,7 +55,7 @@ Ask only what you cannot already see.
 | **B** | *What as-of date for the aging? Do you use aging buckets other than the standard ones?* | The aging changes materially day to day; days past due are counted from it | **Never default the as-of date.** Buckets default to not yet due, 1–30, 31–60, 61–90, 91–120 and over 120 days overdue. |
 | **C** | *Aging only, or a payment run too — and if a run, how much cash is available for it?* | Every proposed payment must fit inside it | **Required for a payment run. Never default or infer it** from a bank balance. Without it, say that no payment run can be proposed. |
 | **D** | *Which vendors are critical, standard or discretionary?* | Critical vendors — services that stop without payment — rank first in the run | Optional, but the books cannot supply it. Ask; once given, it need not be re-asked every week. |
-| **E** | *Any vendors on hold, or bills with disputed lines?* | Held vendors are excluded from the run; only the undisputed portion of a bill is paid | Hold and dispute status come only from you or a stored preference — **never inferred from the books**. |
+| **E** | *Any vendors on hold, or bills with disputed lines? Any payments already scheduled or sent that are not yet in the books? Has any vendor in this run asked to change bank details since their last payment?* | Held vendors are excluded; only the undisputed portion is paid; payments in flight are deducted; a bank-detail change is held until confirmed | Hold and dispute status come only from you or a stored preference — **never inferred from the books**. Unanswered bank-detail question: Sheet 3 states "bank-detail changes not screened". |
 | **F** | *How is each vendor paid — ACH, wire, cheque or card?* | Fills the payment method on every proposed line | Recommended. Method names are usually readable; the per-vendor mapping usually is not. |
 | **G** | *Any bills in another currency — what FX rate, from what source?* | Converting to the functional currency for the run | Ask only if bills show more than one currency. **No connector supplies a live wire rate**; the rate source and date are flagged on the output. |
 
@@ -79,7 +79,7 @@ Ask only what you cannot already see.
 | **Open bill list or A/P aging** — vendor, bill number, bill date, due date or terms, open amount, currency | Required | CSV or XLSX export |
 | As-of date, entity name, functional currency | Required | Type it in the chat |
 | **Cash available** for the run | **Required for a payment run** | Type it in the chat |
-| **A/P control balance** — a trial balance or balance sheet | Recommended — the aging buckets are tied to it | CSV, XLSX or PDF |
+| **A/P control balance** — a trial balance or balance sheet | **Required for the tie-out** — without it, Sheet 1 is headed "not agreed to the A/P control balance", and the read-back says so | CSV, XLSX or PDF |
 | Payments made and vendor credits open against those bills | Recommended — open amount is original less payments less credits | CSV or XLSX |
 | **Vendor master** with payment terms, including early-pay discount terms | Recommended — drives due dates and the discount analysis | CSV or XLSX |
 | Vendor tiers, payment method per vendor, holds and disputes | Recommended — tiers optional | Type it in the chat, or CSV |
@@ -108,8 +108,8 @@ the upload path, go straight to Stage 3.
 ## Stage 3 — Read the bills and normalise them
 
 Pull the aging report, open bills, payments, credits, vendor terms and balances in one batch, per
-entity; then put every bill in one shape — open amount above zero, days outstanding from the
-as-of date, a due date derived from terms (and labelled derived) where none is held — and flag
+entity; then put every open item in one shape — non-zero open amount, with open credits and
+unapplied payments kept as negatives, days past due from the as-of date, a due date derived from terms (and labelled derived) where none is held — and flag
 open-above-original, bill-after-due, future-dated and possible duplicate bills:
 [`references/method.md`](references/method.md) Steps 0–1.
 
