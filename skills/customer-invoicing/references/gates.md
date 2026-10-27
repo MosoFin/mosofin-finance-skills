@@ -120,12 +120,12 @@ books already answer:
 |---|---|---|
 | **Customer** — name, address, tax ID | **Required — usually [auto]** | Pulled from the customer record. **Confirm the tax ID is current**; the record holds what was typed. |
 | **Entity (seller)** — legal name, address, tax registration | **Required — [auto]** for name and address; **[manual]** for the registration number if not in the profile | |
-| **Line items** — description, qty, unit price, tax code | **Required — [gated]** | **What to bill is [manual]**; descriptions, standard prices and tax codes pull from the item list. |
+| **Line items** — description, qty, unit price, tax code | **Required — [manual]** what to bill; **[auto]** descriptions, prices, tax codes | **What to bill is [manual]**; descriptions, standard prices and tax codes pull from the item list. |
 | **Invoice date** | **Required** | Never default it. Note the tax point may differ — see Step 1. |
 | **Payment terms** | **Required — usually [auto]** | The customer's terms pull; confirm. |
 | **Currency** | **Required — usually [auto]** | From the customer or the entity. |
 | **Jurisdiction** | **Required — [manual]** | Drives mandatory fields and tax. **Never infer from the profile's country** — where you are registered and where the supply takes place can differ. |
-| **Customer PO / reference** | Recommended — **[gated]** | Prior invoices to this customer show whether they require one. |
+| **Customer PO / reference** | Recommended — **[auto]** from prior invoices | Prior invoices to this customer show whether they require one. |
 | **Sales tax / VAT / GST rates per line** | Required if tax applies — **usually [auto]** | The tax catalogue in use pulls; **whether a rate is correct for this supply is [manual]**. |
 | **Invoice numbering scheme** | **Required — usually [auto]** | **The next number in sequence is readable.** Confirm the scheme (prefixes, resets, per-entity sequences). |
 | **Chart of accounts** | **Required — usually [auto]** | For the revenue, tax and deferred revenue accounts. |

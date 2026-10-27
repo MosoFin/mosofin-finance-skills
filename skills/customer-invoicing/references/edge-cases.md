@@ -53,7 +53,9 @@ action, and until that happens the invoice does not exist and its number is not 
 
 **A gap in the invoice number sequence** — *Mosofin-specific and directly detectable*. Usually a deleted or
 voided invoice. In several jurisdictions an unexplained gap is a compliance finding, so report gaps with
-their numbers rather than only a count.
+their numbers rather than only a count. Test only inside the fixed range (Step 0): a number missing at the
+edge of the search window is not a gap. A voided invoice still appears (at zero); a deleted one does not,
+and only the audit log can confirm a deletion.
 
 **A duplicate invoice number** — *Mosofin-specific*. Two documents with the same number is a genuine
 problem, and in a multi-entity workspace it most often arises from two entities sharing a convention

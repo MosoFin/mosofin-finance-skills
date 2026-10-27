@@ -58,7 +58,8 @@ endpoint on this surface.**
 - **Progress billing** — invoicing in stages as a long job advances.
 - **Retainage / retention** — a portion the customer withholds until the job is signed off.
 - **Deferred revenue** — money invoiced for work not yet done; a liability, not income.
-- **Sales discount** — a reduction for paying early, recorded separately rather than netted off revenue.
+- **Sales discount** — a reduction for paying early, recorded either in its own contra-revenue account or
+  netted against revenue; use one method consistently.
 - **Remit-to** — where and how the customer should send payment.
 
 ---

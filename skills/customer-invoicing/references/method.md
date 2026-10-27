@@ -44,7 +44,12 @@ Typical opening batch, for the selling entity:
 - *`search_terms`* / *`get_term`* — the terms catalogue, including any early-pay discount — usually
   **[auto]**
 - *`search_invoices`* over recent periods — **the existing number sequence, for the next number and the
-  gap check** — usually **[auto]**
+  gap check** — usually **[auto]**. For the gap and duplicate check, **fix the range** first: the first
+  and last invoice number (or date range) to test, and pull **every** invoice in it, including voids
+  (*`search_invoices`* over the full date range, paged; upload path: an Invoice List / Transaction List
+  by type Invoice **with voided transactions included**, for the range). Report gaps by number and voids
+  by number separately, and say that deleted invoices can only be confirmed from the audit log, which
+  this skill cannot read
 - *`read_invoice`* on recent invoices to this customer — **what they were last billed, on what terms, with
   what PO reference** — usually **[auto]**
 - *`search_accounts`* — the revenue, output tax and deferred revenue accounts — usually **[auto]**
@@ -88,6 +93,8 @@ Common required fields across jurisdictions — verdicts noted, since roughly ha
 - **Total exclusive of tax** — **[auto]**
 - **Total inclusive of tax** — **[auto]**
 - **Currency** — **[auto]**
+- **VAT / GST amount in local currency**, where the invoice is in another currency and the regime
+  requires it — **[manual]**
 - **Payment terms / due date** — **[auto]**
 - **Any specific phrases the jurisdiction requires** (e.g. "Reverse charge", "Zero-rated export", "Tax
   invoice") — **[manual]**, and their absence is a common reason a customer's tax authority disallows
@@ -96,6 +103,10 @@ Common required fields across jurisdictions — verdicts noted, since roughly ha
 **If the user is in a jurisdiction with electronic invoicing mandates** — e-invoicing portals, QR codes,
 government clearance — **flag it: the skill can produce the data but submission requires the relevant
 platform.** Mosofin cannot submit to a government portal.
+
+Under **US-style sales tax** there is no reclaim and no tax point; the rate follows the ship-to
+(destination) address and exemption certificates. Skip those two fields and confirm the destination
+address instead.
 
 **In validate mode**, run this list against existing invoices and report every missing field.
 
@@ -112,13 +123,16 @@ Each line — **[auto]** for all five checks, whether on a draft or on an existi
 **Compute line totals: qty × unit price = line subtotal; subtotal × tax rate = line tax; subtotal + line
 tax = line total.**
 
+If prices are **tax-inclusive**: line tax = line gross × rate ÷ (1 + rate); line net = gross − tax.
+Round tax per line or per rate total according to the entity's stated method (asked at intake G).
+
 **[auto]** and worth adding in prepare mode: **compare the price being charged against the item's standard
 price and against what this customer was last charged** (*`read_item`*, *`read_invoice`*). A price that
 departs from both is either a deliberate concession or a keying error, and it is much cheaper to ask now.
 
 ## Step 3 — Compute totals
 
-- **Subtotal** (sum of line subtotals)
+- **Subtotal** (sum of goods / service line subtotals, before discount, excluding shipping)
 - **Total tax by rate** (e.g. $X at 5%, $Y at 20%)
 - **Discount** (if any) applied at invoice or line level — **specify which**
 - **Shipping / freight** (if applicable)
@@ -131,7 +145,8 @@ tax-inclusive.**
 
 All **[auto]** arithmetic. In **validate mode this is the arithmetic check** — recompute every existing
 invoice's totals from its lines and report any that do not agree. Rounding differences at the line-versus-
-total level are the usual cause and are worth quantifying rather than ignoring.
+total level are the usual cause and are worth quantifying rather than ignoring: recompute using the
+entity's stated rounding method and report any difference over 0.01 that remains.
 
 ## Step 4 — Construct the AR / Revenue / Tax JE
 
@@ -140,11 +155,24 @@ proposal:
 
 ```
 DR  Accounts Receivable                            $total inclusive
+DR  Sales Discounts (or net against the line's revenue — state which)  $discount
     CR  Revenue (per product/service line)           $subtotal
     CR  Output Tax / VAT / GST Payable               $tax
     CR  Other (shipping income, etc.)                $other
 Memo: Invoice [#] — [Customer]
 ```
+
+**The check:** DR AR = subtotal − discount + shipping + tax. The entry must foot to Step 3's
+Amount due before it is presented; in validate mode, compare that figure to the invoice's own
+total. Tax is on the discounted base where the jurisdiction taxes the net.
+
+**For a foreign-currency invoice**, show each line in invoice currency, the rate, and the
+functional-currency amount.
+
+**If any line's delivery or service period ends after the invoice date**, credit **Deferred
+Revenue** for that portion and note the recognition date; otherwise credit Revenue. In
+validate mode, flag invoices whose service period falls after the invoice date and whose item
+maps to an income account.
 
 **If revenue recognition is deferred** (e.g. a subscription invoiced annually in advance), book:
 

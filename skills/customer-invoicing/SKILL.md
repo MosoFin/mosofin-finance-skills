@@ -56,9 +56,9 @@ Ask only what you cannot already see.
 | **B** | *Prepare new invoices, or validate ones already issued?* | They are different jobs: validate mode runs Steps 1–3 over existing invoices, plus the duplicate and gap check | **Required.** |
 | **C** | *Which entity is selling?* | Its legal name, tax registration and number sequence go on the invoice; drafting from the wrong file is legally wrong on its face | **Required.** On the Mosofin path, ask by `display_name`; name and address come from its profile, the registration number is asked if the profile lacks it. |
 | **D** | *Which customer, and what to bill: description, quantity, unit price, tax code per line?* | What to bill is never in the books | **Required.** Customer details pull from the record on the Mosofin path; **confirm the tax ID is current**. |
-| **E** | *The invoice date, and the tax point if it differs.* | The tax point, not the invoice date, decides which period the tax falls in | **Never default the invoice date.** |
+| **E** | *The invoice date, and the tax point if it differs — and the delivery date or service period for each line.* | The tax point, not the invoice date, decides which period the tax falls in; delivery decides whether revenue or deferred revenue is credited | **Never default the invoice date.** |
 | **F** | *Which jurisdiction, and its mandatory fields and required phrases? Any e-invoicing mandate?* | Drives the mandatory fields and the tax | **Never infer from the profile's country.** Without a field list, include the common set and ask the user to validate it. |
-| **G** | *Tax rate per line, and any exemption certificates or reverse-charge customers.* | Whether a rate is correct for this supply cannot be read | **Required if tax applies. Never default a rate.** The certificate is always `[manual]`. |
+| **G** | *Tax rate per line, and any exemption certificates or reverse-charge customers. Are your prices tax-inclusive, and is tax rounded per line or per rate total?* | Whether a rate is correct for this supply cannot be read | **Required if tax applies. Never default a rate.** The certificate is always `[manual]`. |
 | **H** | *The numbering scheme: prefixes, resets, per-entity sequences.* | Duplicates and gaps are measured against it | **Never default it.** On the Mosofin path the next number is read from the live sequence. |
 | **I** | *Payment terms, currency, customer PO, and the payment instructions.* | Terms and currency are Required; some customers will not pay without their PO number | Terms and currency usually pull on the Mosofin path; confirm. **Payment instructions are confirmed from a trusted source**, never reproduced. |
 
@@ -85,7 +85,7 @@ Ask only what you cannot already see.
 | Invoice date, payment terms, currency, jurisdiction, tax rate per line | Required (tax rates if tax applies) | Type it in the chat |
 | **Numbering scheme** and the recent invoice listing, for the next number | Required | CSV or XLSX export |
 | **Chart of accounts**: revenue, output tax and deferred revenue accounts | Required | CSV or XLSX |
-| **Issued invoices to check** | **Required in validate mode** | PDF or image, or a CSV/XLSX export |
+| **Issued invoices to check**, plus an invoice list for the range under test, voids included | **Required in validate mode** — gaps and duplicates cannot be tested from a sample | PDF or image, or a CSV/XLSX export |
 | Customer PO or reference | Recommended | Type it in the chat |
 | Exemption certificate reference, if a customer is tax-exempt | When it applies | PDF or image |
 
