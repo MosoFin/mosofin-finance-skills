@@ -40,7 +40,11 @@ Typical opening batch, per in-scope entity:
 - *`search_purchases`* / *`search_bills`* / *`search_expenses`* — **prior transactions by vendor with their
   accounts** — usually **[auto]**
 - *`get_general_ledger`* on **Uncategorized Expense / Income and any suspense account** — **the work waiting
-  to be done** — usually **[auto]**
+  to be done** — usually **[auto]**. **This covers only items already posted** to those accounts: bank-feed
+  items awaiting review ("For Review" in QuickBooks Online, unreconciled bank lines in Xero) are not in the
+  ledger and are not visible here. Ask for the bank and card statement CSVs for the period to code them
+- *`get_general_ledger`* on **Accounts Receivable, Undeposited Funds / Payments to Deposit and any processor
+  clearing account** — for the receipts rule in Step 4 — usually **[auto]**
 - *`search_tax_codes`* / *`search_tax_rates`* — **the codes configured in this entity** — often **[auto]**
 - *`search_accounts`* on **bank and credit card accounts** — for transfer detection — usually **[auto]**
 - *`search_employees`* — for related-party name comparison — usually **[auto]**
@@ -90,7 +94,8 @@ Three outcomes, each worth reporting differently:
 
 ## Step 2 — Classify each transaction
 
-**Apply this decision hierarchy in order. Stop at the first confident match.**
+**Apply this decision hierarchy in order. Stop at the first confident match.** The receipts rule and the
+other Step 4 checks still run on every transaction, whatever tier matched.
 
 ### Tier 1 — Exact vendor match (Confidence: High) — **[auto]**
 
@@ -157,9 +162,9 @@ exists in this chart; the nearest is 6300 Software Subscriptions — confirm."*
 | **"fuel", "petrol", "diesel"** | Vehicle / Fuel |
 | **"repair", "maintenance"** | Repairs & Maintenance |
 | **"bank fee", "wire fee", "transaction charge"** | Bank Charges |
-| **"interest"** | Interest Expense |
+| **"interest"** | **Outflow**: Interest Expense; **inflow**: Interest Income |
 | **"loan payment"** | **Split**: Interest Expense + Loan Principal (BS) |
-| **"dividend", "distribution"** | Owner Distributions / Dividends |
+| **"dividend", "distribution"** | **Outflow**: Owner Distributions / Dividends Paid (equity); **inflow**: Dividend / Investment Income |
 | **"refund", "credit" + positive amount** | Contra to original expense account |
 
 ### Tier 4 — Amount heuristics (Confidence: Medium-Low) — **[auto]**
@@ -207,6 +212,23 @@ it turns a blank into a short list to choose from.
 
 ## Step 4 — Special-case rules
 
+**Step 4 runs on every transaction regardless of tier, and any Step 4 flag caps confidence at Medium.**
+
+**Receipts** — **[gated]**
+
+**Before suggesting an income account for any inflow, check for an open invoice of the same amount or
+customer, and for a matching balance in Undeposited Funds / Payments to Deposit or a processor clearing
+account** — Mosofin: the AR and clearing ledgers from Step 0 (and an open-invoice read where the Gate 2
+catalog lists one); upload: the open-invoices / AR aging export. If one exists, flag **"🔁 Possible invoice
+payment / deposit — match, do not code to income"**: coding it to income when the invoice or sales receipt
+already recognised the revenue double-counts it and leaves the invoice open on the aging. **Treat processor
+payouts (Stripe, Square, PayPal) as gross sales less fees from the processor report, never as net income.**
+
+**Unusual amount** — **[auto]** where history exists
+
+**An amount well outside this vendor's historical range — state the measure used, such as a multiple of the
+median — or at or above the capitalization threshold: flag ⚠️ Unusual amount and cap at Medium.**
+
 **Capitalization threshold check** — **[gated]**
 
 For equipment, computers, furniture, vehicles and so on, **if the amount ≥ the entity's capitalization
@@ -245,15 +267,18 @@ matching transaction and its account. **The entity's own bank and card accounts 
 **Owner / related-party transactions** — **[gated]**
 
 **Payments to / from owners, shareholders, directors, or related entities → flag for Due to / from accounts
-or distributions.** **[auto]** support: compare vendor names against the employee list and against the other
-connected company files' legal names. **A vendor whose name matches another entity in the group is an
+or distributions.** **[auto]** support: compare vendor names against the employee list, against the other
+connected company files' legal names, and against the owner, family and other-business names from Stage 1
+(G) — those names are used only for this flag and never stored. **A vendor whose name matches another entity in the group is an
 intercompany transaction**, not a third-party expense.
 
 **Loan payments** — **[gated]**
 
 **Always split between Interest Expense (P&L) and Principal (BS liability reduction). Ask for the split if
-not obvious from the source.** **[auto]** support: the loan liability account and its movement are readable,
-which often reveals the principal portion directly — but **the amortization schedule is `[manual]`**.
+not obvious from the source.** **The split comes from the lender statement or amortization schedule
+(`[manual]`).** The ledger balance is used only to confirm the loan balance after the payment agrees to the
+lender's figure. **Without the statement, code the full payment to the loan account, flagged "split
+required" — never to expense.**
 
 ## Step 5 — Output
 
@@ -293,7 +318,9 @@ returned `mock` data; **and whether the COA was read or a fallback is in use.**
 
 **Sheet: Uncoded Population — NEW, Mosofin-specific** — what is sitting in uncategorized and suspense
 accounts, with ages and amounts. **This is the work list**, and it is often more useful than the batch that
-prompted the request.
+prompted the request. **Its header says: "Covers only items already posted to Uncategorized / suspense.
+Bank-feed items awaiting review are not in the ledger and are not visible here. Upload the bank and card
+statement CSVs for the period to code them."
 
 **Sheet: Coverage — NEW, Mosofin-specific**
 

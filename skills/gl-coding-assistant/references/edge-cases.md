@@ -41,7 +41,8 @@ and overridden thereafter. **Read the history.**
 and both will be miscounted. Flag it.
 
 **The uncategorized account is growing** — *Mosofin-specific, and worth surfacing unprompted*. It is the
-backlog, with ages and amounts, and it is readable in one call.
+backlog, with ages and amounts, and it is readable in one call — the posted backlog only; bank-feed items
+awaiting review are not in it.
 
 **A vendor is another group entity** — *Mosofin-specific*. An intercompany balance, not a third-party
 expense. Detectable by comparing names across connected files.

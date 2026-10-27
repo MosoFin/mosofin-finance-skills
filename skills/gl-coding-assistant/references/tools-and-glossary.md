@@ -24,7 +24,7 @@ Typical evidence tools — **resolve real names and policies from your Gate 2 ca
 | Vendor master, defaults, addresses | `search_vendors` / `get_vendor` | `query`/`name`, `active_only`; `id` |
 | **The tax codes configured in this entity** | `search_tax_codes` / `search_tax_rates` | varies |
 | Related-party name comparison | `search_employees` / `get_employee` | `query`/`name`, `active_only`; `id` |
-| Loan balances, for the interest / principal split | `get_balance_sheet` / `get_general_ledger` | `start_date`, `end_date`, `account` |
+| Loan balances, to confirm the post-payment balance agrees to the lender's figure | `get_balance_sheet` / `get_general_ledger` | `start_date`, `end_date`, `account` |
 | **Country, industry, currency** | `get_company_info` | none (uses the connected company) |
 
 Each tool's **own description in your Gate 2 catalog is the authority** on its arguments and failure

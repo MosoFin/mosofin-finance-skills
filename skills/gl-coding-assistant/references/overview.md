@@ -40,7 +40,8 @@ Four more things follow from the same access:
    REQUIRED** fallback survive as a degradation path, not the normal case.
 2. **You can find the work yourself.** **Uncategorized, suspense and "ask my accountant" accounts are
    readable** — so the skill can locate what actually needs coding rather than waiting for someone to paste
-   a list. That is often the more useful opening move.
+   a list. That is often the more useful opening move. **It sees only what is posted**: bank-feed items
+   still awaiting review are not in the ledger, so the statement CSVs are still needed for those.
 3. **Transfer detection becomes real.** The original infers a transfer from a one-sided bank export —
    "same amount, opposite sign, within ~3 days". **With the ledger, both sides are visible.**
 4. **The tax codes actually configured in this entity are readable**, so a tax-code suggestion can name a

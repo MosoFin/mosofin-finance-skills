@@ -57,8 +57,9 @@ Ask only what you cannot already see.
 | **B** | *Which transactions should I code?* A pasted list or a bank or card export — or shall I find them? | The work itself | **Required.** On the Mosofin path, **offer to find them**: uncategorized and suspense accounts are readable. |
 | **C** | *Which entity are they for?* In a group, which entity each batch belongs to | Coding is entity-specific: the same vendor maps to different accounts in different charts | Confirm **before coding any of them**. On the Mosofin path, by `display_name`. |
 | **D** | *Do you want tax codes? If so, which jurisdiction, and which tax codes are set up?* | Tax codes are only suggested with both | **Required for tax codes.** Without them, output "Tax code: TBD — confirm with tax setup"; never assume a treatment. |
-| **E** | *What is your capitalization threshold?* Ask if equipment, computers, furniture or vehicles are in the batch | Drives the possible-capex flag | **Never pick one.** The flag reads "unknown — please confirm". |
+| **E** | *Above what amount do you treat a purchase as an asset to depreciate rather than an expense (your capitalization threshold)? Ask your accountant if unsure; leave blank and I'll flag large equipment purchases for you to decide.* Always asked | Drives the possible-capex flag | **Never pick one.** The flag reads "unknown — please confirm". |
 | **F** | *Any house coding rules that override past practice?* | A policy wins over history | Optional. History is used, labelled as practice. |
+| **G** | *Names of owners, their family members on the books, and any other businesses they own?* | Flags possible owner or related-party items | Optional. Used only for that flag, **never stored**. |
 
 **Then, depending on the answer to A:**
 
@@ -79,13 +80,16 @@ Ask only what you cannot already see.
 | **Chart of accounts** — numbers and names | **Required** — without it, stop and ask; coding falls to category names, or an authorized placeholder | CSV or XLSX |
 | Entity name; jurisdiction; industry | Entity: Required. Jurisdiction: Required for tax codes. Industry: if known | Type it in the chat |
 | **Tax code list** | Required for tax codes | CSV or XLSX, or typed in |
-| **Prior vendor-to-account mappings**, or a coded GL export | Optional — improves accuracy; enables Tier 1, the strongest evidence | CSV or XLSX |
+| Exports for **every bank and card account** for the same period | Recommended — so both sides of a transfer can be matched | CSV or XLSX |
+| **Prior vendor-to-account mappings**, or a coded GL export (QBO Transaction Detail by Account / Xero Account Transactions, last 12 months) | Recommended — enables Tier 1, the strongest evidence | CSV or XLSX |
+| **Open invoices (AR aging)** | Recommended if the batch has deposits — receipts are matched before any income coding | CSV or XLSX |
 | **Capitalization threshold**; house coding policy | Optional — ask if relevant | Type it in the chat |
 
 **Read back before starting, then wait for a yes:**
 
 > *Coding the **38 transactions in Uncategorized Expense** at **Northbrook Trading**, read from
-> **your Mosofin connection**, against its chart and coding history. Tax codes from the configured
+> **your Mosofin connection**, against its chart and coding history. Bank-feed items still awaiting review
+> are not in the ledger — upload the statement CSVs if you want those coded too. Tax codes from the configured
 > list, **which code applies to be confirmed by you**; capitalization threshold **$2,500**. Shall I
 > go ahead?*
 
@@ -114,10 +118,10 @@ processor prefixes — and match it to the vendor master: known, new, or a dupli
 
 ## Stage 4 — Classify, assign tax codes, and flag special cases
 
-Apply the five tiers **in order and stop at the first confident match**: exact vendor match from
+Apply the five tiers **in order and stop at the first confident match** — Step 4 still runs on every row: exact vendor match from
 the history (consistent, inconsistent or changed), vendor-type pattern, keyword inference, amount
 heuristics, and "Needs Review" with a reason. Suggest tax codes only with a jurisdiction and code
-list, flagging cross-border items for review. Then the special cases — capitalization threshold,
+list, flagging cross-border items for review. Then the special cases — receipts matched to open invoices or clearing before any income coding, capitalization threshold,
 personal use, splits, transfers with both legs named, owner and related-party items, loan payments
 split between interest and principal: [`references/method.md`](references/method.md) Steps 2–4.
 Check [`references/edge-cases.md`](references/edge-cases.md) for refunds, card payments,
