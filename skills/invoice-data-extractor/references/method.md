@@ -41,6 +41,16 @@ Typical batch, per in-scope entity:
 - *`search_bills`* / *`search_purchases`* — **posted bills for this vendor, and for this invoice number:
   the duplicate check** — usually **[auto]**
 - *`search_payments`* — **whether it has already been paid** — usually **[auto]**
+
+**The duplicate and already-paid look-back.** Search **by vendor**, open **and paid** bills, payments, and
+direct purchases (cheques and card charges entered without a bill), over a window long enough to cover
+the vendor's re-billing lag — **ask the user how far back** (or use the persisted tolerance), and **state
+the window searched** on the Validation Results row. The current period alone, or aged payables alone
+(open bills only), cannot show an invoice that was already paid. **A match** is the same vendor with the
+same normalized invoice number (case, punctuation, leading zeros and prefixes stripped), **or** the same
+amount with an invoice date inside the agreed date window — state the window used. For a **Credit Memo**,
+run the check against posted vendor credits instead (resolve the read from your Gate 2 catalog), and
+report whether the credit is already applied.
 - *`get_general_ledger`* / *`get_profit_and_loss`* — **how this vendor is usually coded** — usually
   **[auto]**
 - *`search_purchase_orders`* — **PO matching**, where POs are used — often **[gated]**
@@ -85,7 +95,7 @@ original's Sheet 4 requires it, and it is the audit trail.
 | **Vendor remit-to** | **"Remit payment to", "Mail payments to"** | **[gated]** — **the closest available proxy for the bank-detail check** |
 | **Invoice number** | **"Invoice #", "Bill #", "Document #", "Tax Invoice #"** | **[auto]** — **the duplicate check** |
 | **Invoice date** | "Invoice Date", "Date Issued", "Bill Date" | — |
-| **Due date** | "Due Date", "Payment Due" — or calculated from terms | **[auto]** against vendor terms |
+| **Due date** | "Due Date", "Payment Due" — as printed. If calculated from terms, put it in a separate `due_date_calculated` field marked as derived | **[auto]** against vendor terms |
 | **Payment terms** | **"Terms", "Net 30", "2/10 Net 30", "End of Month + N"** | **[auto]** against the vendor record |
 | **Customer / billed-to name** | **"Bill To", "Sold To", "Invoice To"** | **[auto]** against the entity's legal name |
 | **Customer reference / PO #** | **"PO #", "Customer Ref", "Your Reference"** | **[gated]** against open POs |
@@ -124,9 +134,9 @@ the books rather than inventing a third variant.
 | Field | Description |
 |-------|-------------|
 | **Line description** | Service or product description |
-| **Quantity** | Numeric; **default 1 if not shown** |
-| **Unit price** | Numeric |
-| **Line subtotal** | Quantity × Unit price |
+| **Quantity** | Numeric, as shown; else `null` |
+| **Unit price** | Numeric, as shown; else `null` |
+| **Line subtotal** | **As printed.** Where quantity and unit price are both shown, flag any line where quantity × unit price ≠ the printed amount |
 | **Line tax** | Tax allocated to this line, if shown |
 | **Line total** | Subtotal + tax |
 | **Service period** | **"From — To" dates if shown** |
@@ -156,12 +166,18 @@ service description.**
 | **Balance due** | Total − paid |
 
 **Cross-check: Subtotal + Tax + Shipping − Discount should equal Total. If not, capture as-is and flag the
-discrepancy. Do not silently force a match.** **[auto]** arithmetic, and it is one of the more useful
+discrepancy. Do not silently force a match.** (For a tax-inclusive invoice, use the cross-checks below.) **[auto]** arithmetic, and it is one of the more useful
 extraction quality signals — **a failed cross-check usually means a misread figure, not a wrong invoice.**
 
 **Tax-inclusive pricing**: **if the invoice shows "Total includes VAT / GST" or similar, decompose
 explicitly**: show pre-tax subtotal, tax amount, and total. **The invoice may show only the inclusive total
 — extract what's visible and flag any decomposition that requires assumption.**
+
+**If Tax-inclusive = true:** the sum of line amounts = **Total**; **Subtotal (pre-tax) = Total − Tax**, with
+Tax taken from the tax summary printed on the invoice. Cross-check **Σ lines + Shipping − Discount = Total**
+and **Subtotal + Tax = Total**. If the invoice prints no tax amount, leave Subtotal and Tax `null` and flag
+it. **Never calculate tax from a rate** — a gross figure in the pre-tax Subtotal overstates the cost by
+the recoverable tax.
 
 **Mosofin note on shipping and freight**: where the invoice is for inventory or a capital item, **freight is
 part of the asset's cost** — see
@@ -220,8 +236,8 @@ counts** rather than depending on a mapping file.
 
 | Validation status | Meaning |
 |---|---|
-| **Clean** | Known vendor, no duplicate, Bill-To matches, terms consistent |
-| **Review** | New vendor, terms mismatch, currency unusual for this vendor, remit-to differs |
+| **Clean** | Known vendor, no duplicate, Bill-To matches, terms consistent, and the cited PO, if any, is found and open |
+| **Review** | New vendor, terms mismatch, currency unusual for this vendor, remit-to differs; **PO cited but not found, closed, or for a different vendor, or total exceeds the open PO balance** (line-level matching: `three-way-match`); **service period not within the invoice month** — a prepaid or accrual decision is needed |
 | **Stop** | **Duplicate invoice number for this vendor**, or **already paid**, or **Bill-To is a different entity** |
 
 ## Step 7 — Output
@@ -231,14 +247,16 @@ sheets.**
 
 **Sheet 1: Invoices** (one row per invoice)
 
-| Vendor | Vendor Tax ID | Invoice # | Invoice Date | Due Date | Currency | Subtotal | Tax | Shipping | Discount | Total | Tax-Inclusive? | PO # | Payment Terms | Confidence | Notes |
+| Vendor | Vendor Tax ID | Bill-To | Remit-to (masked) | Invoice # | Invoice Date | Due Date | Currency | Subtotal | Tax | Shipping | Discount | Total | Amount Paid | Balance Due | Tax-Inclusive? | PO # | Payment Terms | Confidence | Notes |
 
 **Add three Mosofin columns**: **Entity** (`display_name`), **Validation Status**, and **Duplicate Match**
 (the posted bill it matches, where one exists).
 
 **Sheet 2: Line Items**
 
-| Invoice # | Line # | Description | Qty | Unit Price | Subtotal | Tax | Total | Service Period Start | Service Period End | Product Code |
+| Invoice # | Line # | Description | Qty | Unit Price | Subtotal | Tax | Total | Service Period Start | Service Period End | Product Code | Tax Code (as printed) | Suggested Account (source: vendor default / coding history / mapping file / none) |
+
+**Tax Code and Suggested Account are suggestions**, not extracted facts — say which source each came from.
 
 **Sheet 3: Tax Detail** (if multi-rate / multi-jurisdiction)
 
@@ -265,13 +283,15 @@ plausibility, remit-to comparison — **and the bank-detail check, recorded as N
 {
   "invoices": [
     {
-      "vendor": { "name": "...", "tax_id": "...", "address": "..." },
+      "vendor": { "name": "...", "tax_id": "...", "address": "...", "remit_to_masked": "..." },
+      "bill_to": "...",
       "invoice_number": "...",
       "invoice_date": "YYYY-MM-DD",
       "due_date": "YYYY-MM-DD",
+      "due_date_calculated": null,
       "currency": "ISO-4217 code",
       "tax_inclusive": false,
-      "totals": { "subtotal": 0, "tax": 0, "shipping": 0, "discount": 0, "total": 0 },
+      "totals": { "subtotal": 0, "tax": 0, "shipping": 0, "discount": 0, "total": 0, "amount_paid": 0, "balance_due": 0 },
       "tax_breakdown": [{ "rate": 0, "jurisdiction": "...", "amount": 0 }],
       "line_items": [...],
       "extraction_confidence": "High|Medium|Low",

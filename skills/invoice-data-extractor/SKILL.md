@@ -25,7 +25,7 @@ check is always reported as **not run**. Background: [`references/overview.md`](
 ## Rules that never bend
 
 - **Asks before using Mosofin.** A connected account is not permission to read it.
-- **Reads nothing until Stage 1 is answered** and you have confirmed the read-back.
+- **Reads nothing from your books until Stage 1 is answered** and you have confirmed the read-back.
 - **Never writes, updates or deletes anything, in any system.** Every entry it produces is a
   proposal for a person to post.
 - **Never guesses a field.** Anything not visible is `null`; it **never defaults a currency** — a
@@ -74,7 +74,7 @@ Ask only what you cannot already see.
 |---|---|---|
 | **Invoice document(s)** | **Required** | PDF, PNG, JPG or multi-page scan — a single file or a batch |
 | Entity being invoiced: legal name and any trading names | Required — the Bill-To check needs it | Type it in the chat |
-| **Posted bills and payments** for the vendors in the batch — an AP listing or aged payables | Recommended — without it **the duplicate and already-paid checks cannot run**, and the output says so prominently | CSV or XLSX |
+| **Vendor transaction history** for the vendors in the batch — all bills **open and paid**, bill payments, cheques and card charges, as far back as the vendor's re-billing lag (e.g. a transaction list by vendor) | Recommended — without it **the duplicate and already-paid checks cannot run**, and the output says so prominently. **Aged payables alone is not enough** — it omits paid bills | CSV or XLSX |
 | **Vendor list** — name, tax ID, address, terms | Recommended — enables the vendor, terms and remit-to checks | CSV or XLSX |
 | Vendor mapping file; output format | Optional — default xlsx | CSV or XLSX; type the format in the chat |
 
@@ -105,7 +105,7 @@ Read each document, record its filename and page count, and split bundled invoic
 header fields with the vendor's labels as ground truth, dates in ISO `YYYY-MM-DD`, line items
 exactly as shown — no merging, no splitting — with service periods, then totals and tax by rate
 and jurisdiction, tax-inclusive or exclusive, and the **Subtotal + Tax + Shipping − Discount =
-Total** cross-check, and the payment instructions: [`references/method.md`](references/method.md)
+Total** cross-check (for tax-inclusive invoices, lines sum to Total and Subtotal = Total − printed Tax), and the payment instructions: [`references/method.md`](references/method.md)
 Steps 1–5. Check [`references/edge-cases.md`](references/edge-cases.md) for poor scans, statements,
 credit memos, pro formas, foreign language, ambiguous dates and currency, and "PAID" stamps.
 

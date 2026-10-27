@@ -17,7 +17,8 @@ to the entity's payable balance, which is `[auto]` (*`get_aged_payables`*). **Of
 posting it.**
 
 **Credit memos**: **negative amounts, "Credit Memo", "Refund", or parenthesized amounts. Tag as Credit Memo.
-Output amounts negative for downstream processing.**
+Output amounts negative for downstream processing.** Run the duplicate check against posted vendor
+credits, not bills, and report whether the credit is already applied (Step 0).
 
 **Foreign language**: **identify language, translate field labels, preserve original amounts and currency.
 Note translation in output.**
