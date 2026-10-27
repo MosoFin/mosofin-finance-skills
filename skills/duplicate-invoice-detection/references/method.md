@@ -40,6 +40,8 @@ Typical opening batch, per in-scope entity:
   **[auto]**
 - *`search_purchases`* — direct payments and card charges that bypassed the bill process — usually
   **[auto]**
+- *`search_journal_entries`* — manual entries posted to AP or expense with a vendor name, which also
+  bypass the bill process — usually **[auto]**
 - *`search_vendors`* / *`get-vendor`* — **the vendor master, including inactive records** — usually
   **[auto]**
 - *`search_vendor_credits`* — **credits never applied** (Rule 10) — usually **[auto]**
@@ -68,7 +70,9 @@ or worse**, and a recovery request sent to a real supplier on fixture evidence i
 For each record — **[auto]**:
 
 - **Strip whitespace, normalize case** on vendor name and invoice number
-- **Remove punctuation and special characters from invoice numbers** — some systems prefix or suffix
+- **Remove punctuation and special characters from invoice numbers** — some systems prefix or suffix.
+  Also strip **leading zeros** and common prefixes and suffixes (INV, #, -A, -R), and keep the raw number
+  alongside
 - **Group records by vendor** — use vendor ID as primary; **also link by vendor name fuzzy match for
   aliases**
 - **Convert amounts to a common currency for comparison** if the register is multi-currency — **but flag
@@ -89,6 +93,10 @@ Two additions worth making explicit, because both cause false negatives:
 Same vendor + identical invoice number = **almost certainly a duplicate entry. Even if dates and amounts
 differ slightly, this is highly suspicious.** Flag.
 
+**Rule 1 also covers a near-match invoice number (Confidence: High)** — same vendor, same amount,
+normalized numbers differ by one character or one is contained in the other ("1043" vs "1043A",
+"INV-01043" vs "1043"), any date in the scan window. Show both raw numbers.
+
 **Rule 2 — Same amount + same vendor + same invoice date (Confidence: High)** — **[auto]**
 Same vendor, same date, same amount, different invoice numbers = **could be two legitimate same-day
 invoices or could be a duplicate with an altered invoice number.** Flag for review.
@@ -97,6 +105,7 @@ invoices or could be a duplicate with an altered invoice number.** Flag for revi
 **N defaults to 7.** Same vendor, identical amount, near dates = possible duplicate.
 
 **Rule 4 — Same amount + similar vendor name + same period (Confidence: Medium)** — **[auto]**
+"Same period" means dates within the Rule 3 window; state it on the output.
 Vendor name slightly altered — **"Acme Corp" vs "Acme Corporation" vs "Acme Inc."**. Use string-similarity
 matching (**Jaro-Winkler ≥ 0.85** or similar). Flag for review. Present the similarity score with each
 match so a reviewer can judge it.
@@ -117,9 +126,15 @@ setup. Flag both.**
 surface. **It must be run in the AP or banking system directly**, and it should be — it is the highest-value
 fraud test in the list. **Report it as not run**, with a named owner, rather than omitting it.
 
+**On the upload path it can run** if the user supplies vendor payee bank details (the last four digits of
+the account plus the routing or sort code are enough). Compare them in this conversation only, **mask
+every account number in the output**, and never persist them.
+
 **Rule 8 — Round-number duplicate amounts within short windows (Confidence: Low)** — **[auto]**
 **Many vendors do issue same-amount recurring invoices (rent, subscriptions). Don't auto-flag, but check
-for an above-threshold cluster.**
+for an above-threshold cluster.** The threshold — how many same-amount round-number bills from one vendor,
+within what window — is the user's call: **ask for it**, and state it on the Summary. Without one, list the
+clusters for review and say no threshold was applied.
 
 **Rule 9 — Identical invoice attributes but one paid via cheque, one via wire (Confidence: High)** —
 **[gated]**
@@ -135,9 +150,16 @@ was never applied. Not a duplicate per se but worth surfacing** — and worth su
 
 ## Step 3 — Sensitivity tuning
 
-- **Strict**: flag any rule match with **Medium+** confidence
-- **Standard** (default): flag any rule match with **High+** confidence
-- **Permissive**: only flag **Very High** confidence matches
+**All rules always run, and every match appears on Flagged Pairs with its confidence.** Sensitivity
+decides only which matches go into the **headline exposure and the Recovery Plan**:
+
+- **Strict**: headline any rule match with **Medium+** confidence
+- **Standard** (default): headline any rule match with **High+** confidence
+- **Permissive**: only headline **Very High** confidence matches
+
+**Rule 10 sits outside the scale** — it is reported on its own at every sensitivity, because it is money
+owed, not a duplicate suspicion. The Summary also shows **matches below the sensitivity threshold: count
+and amount**, so a "clean" headline never hides them.
 
 **[manual]** to set; **[auto]** to apply. **State the setting used on the output** — a "clean" result under
 Permissive means something very different from a clean result under Strict, and the two are
@@ -170,11 +192,23 @@ For confirmed duplicates that have already been paid — **[auto]** to determine
   - **Refund from the vendor** — request explicitly
   - **Set off against an open balance** — **[auto]** to check whether one exists, which decides whether
     this option is even available
-- **For open (unpaid) duplicates, simply void or remove the duplicate before payment** — and these are the
-  valuable ones: **a duplicate caught before payment costs nothing to fix.** Sort the output so unpaid
-  duplicates appear first
+- **For open (unpaid) duplicates, propose voiding the duplicate bill before payment**, for a person to do in
+  their system, where its period is still open — and these are the valuable ones: **a duplicate caught
+  before payment costs nothing to fix.** Sort the output so unpaid duplicates appear first. **Where the
+  duplicate is dated in a closed period**, do not alter that period; propose a vendor credit dated in the
+  current open period: DR Accounts Payable / CR the expense or inventory account on the duplicate bill
 
-**Quantify the dollar exposure: total amount in flagged duplicates by confidence level.**
+**Proposed entry for a paid duplicate** — in the current period, a proposal for a person to post:
+
+```
+DR  Vendor Receivable (or Accounts Payable debit balance)     $duplicate amount
+    CR  [expense or inventory account on the duplicate bill]     $duplicate amount
+```
+Clear it when the credit or refund arrives.
+
+**Quantify the dollar exposure by confidence level.** **Duplicate exposure = cluster total − the one record
+treated as valid** (for paid clusters: total paid − invoice total). Cluster Total is shown for reference
+only; summing it would count the legitimate original too.
 
 ## Step 6 — Output
 
@@ -185,7 +219,9 @@ Deliver an `.xlsx` workpaper.
 - **Period scanned, record count** — and **state the population scanned versus the population available**,
   so a truncated scan is visible
 - **Total flagged by confidence level**
-- **Total exposure ($) by confidence level**
+- **Total exposure ($) by confidence level** — on the duplicate-exposure basis (Step 5)
+- **Matches below the sensitivity threshold** — count and amount
+- **Parameters used** — Rule 3 window, Rule 8 threshold, and the scan window actually read
 - **Already-paid vs. open**
 - **Recovery actions proposed**
 
@@ -195,7 +231,7 @@ data.
 
 **Sheet 2: Flagged Pairs (and Groups)**
 
-| Cluster ID | Vendor (Primary) | Records in Cluster | Rule Matched | Confidence | Amount per Record | Cluster Total | Paid Status | Recovery Action |
+| Cluster ID | Vendor (Primary) | Records in Cluster | Rule Matched | Confidence | Amount per Record | Cluster Total | Duplicate Exposure | Paid Status | Recovery Action | Disposition (Confirmed duplicate / Cleared) | Reason | Reviewed by | Date |
 
 **Each cluster expanded to show the 2+ underlying records side by side** — this is what lets a reviewer
 agree or dismiss in seconds rather than investigating.
@@ -246,7 +282,7 @@ positives come back every time and the report stops being read.**
 
 On an explicit yes, persist the **decisions**:
 
-- **Cleared clusters** — pairs and groups reviewed and dismissed, with the reason and the date. **The
+- **Cleared clusters** — the Flagged Pairs rows marked **Cleared**, with the reason and the date. **The
   single most valuable artefact here**, because a recurring false positive is what kills a control report
 - **Known legitimate recurring suppliers** — rent, subscriptions, retainers — so Rule 8 stays quiet
 - **Confirmed vendor aliases** that have been merged, and those deliberately kept separate

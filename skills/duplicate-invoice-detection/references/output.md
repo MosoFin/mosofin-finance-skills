@@ -24,7 +24,9 @@ All of the original standards, plus the Mosofin ones.
 - **The population scanned is stated against the population available**, and pagination was run to
   completion
 - **Inactive vendor records and voided entries were included in the read**, then handled per their rules
-- **The sensitivity setting is stated on the output**, so a clean result is interpretable
+- **The sensitivity setting is stated on the output**, so a clean result is interpretable, with the matches
+  below it counted
+- **Exposure excludes the record treated as valid** — never the cluster total
 - **Fuzzy matches show their similarity score** and the alternatives considered
 - **Unpaid duplicates are listed first** — they cost nothing to fix
 - **Unapplied vendor credits are surfaced prominently** as money owed to the entity

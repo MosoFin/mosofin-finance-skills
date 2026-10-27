@@ -20,7 +20,8 @@ did not run, never reads as "no duplicates found".
 payments with their method and date, direct purchases that bypassed the bill process, the vendor
 master **including inactive records**, vendor credits, open payables and PO references — nine of
 the ten rules run as queries. **It can never read vendor bank details**, so **Rule 7 — same bank
-account, different vendors — cannot run here** and must be run in the AP or banking system itself.
+account, different vendors — cannot run from the Mosofin connection**; it runs from an uploaded payee
+list, or in the AP or banking system itself.
 Background: [`references/overview.md`](references/overview.md).
 
 ## Rules that never bend
@@ -54,9 +55,9 @@ Ask only what you cannot already see.
 |---|---|---|---|
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which entity, or entities? In a group, should I also scan across them?* | One scan per entity; the same invoice paid by two group entities is invisible to each entity's own scan | **Never default the entity.** On the Mosofin path, confirm by `display_name`. |
-| **C** | *Which period should I scan?* | Sets every read | **Never default it.** Scan wider than the period under review — duplicates straddle boundaries. |
+| **C** | *Which period should I scan, and how far back before it?* | Sets every read | **Never default it.** Scan wider than the period under review — duplicates straddle boundaries — and state the window actually read. |
 | **D** | *Which suppliers legitimately bill the same amount repeatedly — rent, subscriptions, retainers?* | Naming them up front removes most false positives | Recommended. Otherwise their repeat invoices are filtered by date pattern at Rule 8, not by name. |
-| **E** | *Sensitivity — Strict, Standard or Permissive — and the Rule 3 date window?* | Decides which confidence levels are flagged | Optional: state the defaults, **Standard** and **7 days**, rather than asking. |
+| **E** | *Sensitivity — Strict, Standard or Permissive — and the Rule 3 date window?* | Decides which confidence levels count in the headline exposure; every match is still listed | Optional: state the defaults, **Standard** and **7 days**, rather than asking. |
 | **F** | *Any prior duplicate-scan results?* | So clusters already cleared are not raised again | Optional. |
 
 **Then, depending on the answer to A:**
@@ -74,7 +75,9 @@ Ask only what you cannot already see.
 |---|---|---|
 | **AP register and payment history** for the period and beyond — vendor, vendor ID, invoice number, invoice date, amount, PO reference, payment date, payment method, status, incl. voided records | **Required** | CSV or XLSX |
 | **Vendor master**, including inactive records — names, IDs, tax IDs, remit-to addresses | Recommended — needed for the alias rules | CSV or XLSX |
+| **Cheques, expenses and card charges by vendor** for the same window (e.g. a transaction list by vendor) | **Required** — payments made outside the bill process, for Rule 9 | CSV or XLSX |
 | Open vendor credits; open payables (aged payables) | Recommended — Rule 10, and paid versus unpaid | CSV or XLSX |
+| Vendor payee bank details (last 4 digits + routing or sort code) | Optional — enables Rule 7 on this path; masked, never stored | CSV or XLSX |
 | Known legitimate recurring suppliers | Recommended | Type it in the chat |
 | Prior duplicate-scan results; sensitivity and Rule 3 window | Optional — default Standard, 7 days | XLSX, or type it in the chat |
 
@@ -110,9 +113,9 @@ with FX matches flagged, and read voided and reversed records to report separate
 
 ## Stage 4 — Run the ten rules, tune sensitivity, find aliases
 
-Run Rules 1–10 with their confidence levels — Rule 7 recorded as not run, Rule 9 degrading to
+Run Rules 1–10 with their confidence levels — Rule 7 recorded as not run unless payee bank details were uploaded, Rule 9 degrading to
 Rule 2 where payment method is not recorded, fuzzy matches shown with their similarity score —
-apply the sensitivity setting, and check each suspect for vendor records that should be merged:
+list every match and apply the sensitivity setting to the headline, and check each suspect for vendor records that should be merged:
 [`references/method.md`](references/method.md) Steps 2–4. In a group, run the cross-entity scan
 with group entities excluded from the counterparty population. Check
 [`references/edge-cases.md`](references/edge-cases.md) for recurring invoices, cross-period
@@ -120,9 +123,10 @@ duplicates, reissued invoices, partial payments, different currencies and differ
 
 ## Stage 5 — Assess recovery and present the workpaper
 
-For paid duplicates, propose a vendor credit, a refund or a set-off where an open balance exists;
-for unpaid ones, propose voiding before payment, listed first. Quantify exposure by confidence
-level. Then the workpaper — Summary with population scanned against available, Flagged Pairs,
+For paid duplicates, propose a vendor credit, a refund or a set-off where an open balance exists,
+with the draft entry; for unpaid ones, propose voiding before payment (a current-period vendor
+credit if the period is closed), listed first. Quantify exposure by confidence level, excluding the
+record treated as valid. Then the workpaper — Summary with population scanned against available, Flagged Pairs,
 Detail, Vendor Aliases to Merge, Recovery Plan, **Rules Run** and Coverage:
 [`references/method.md`](references/method.md) Steps 5–6. Before presenting, check it against
 [`references/output.md`](references/output.md).
