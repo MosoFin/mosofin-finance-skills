@@ -119,9 +119,9 @@ answered:
 
 | What to confirm | Required? | Notes |
 |---|---|---|
-| **Opening cash balance** — by account, as of the start date | **Required — usually [auto]** | Pulled. Confirm which accounts count as available cash, and **exclude restricted cash**. |
+| **Opening cash balance** — by account, as of the start date | **Required — book balance [auto], bank balance [manual]** | Book balance pulled; **ask for the bank balance on the start date** and agree the two (Step 1). Confirm which accounts count as available cash, and **exclude restricted cash**. |
 | **Forecast horizon** — default 13 weeks; can be 6, 8, 17, 26 | **Required** | Ask; see the seasonality edge case before defaulting to 13. |
-| **AR / open invoices with expected collection timing** | **Required — [auto] for the invoices, [gated] for the timing** | Invoices and due dates pull; the expected pay date is derived from history and then confirmed. |
+| **AR / open invoices with expected collection timing** | **Required — [auto] for the invoices; timing [auto] to derive, [manual] to confirm** | Invoices and due dates pull; the expected pay date is derived from history and then confirmed. |
 | **AP / open bills with payment timing** | **Required — [auto] for the bills, [manual] for the plan** | Due dates pull; **which bills you intend to pay when is a decision**, not data. |
 | **Payroll schedule** — pay dates and amounts | **Required — [manual]** unless payroll is connected | Historical payroll outflows are visible and give the rhythm; the forward amounts are not. |
 | **Recurring receipts and disbursements** — rent, debt service, taxes, subscriptions | **Required — partly [auto]** | Recurring patterns derive from history; **debt service and tax due dates are [manual]** and are exactly the lumpy items that breach a floor. |

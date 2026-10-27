@@ -22,7 +22,7 @@ Typical evidence tools — **resolve real names and policies from your Gate 2 ca
 | **Opening cash by account** | `get_balance_sheet` / `get_trial_balance` | `start_date`, `end_date`, `accounting_method` |
 | Open invoices with due dates | `get_aged_receivables` | `report_date`, `customer`, `aging_method`, `num_periods` |
 | Open bills with due dates | `get_aged_payables` | `report_date`, `vendor`, `aging_method`, `num_periods` |
-| **Invoice dates and terms** (days-to-pay start date) | `search_invoices` / `read_invoice` / `get_term` | `start_date`, `end_date` (required), `customer_id`; `id` |
+| **Invoice due dates and terms** (days-to-pay start date) | `search_invoices` / `read_invoice` / `get_term` | `start_date`, `end_date` (required), `customer_id`; `id` |
 | **When invoices were actually paid** (days-to-pay end date) | `search_payments` / `get_payment` | `start_date`, `end_date` (required), `customer_id`; `id` |
 | Bill dates and when bills were actually paid | `search_bills` / `search_bill_payments` | `start_date`, `end_date` (required), `vendor_id` |
 | **Recurring disbursement patterns** | `get_vendor_expenses` | `start_date`, `end_date`, `vendor`, `summarize_column_by` |
@@ -53,8 +53,10 @@ envelopes. Where this table and the live description disagree, the live descript
 - **Revolver** — a credit facility you can draw on and repay repeatedly.
 - **Borrowing base** — the formula limiting how much of a facility you may actually draw, usually
   based on receivables and inventory.
-- **Clean-down** — a requirement to repay a facility to zero for a period each year.
-- **Days-to-pay** — how long a customer actually takes to pay, measured from invoice or due date.
+- **Clean-down** — a requirement to repay a facility to zero (or below a set level) for a set
+  period, at whatever frequency the facility agreement states.
+- **Days-to-pay** — how long a customer actually takes to pay, measured here as days past the due
+  date at payment (payment date − due date), weighted by amount.
 - **Float / clearing time** — the delay between initiating a payment and the money moving.
 - **Probability-weighting** — including an uncertain receipt at less than its full value.
 - **Debt service** — scheduled loan repayments of principal and interest.

@@ -68,8 +68,8 @@ Ask only what you cannot already see.
 - Read back the workspace and the company file **by name** and wait for an explicit yes
   (Gates 0–1 in [`references/gates.md`](references/gates.md)). An excluded entity's payroll and bills
   are real outflows: name it, and say the omission flatters the forecast.
-- Do not ask for opening cash, open invoices or open bills — they are read; **confirm which accounts
-  count** (C).
+- Do not ask for open invoices or open bills — they are read; **confirm which accounts count** (C),
+  and **ask for each account's bank balance on the start date** — the books hold only the book balance.
 - Check at Gate 2 that the agings carry **due dates** and that **payment history is readable**. Without
   history, collections fall back to due dates plus a **stated** assumption, and the forecast is
   materially weaker — say so.
@@ -79,10 +79,11 @@ Ask only what you cannot already see.
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **Cash balances by account** at the start date, restricted accounts marked | **Required** | CSV, XLSX or bank statements (PDF) |
-| **Open receivables** — invoice, customer, amount, due date | **Required** | CSV or XLSX (an aged receivables report works) |
-| **Open payables** — bill, vendor, amount, due date | **Required** | CSV or XLSX (an aged payables report works) |
+| **Bank balances by account** at the start date (statement or feed), restricted accounts marked, plus the latest bank reconciliation | **Required** | CSV, XLSX or bank statements (PDF) |
+| **Open receivables** — invoice, customer, amount, due date | **Required** | CSV or XLSX (an **A/R Aging Detail** export works — one row per invoice, with due date) |
+| **Open payables** — bill, vendor, amount, due date | **Required** | CSV or XLSX (an **A/P Aging Detail** export works — one row per bill, with due date) |
 | **Payroll schedule; debt service schedule; tax due dates** | **Required** | XLSX, PDF, or type it in the chat |
+| **Credit card statements** (latest) | **Required** when cards are used | PDF, CSV or XLSX |
 | **Payment history** — past invoices and the dates they were paid, several months | Recommended — derives each customer's days-to-pay; without it collections are due-date-based and weaker | CSV or XLSX |
 | **Cash account transactions** for the prior twelve months | Recommended — recurring pattern, payroll rhythm, annual one-offs, forecast-vs-actual | CSV or XLSX |
 | Facility terms; covenant definition | Recommended | PDF, or type it in the chat |

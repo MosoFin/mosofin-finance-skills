@@ -40,7 +40,10 @@ Typical opening batch, per in-scope entity:
 
 - *`search_accounts`* — identify the cash and bank accounts, and any restricted ones — usually
   **[auto]**
-- *`get_balance_sheet`* / *`get_trial_balance`* — **opening cash by account** — usually **[auto]**
+- *`get_balance_sheet`* / *`get_trial_balance`* — **opening cash by account** — usually **[auto]**;
+  and from the same read, the **balances to be paid in the window**: credit cards, sales tax / VAT
+  payable, payroll liabilities, current portion of loans and accrued interest — amounts **[auto]**,
+  due dates **[manual]**
 - *`get_aged_receivables`* — open invoices with due dates — usually **[auto]**
 - *`get_aged_payables`* — open bills with due dates — usually **[auto]**
 - *`search_invoices`* / *`read_invoice`* — invoice dates and terms, for the days-to-pay derivation
@@ -77,8 +80,23 @@ decision**. A forecast on fixtures can look perfectly healthy while a real busin
 actual cash movements, not accruals or non-cash items.**
 
 **Establish each week's start and end dates and the opening cash balance for Week 1.** **[auto]** for
-the opening balance; **[gated]** for which accounts count — **restricted cash is excluded**, and a
-deposit account you cannot access this week is not liquidity.
+the book balance; **[auto] to derive, [manual] to confirm** which accounts count — **restricted cash is
+excluded**, and a deposit account you cannot access this week is not liquidity.
+
+**Opening cash is the bank balance, not the book balance.** Ask for each in-scope account's bank
+balance on the start date (bank statement or feed balance) — **[manual] on both paths**, since the
+books cannot supply it — and agree it to the book balance through the latest bank reconciliation
+(ask its date). Then:
+
+- **Outstanding cheques and payments** (in the books, not yet cleared) become Week 1–2
+  disbursements in their clearing weeks — and are not placed again in Step 3.
+- **Deposits in transit, and any Undeposited Funds balance** (customer payments received in the
+  books but not yet banked), become Week 1 receipts.
+- **Unreviewed bank-feed items** (money that moved but is not yet in the books) are listed and
+  placed, or confirmed as already in the book figures.
+
+If no bank balance is supplied, label opening cash **"book balance, not agreed to bank"** on Sheet 1
+and on the coverage sheet.
 
 Use the entity's time zone when a week boundary falls near a payment date.
 
@@ -89,14 +107,19 @@ best:
 
 - **Take open invoices with due dates** — **[auto]** (*`get_aged_receivables`*, *`search_invoices`*)
 - **Apply expected collection timing based on customer payment behavior — not just due dates,
-  because customers pay late** — **[auto]** to derive, **[gated]** to confirm
+  because customers pay late** — **[auto]** to derive, **[manual]** to confirm
 - **Use historical days-to-pay per customer or per segment** — **[auto]**: for each customer, compare
-  invoice dates against the dates their payments were received (*`search_invoices`* against
-  *`search_payments`*) over the last several months, and compute the average and the spread. Show
-  the sample size; a days-to-pay from two invoices is not a pattern
+  **due dates** against the dates their payments were received (*`search_invoices`* against
+  *`search_payments`*) over the last several months — **days past due at payment = payment date − due
+  date**, weighted by amount, payments only (exclude credit-memo applications) — and compute the
+  average and the spread. **Expected collection = due date + that lag.** Show the sample size; a
+  days-to-pay from two invoices is not a pattern
+- **An open invoice whose expected date is already past** goes in Week 1–2 at reduced confidence,
+  unless it is older than the at-risk cutoff — **ask the user for that cutoff**; beyond it, the invoice
+  is at-risk, `[manual]` to confirm or exclude. Never let it fall silently before Week 1
 - **For example: a customer who pays on average 15 days late → forecast collection 15 days after the
   due date** — with the derived figure, this stops being an example and becomes the method
-- **Probability-weight uncertain collections** — **[gated]**; disputed and at-risk invoices are
+- **Probability-weight uncertain collections** — **[auto]** to derive, **[manual]** to confirm; disputed and at-risk invoices are
   `[manual]` to identify
 
 **Other receipts** — mostly **[manual]**, since they are future events:
@@ -127,13 +150,19 @@ best:
 - **Place in the week payment will be made (considering payment method clearing time)**
 
 **Recurring / fixed disbursements** — **[auto]** to detect the pattern from history
-(*`get_vendor_expenses`*, *`search_bills`* across months), **[manual]** to confirm amounts change:
+(*`get_vendor_expenses`*, *`search_bills`* across months), **[manual]** to confirm amounts change.
+**Derive the amounts from cash paid** (*`get_general_ledger`* on the cash accounts,
+*`search_bill_payments`*) — an expense-by-vendor report is accrual-basis, not cash:
 
 - **Rent / lease payments**
 - **Debt service (principal + interest) on scheduled dates** — **[manual]** for the schedule
 - **Insurance**
 - **Software subscriptions**
 - **Utilities**
+
+**Credit-card payments** — not an A/P bill, payroll, debt or tax, so give them their own line: the
+statement balance on its due date, then the run-rate of card spend — **[auto]** for the balance and
+the history, **[manual]** for the due date.
 
 **Periodic / lumpy disbursements** — **[manual]**, and the ones most likely to breach a floor:
 
@@ -148,6 +177,12 @@ best:
 (*`get_general_ledger`* on the cash accounts) and check whether an anniversary of each falls inside
 the horizon. Annual insurance, tax instalments and licence renewals are the classic forgotten items,
 and they are visible in last year's cash.
+
+**De-duplicate before the chain.** For each recurring item and each anniversary one-off, drop the
+occurrence if an open bill, a supplied schedule line, or a payroll, debt, tax or card line already
+covers that vendor and period. Rent, insurance, software and utilities are usually entered as bills,
+so the same payment can otherwise arrive twice. Sheet 3 shows each payment's **source** so a reviewer
+sees it once.
 
 ## Step 4 — Compute the weekly cash position
 
@@ -202,7 +237,11 @@ Each week, compare the prior forecast to actual cash flows — **[auto]** for th
 - **Forecast vs. actual receipts (collection accuracy)**
 - **Forecast vs. actual disbursements**
 - **Variance explanation**
-- **Roll the forecast forward one week** (Week 1 drops off, a new Week 13 is added)
+- **Roll the forecast forward one week** (Week 1 drops off, a new Week 13 is added). **The new
+  Week 1 opens at the actual bank balance** (per Step 1), with the difference from last week's
+  forecast closing shown as a variance line — never at the old forecast figure
+- **Exclude transfers between in-scope cash accounts** (*`search_transfers`*) from actual receipts
+  and disbursements; they are neither
 
 **This rolling discipline sharpens collection-timing assumptions over time.** In a connected
 workspace it does so mechanically: each week's actual receipts feed straight back into the
@@ -239,7 +278,7 @@ expected week is auditable rather than asserted.
 
 **Sheet 3: AP / Disbursement Detail**
 
-| Vendor / Item | Amount | Due Date | Planned Payment Week | Priority |
+| Vendor / Item | Amount | Due Date | Planned Payment Week | Priority | Source (open bill / recurring / schedule / one-off / card) |
 
 **Sheet 4: Liquidity Alerts**
 
