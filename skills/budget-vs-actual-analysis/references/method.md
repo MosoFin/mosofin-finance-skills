@@ -81,12 +81,25 @@ Ensure both are on the same basis — **[auto]** to test each of these:
   that means nothing
 - **Same period definition** — confirm the budget's periods align to the fiscal calendar
 - **Same currency**
-- **Same accounting treatment** — if the budget was on a simplified basis, reconcile. **[gated]**:
-  a budget built on cash assumptions compared to accrual actuals will show timing noise on every
-  line
+- **Same accounting treatment** — if the budget was on a simplified basis, reconcile. **[auto]
+  figures / [manual] judgment**: a budget built on cash assumptions compared to accrual actuals will
+  show timing noise on every line. **Pull actuals with `accounting_method` set to the budget's
+  basis** — ask if unknown; use accrual only on the user's yes — and state the basis in the header
+- **Same sign convention** — normalise so each line's natural balance is positive on both sides;
+  budgets often store every line as positive while the P&L shows contra lines (discounts, refunds)
+  as negatives. **Flag each contra line**, or Step 3's F/U label comes out reversed
+- **Same subdivision** — if the budget is set by class, location or customer, pull actuals with the
+  same `class` / `department` / `customer` breakdown
 
 **Map actual accounts to budget lines where they differ**, and **show the mapping** rather than
 applying it silently — a mapping is a judgment that changes the answer.
+
+**Confirm the period is closed** — bank and card reconciled, accruals and prepaids posted, bank-feed
+items reviewed. If it is not, or the user does not know, put **"PRELIMINARY — period not closed"** in
+the Sheet 1 header, and classify a favourable expense variance with no ledger evidence as **"possible
+missing accrual — to be confirmed"**, not as a saving. On the Mosofin path, list bills and journal
+entries dated after period end that relate to the period (*`search_bills`*,
+*`search_journal_entries`*) — **[auto]**.
 
 ## Step 2 — Compute variances
 
@@ -128,7 +141,8 @@ Not every variance needs commentary; a report that explains everything gets read
 
 Apply the threshold:
 
-- **Variances above the $ threshold AND/OR the % threshold → require explanation**
+- **Variances above both the $ threshold and the % threshold → require explanation** — or above
+  either one, if the user chooses that rule. **Ask which rule** and record it in the header
 - **Below threshold → noted but not explained**
 
 **Use both an absolute and a relative threshold** (a $5K variance on a $10K line is 50% and worth
@@ -136,14 +150,16 @@ explaining; a $5K variance on a $5M line is noise). **The user sets thresholds; 
 ask — don't assume.**
 
 **[auto]** to apply once set; **[manual]** to set. If the user declines to set thresholds, say so
-and explain everything above zero rather than picking a figure.
+rather than picking a figure: list every variance ranked by absolute dollar amount, explain from the
+top down, state in the header that no materiality rule was applied, and offer to stop at whatever
+number of lines the user names.
 
 ## Step 5 — Decompose variances into drivers
 
 **For material variances, break down the cause rather than just stating the gap.** This is the step
 that separates a variance report from a subtraction.
 
-**Revenue variance decomposition** — **[gated]**: the arithmetic is **[auto]**, and the actual
+**Revenue variance decomposition** — **[auto] figures / [manual] judgment**: the arithmetic is **[auto]**, and the actual
 units, prices and mix are readable where items are tracked (*`search_invoices`*, *`search_items`*,
 *`get_customer_sales`*); the **budgeted** units and prices come from the budget's own detail or
 from the user:
@@ -151,11 +167,16 @@ from the user:
 ```
 Total revenue variance = Volume variance + Price variance + Mix variance + FX variance
 
-Volume variance = (Actual units − Budget units) × Budget price
-Price variance = (Actual price − Budget price) × Actual units
-Mix variance = effect of selling a different product mix than budgeted
-FX variance = effect of currency movement vs. budgeted rates
+Volume variance = (Total actual units − Total budget units) × Budget average price
+Mix variance    = Σ (Actual units_i − Total actual units × Budget mix %_i) × Budget price_i
+Price variance  = Σ (Actual price_i at budget FX rate − Budget price_i) × Actual units_i
+FX variance     = Actual revenue − Actual revenue restated at budget FX rates
 ```
+
+Volume is at the budget **average** price and price is in **constant (budget-rate) currency**, so
+mix and FX are not counted twice. **Check: Volume + Mix + Price + FX = the line variance, to the
+cent. Show any residual as "unexplained" — never plug it.** For a single product, mix is zero; with
+one currency, FX is zero.
 
 **Cost variance decomposition**:
 
@@ -164,18 +185,22 @@ For variable costs:
 Volume-driven = (Actual volume − Budget volume) × Budget unit cost
 Rate/efficiency = (Actual unit cost − Budget unit cost) × Actual volume
 
-For personnel:
-Headcount variance = (Actual heads − Budget heads) × Budget avg cost
-Rate variance = (Actual avg cost − Budget avg cost) × Actual heads
-Timing variance = hires earlier/later than budgeted
+For personnel (heads = average heads for the period):
+Headcount variance = (Actual avg heads − Budget avg heads) × Budget avg cost
+Rate variance = (Actual avg cost − Budget avg cost) × Actual avg heads
 ```
 
-**[gated]** for personnel: actual headcount is often readable (*`search_employees`*), actual
+Because heads are averaged over the period, hires earlier or later than budgeted already fall within
+the headcount variance. **Show hiring timing as commentary, not as a third amount.** The same check
+applies to every cost decomposition: the components sum to the line variance, any residual shown as
+"unexplained"
+
+**[auto] figures / [manual] judgment** for personnel: actual headcount is often readable (*`search_employees`*), actual
 average cost usually is not without a payroll connection.
 
 **Spend variance** (discretionary):
 
-- **One-time vs. recurring** — **[gated]**: a single large transaction in the ledger
+- **One-time vs. recurring** — **[auto] figures / [manual] judgment**: a single large transaction in the ledger
   (*`get_general_ledger`*) is strong evidence of a one-off, but whether it recurs is a judgment
 - **Timing (spend shifted between periods) vs. permanent (genuinely more / less)**
 
@@ -194,7 +219,7 @@ A critical FP&A distinction:
 **Flag which is which. Timing variances shouldn't trigger the same concern as permanent ones, but
 cumulative timing variances can mask trends.**
 
-**[gated]**: the ledger gives strong signals — a bill dated in one month for a service in another,
+**[auto] figures / [manual] judgment**: the ledger gives strong signals — a bill dated in one month for a service in another,
 an accrual reversing, a deal invoiced a few days after period end (*`search_bills`*,
 *`search_invoices`*, *`search_journal_entries`*) — but the classification is a judgment the user
 confirms. **[auto]** to support it: check the *following* period's actuals where they exist, since
@@ -202,7 +227,7 @@ a timing variance that has already reversed is proven, not asserted.
 
 ## Step 7 — Roll up and assess full-year impact
 
-For each material **permanent** variance, assess the full-year implication — **[gated]**:
+For each material **permanent** variance, assess the full-year implication — **[auto] figures / [manual] judgment**:
 
 - **Will this variance persist?** → update the full-year outlook
 - **Is a re-forecast warranted?** → raise it as a re-forecasting task
@@ -226,7 +251,7 @@ Example: *"G&A was $42K (12%) unfavorable to budget. Driven by $35K of legal fee
 (one-time, not recurring) and $7K higher software costs from the [tool] renewal at a higher tier
 (permanent; full-year impact ~$84K). No action on legal; software tier under review."*
 
-**[gated]**: the figures, the accounts and the transactions are **[auto]**; **why** a cost was
+**[auto] figures / [manual] judgment**: the figures, the accounts and the transactions are **[auto]**; **why** a cost was
 incurred, and what will be done about it, come from the business. **Never invent a cause.** If the
 ledger shows a large payment to a law firm, say that — do not narrate a lawsuit nobody mentioned.
 Where the driver is unknown, write the variance, name the transactions behind it, and mark the

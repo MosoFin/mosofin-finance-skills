@@ -52,9 +52,9 @@ Ask only what you cannot already see.
 |---|---|---|---|
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which entity, or which set of entities?* | Each entity is compared to its own budget; a missing entity reads as a favourable cost variance | **Never default the entity.** On the Mosofin path, ask by `display_name`. |
-| **C** | *Which period, and at what granularity: month, QTD, YTD?* | QTD and YTD are measured against the fiscal year, not the calendar | **Never default the period.** Confirm it against the year-end. |
+| **C** | *Which period, and at what granularity: month, QTD, YTD? Is that period closed (reconciliations done, accruals posted)?* | QTD and YTD are measured against the fiscal year, not the calendar; an open month shows unbooked bills as savings | **Never default the period.** Confirm it against the year-end. If not closed, or unknown, the report is marked PRELIMINARY (Step 1). |
 | **D** | *Which budget, by name: the original, a revised budget, or the latest forecast?* | Each tells a different story | **Required. Never pick the most recent by default**; name the chosen one on the report. |
-| **E** | *Materiality thresholds: a dollar amount and a percentage.* | Decides which variances get commentary | **Don't assume.** If the user declines, say so and explain everything above zero. |
+| **E** | *Materiality thresholds: a dollar amount and a percentage — and must a variance exceed both, or either?* | Decides which variances get commentary | **Don't assume.** If the user declines, say no rule was applied and rank every variance by size (Step 4). |
 | **F** | *Any known one-time items in the period?* | Saves misattributing a legal settlement to run-rate cost | Recommended. A single large ledger transaction is evidence of a one-off; whether it recurs is a judgment. |
 | **G** | *Driver data: units, headcount, prices, and the budgeted drivers.* | Decomposition needs both actual and budgeted drivers | Recommended. Actual units and prices are often readable; headcount cost and planned drivers are usually supplied. |
 | **H** | *Which grouping does management actually read?* | Decides how lines roll up | Recommended. The chart, classes and departments pull on the Mosofin path; confirm which one. |
@@ -76,7 +76,7 @@ Ask only what you cannot already see.
 | Upload | Needed? | Format |
 |---|---|---|
 | **Actuals** for the period, by line, by month | Required | CSV or XLSX export |
-| **Budget or forecast** for the same period, by line, by month, with its name | **Required** — without it there is no variance report | CSV or XLSX |
+| **Budget or forecast** for the same period, by line, by month, with its name, its basis (cash or accrual) and any subdivision (class, location, customer) | **Required** — without it there is no variance report | CSV or XLSX |
 | Period and granularity; fiscal year-end and functional currency | Required | Type it in the chat |
 | Materiality thresholds, dollar and percentage | Recommended | Type it in the chat |
 | **Prior-year actuals**, same granularity | Recommended — the YoY column, never a substitute for the budget | CSV or XLSX export |
