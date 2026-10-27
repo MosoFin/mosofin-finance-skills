@@ -15,7 +15,7 @@ This skill uses three, with one distinction worth drawing:
 
 - **`[auto]`** — Mosofin does this unattended. **Two sub-kinds**, and Sheet 5 distinguishes them:
   - **`[auto: computed]`** — pure calculation from what the user supplied. Needs no ledger. Works even with no datasource connected.
-  - **`[auto: read]`** — requires a live read of the workspace. Unavailable without a connection.
+  - **`[auto: read]`** — requires a live read of the workspace. Without a connection, the same check runs on the user's uploaded exports, labelled user-supplied.
 - **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` (**reads only — never for a write**) and the `data_source_id`.
 - **`[manual]`** — not on this surface, or not a machine's to do. **The step stays. The user performs it.**
 
@@ -36,11 +36,15 @@ All twelve preserved.
 | End date or number of occurrences | One of the two | **Required** | Not in the books | `[manual]` |
 | Cadence | Daily / Weekly / Bi-weekly / Semi-monthly / Monthly / Quarterly / Semi-annually / Annually / Custom | **Required** | Not in the books; **inferable from posting history** for an existing charge | `[manual]`, `[auto: read]` to infer |
 | Day-of-period rule | First day / Last day / Specific day / Last business day / N business days into period | **Required** | Not in the books | `[manual]` |
-| GL account(s) and posting template | From the user's COA | **Required for JEs** | **Verifiable against the live chart** — see Step 2b | `[manual]` to specify, `[auto: read]` to verify |
+| Coding and posting template | GL accounts for a JE; account or item for a bill; product / service item for an invoice (on QuickBooks Online an invoice line takes an item mapped to an income account) | **Required** | **Verifiable against the live chart and item list** — see Step 2b | `[manual]` to specify, `[auto: read]` to verify |
+| Payment terms | E.g. Net 30 — drives the due date | **Required for bills and invoices** | **Verifiable** against the configured terms | `[manual]` to specify, `[auto: read]` to verify |
 | Tax code | Per the user's jurisdiction and tax setup | Required if tax applies | **Verifiable** against the configured tax codes | `[manual]` to specify, `[auto: read]` to verify |
 | Description / memo template | Text with variables `{month}`, `{year}` | Recommended | Not in the books | `[manual]` to supply, `[auto: computed]` to resolve |
 | Escalation rule | Fixed / Annual % / CPI-linked / Step-up at date | Optional | **Not in the books — it is in the contract.** See Step 4. | `[manual]` |
 | Stop / pause conditions | Termination clauses | Optional | In the contract | `[manual]` |
+| Partial first / last period treatment | Pro-rate on days, or per the contract | Required when start or end is mid-period | Not in the books | `[manual]` |
+| Holiday calendar and roll direction | Jurisdiction calendar; forward or backward | Required for business-day rules | Not in the books — a client fact | `[manual]` |
+| Closed-through (lock) date | Date | Required when any occurrence is backdated | Not always readable — ask | `[manual]` |
 
 ---
 
@@ -63,7 +67,7 @@ All twelve preserved.
 
 The original's four confirmations, all preserved, all `[auto: computed]`:
 
-- **Start date is reasonable** — not in the distant past unless deliberately backfilling
+- **Start date is reasonable** — not in the distant past unless deliberately backfilling. **Ask the closed-through (lock) date**, and mark any occurrence on or before it **"Closed period — do not load without accountant approval"** — loading it would change figures already issued
 - **End date or count is specified.** **Open-ended recurrences require management approval — flag if the user wants one truly indefinite.** Preserved with emphasis: an unbounded recurring payment is a standing instruction with no review date, and those are how subscriptions outlive the thing they paid for.
 - **Cadence is one of the supported intervals**
 - **Day-of-period rule is unambiguous** — "1st of month" or "last business day", not "monthly"
@@ -87,6 +91,7 @@ The original builds a schedule around accounts, counterparties and tax codes tha
 | **Every account is of the right type** — an expense line pointing at a balance sheet account, or a debit template pointing at an income account | Catches transposed account numbers, which look plausible and post cleanly to the wrong place. |
 | **The counterparty exists** in the vendor or customer list, spelled as given | A near-miss creates a *second* vendor record. Then the payments split across two, the statement never reconciles, and nobody knows why. See `vendor-statement-reconciliation`. |
 | **The tax code exists** and is active | A missing tax code either blocks the load or posts the transaction untaxed. |
+| **The item exists and is active**, with its income or expense account (bills and invoices coded by item) | An invoice line validated against a "revenue account" checks the wrong object; the item decides where the income lands. |
 | **The account is not one the client has flagged as closed to posting** | Some charts mark control accounts as no-post; a template aimed at one will fail. |
 
 **Why this check earns its place.** Validating a one-off entry saves one correction. **Validating a recurring template saves a monthly error that compounds until someone happens to look.** The whole point of automation is that nobody looks — which is exactly why the thing being automated has to be right before it starts.
@@ -97,7 +102,9 @@ The original builds a schedule around accounts, counterparties and tax codes tha
 
 `[auto: read]`, and this is the check most likely to prevent real money going out of the door.
 
-**Before building a schedule, read the ledger for what is already recurring.** For the counterparty in question, look at the trailing twelve to twenty-four months:
+**First, read the platform's own recurring-template list** (QuickBooks recurring transactions; Xero repeating invoices and bills) where the Gate 2 catalog exposes a read for it; otherwise ask the user for the Recurring Template List export. Match on counterparty, amount and next date. A template set up last week, set to start next month, or set as a reminder or draft has no postings yet and passes a history-only check.
+
+**Then read the ledger for what is already recurring.** For the counterparty in question, look at the trailing twelve to twenty-four months:
 
 - Is there **already a charge of this amount, from this counterparty, on this cadence**? If so, a recurring template may already exist and this schedule would duplicate it.
 - Is there a **similar but not identical** charge — same vendor, similar amount, similar timing? That is either the same arrangement with an escalation already applied, or a second arrangement. Ask which.
@@ -146,6 +153,7 @@ One row per future occurrence, with all six fields preserved:
 - **Monthly on the 31st**: roll to the last day of months with fewer than 31 days. Note that this is a **roll**, not a skip — February gets an occurrence on the 28th or 29th, not no occurrence at all. Skipping short months is a real bug and it silently drops one or two occurrences a year.
 - **Semi-monthly** — the 15th and the last day, say: handle month-end shifts.
 - **Weekday-only rules**: roll to the nearest prior or next business day **per policy** — the policy from Gate 3, applied consistently in one direction throughout. Never forward in one month and backward in the next; that produces a schedule nobody can predict and a reconciliation nobody can complete.
+- **A roll never moves an occurrence out of the period it belongs to.** For period-end JEs (accruals, depreciation, amortisation), keep the calendar month-end date; business-day rules apply to bills, invoices and payments. Where a forward roll would cross a month end, roll back for that occurrence and note it in the memo.
 
 `[auto: read]` addition — **a sanity check against the ledger's own history.** Where the same charge has been posted before, compare the generated dates against the dates it has actually landed on historically. A schedule that says the 1st while the charge has consistently hit on the 3rd is either a roll policy that does not match reality or a template that was going to be wrong. Cheap to check, and it is checking the design against observed behaviour rather than against itself.
 
@@ -180,11 +188,11 @@ All four preserved:
 
 **Recurring JE** — hand off to `journal-entry-builder`. The same template for every occurrence, with date and memo variables substituted. Validated against the live chart at Step 2b.
 
-**Recurring Bill** (vendor) — a bill record per occurrence: vendor, invoice date, due date, line items, GL coding, tax code. Vendor and tax code verified at Step 2b.
+**Recurring Bill** (vendor) — a bill record per occurrence: vendor, invoice date, due date (from the payment terms), line items, GL coding or item, tax code. Vendor, item and tax code verified at Step 2b.
 
-**Recurring Invoice** (customer) — an invoice record per occurrence: customer, invoice date, due date, line items, revenue account, tax code.
+**Recurring Invoice** (customer) — an invoice record per occurrence: customer, invoice date, due date (from the payment terms), line items with their product / service item, tax code. Where the invoice covers a service period beyond the invoice month, code the line to **Deferred Revenue** (or the platform's deferred-revenue item) and add a release schedule by service period; code to revenue only when the service period falls within the posting month.
 
-**Subscription Schedule** — **include the service period dates on each occurrence.** The original notes why and it is worth restating: **the service period, not the invoice date, drives deferred revenue.** A subscription invoiced annually in advance produces eleven months of deferred revenue on day one, and a schedule that omits the period dates cannot support that. Recognising the deferred revenue is a revenue-recognition task.
+**Subscription Schedule** — **include the service period dates on each occurrence.** The original notes why and it is worth restating: **the service period, not the invoice date, drives deferred revenue.** A subscription invoiced annually in advance produces twelve months of deferred revenue on the invoice date, released one month at a time, and a schedule that omits the period dates cannot support that. Recognising the deferred revenue is a revenue-recognition task.
 
 **And the handoff, stated plainly.** What Mosofin produces is a **specification**: every field, validated, with every occurrence computed. What creates the recurrence is a person entering that specification into the accounting system's own recurring-transaction feature, or loading the occurrences as a batch.
 
@@ -198,7 +206,7 @@ All four preserved:
 
 **Recurring entries stop.** They stop when an account is renamed, when a template hits its end date, when someone deactivates it during a clean-up, when a vendor record is merged. **The failure is silent** — nothing errors, an entry simply does not appear — and it is typically discovered at a year end, eight months late, by which point eight months of close files are wrong.
 
-So, for every recurring arrangement known to the workspace:
+So, for every recurring arrangement known to the workspace — on the first run, seed the register from the platform's recurring-template list (Step 2c):
 
 - **Did an occurrence post in each expected period?** List the periods where none did.
 - **Was the amount what the schedule expected?** A changed amount is either an escalation that was applied without updating the schedule, or a manual override.
@@ -223,7 +231,7 @@ An `.xlsx` workpaper. All four of the original's sheets, plus two additions.
 **Mosofin additions to the header of this sheet**, and they belong at the top where they cannot be missed:
 
 - **NOT POSTED — every occurrence in this file is Pending.**
-- **Validation status**: validated against `[company display_name]`'s chart on `[date]`, or **NOT VALIDATED** where no datasource was connected.
+- **Validation status**: validated against `[company display_name]`'s chart on `[date]`, or against the uploaded files (labelled user-supplied); **NOT VALIDATED** only for a check whose data was neither read nor supplied.
 - **Fixture flag**, if any read returned `mock: true`.
 
 **Sheet 2: Occurrence Schedule**

@@ -20,6 +20,8 @@ All ten preserved, in order.
 
 **Tax rate change during the schedule period**: if the user knows about it, build with the new rate from its effective date. If not, **flag for review at each rate change.** `[manual]` — and this is a third instance of the same rule: **rates change, so nothing here supplies one.** `[auto: read]` for the supporting fact: which tax codes the book currently has configured.
 
+**Lease payments with escalations**: the schedule is the cash / bill side. If the entity reports under GAAP or IFRS (not cash or tax basis), or holds a lease over 12 months, flag **"lease accounting may apply — expense is not the billed amount"** and code the bill to the lease liability per the user's accountant rather than to Rent Expense. `[manual]` to decide; ask the reporting basis, never assume it.
+
 **Holidays and weekend rolls**: if the cadence falls on a non-business day and the policy is to roll, **apply it consistently — always forward or always backward, per policy.** `[auto: computed]` given the calendar; `[manual]` for the calendar itself, which is not in the accounting system.
 
 **Open-ended ("until cancelled") subscriptions**: **build for a finite horizon — 12 or 24 months — and flag for renewal review at the end.** `[auto: computed]`. This is the right answer and worth defending: a finite horizon with a review date is a control. An indefinite schedule is a standing instruction that nobody will ever revisit, and Step 2's flag exists for the same reason.

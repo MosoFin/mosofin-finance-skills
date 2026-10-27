@@ -59,7 +59,8 @@ Ask only what you cannot already see.
 | **C** | *Amount and currency per occurrence.* | Occurrences stay in the contract currency | **Required.** |
 | **D** | *Start date, and an end date or number of occurrences.* | An open-ended recurrence needs management approval | **Required.** For "until cancelled", build a finite horizon of 12 or 24 months and flag it for renewal review. |
 | **E** | *Cadence and day-of-period rule: "1st of month" or "last business day", not "monthly".* | The rule must be unambiguous | **Required.** |
-| **F** | *GL accounts and posting template; tax code if tax applies.* | Each is validated against the live chart at Step 2b | **Required for JEs**; tax code required if tax applies. |
+| **F** | *Coding: GL accounts for a JE; account or item for a bill; product / service item for an invoice; tax code if tax applies.* | Each is validated against the live chart and item list at Step 2b | **Required**; tax code required if tax applies. |
+| **F2** | *Payment terms (e.g. Net 30), for bills and invoices.* | Sets each occurrence's due date | **Required for bills and invoices.** |
 | **G** | *Holiday calendar and roll policy, forward or backward.* | Business-day rolls depend on both, applied one direction throughout | **Do not pick a default.** Ask once and persist; read a saved version first. |
 | **H** | *Escalation rule (fixed, annual %, CPI-linked, step-up) and any stop or pause conditions.* | They live in the contract, not the ledger | Optional. For CPI, **ask for the index source and the inflation assumption; never assume a rate.** |
 | **I** | *A partial first or last period: pro-rate on days, or per the contract?* | The two differ by real money on the first invoice | **Do not default.** Ask which. |
@@ -80,15 +81,19 @@ Ask only what you cannot already see.
 | Upload | Needed? | Format |
 |---|---|---|
 | Type, counterparty, amount and currency, start, end or count, cadence, day-of-period rule | **Required** | Type it in the chat |
-| GL accounts and posting template | **Required for JEs** | Type it in the chat, or CSV/XLSX |
+| Coding (accounts or items) and posting template; payment terms for bills and invoices | **Required** | Type it in the chat, or CSV/XLSX |
+| **Chart of accounts** (and item list for invoices) | **Required for validation** (Step 2b) | CSV or XLSX export |
+| **Vendor or customer list**; **tax code list** if tax applies | Recommended — counterparty and tax-code checks | CSV or XLSX export |
+| **Recurring / repeating template list** | Recommended — the duplicate check (Step 2c) | CSV or XLSX export |
+| **Transactions with this counterparty, last 12–24 months** | Recommended — the duplicate check and run audit (Steps 2c, 5b) | CSV or XLSX export |
 | Tax code | Required if tax applies | Type it in the chat |
 | Holiday calendar and roll policy, for business-day rules | Required when the rule is business-day-aware | Type it in the chat |
 | Memo template with `{month}`, `{year}` | Recommended | Type it in the chat |
 | The contract: escalation rule, stop and pause conditions | Optional | PDF, or type the terms |
 | A list of recurring items to build templates for | When there are several | CSV or XLSX |
 
-Without a connection the validation, duplicate check, discovery and run audit cannot run; the
-schedule is computed only, and the header says **NOT VALIDATED**.
+Steps 2b–2d and 5b run on the uploaded files and are labelled user-supplied. Only a check whose
+file was not supplied is **NOT VALIDATED**, and the header says which.
 
 **Read back before starting, then wait for a yes:**
 
@@ -125,7 +130,7 @@ day of short months, never skip them; apply the roll policy one way throughout; 
 where the charge has actually landed; apply the escalation and document it in each row's memo:
 [`references/method.md`](references/method.md) Steps 3–4. Check
 [`references/edge-cases.md`](references/edge-cases.md) for partial periods, cadence changes, currency,
-related parties, fixed-plus-variable charges, upgrades, tax rate changes and open-ended subscriptions.
+related parties, fixed-plus-variable charges, escalating leases, upgrades, tax rate changes and open-ended subscriptions.
 
 ## Stage 5 — Build the specification, audit past runs, present the result
 
