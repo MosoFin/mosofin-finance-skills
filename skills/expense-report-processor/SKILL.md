@@ -1,1020 +1,158 @@
 ---
 name: expense-report-processor
-description: "Use this skill whenever the user wants to process, review, or post employee expense reports against their Mosofin workspace. Triggers include: uploading an expense report export (Concur, Expensify, Brex, SAP Concur, Pleo, Spendesk, Soldo, or any other T&E tool), pasting an expense report, 'review these expense claims', 'check this expense report against policy', 'code these employee expenses', 'post the expense report to the GL', or any reference to T&E (travel & entertainment) reimbursements. Also trigger for per-diem calculations, mileage reimbursements, and corporate card reconciliation tied to employee submissions. Workspace-scoped: it confirms the workspace, discovers which company files are connected and which read-only tools are enabled, then codes against the real chart of accounts, matches claims against transactions already posted, and checks the reimbursement and card-clearing balances. Do NOT use for vendor invoices — use invoice-data-extractor. Do NOT use for petty cash — use petty-cash-management. Outputs a policy-validated, GL-coded expense report ready for reimbursement and posting, with a coverage sheet."
+description: "Processes employee expense reports from any T&E tool (Concur, Expensify, Brex, Ramp, Pleo, Spendesk, Soldo) or a pasted report: validates each line against the user's own policy, codes it to the real chart of accounts, flags personal and duplicate claims, calculates what each employee is owed, and prepares the GL posting inputs. Jurisdiction-agnostic: mileage rates, per-diems, receipt thresholds and deductibility rules come from the user, never from memory. Reads the books through a connected Mosofin workspace when the user agrees, so claims are checked against card charges already posted, or works from uploaded exports. Use when the user uploads an expense report, asks to review expense claims, check a report against policy, code employee expenses, or work out mileage, per-diems or T&E reimbursements. Do not use for vendor invoices (use invoice-data-extractor) or petty cash. Read-only: produces a policy-checked, coded workpaper, posting inputs and a coverage sheet, and approves, pays or posts nothing."
 ---
 
-<!-- shared:onboarding-inline start -->
-## Before you start — this skill works with or without Mosofin
+# Expense report processor
 
-**With Mosofin connected**, the skill reads your live accounting data through the
-gateway: the figures come from your own books, it validates against the real chart of
-accounts, and most steps run automatically.
+Takes an employee expense report and works out **what the employee is actually owed**: each line
+checked against **your T&E policy**, coded to **the right account in your chart**, personal and
+duplicate claims flagged, company-paid items taken out, and the posting inputs prepared for a
+person to post.
 
-**Without it, the skill still works.** No subscription, no connector, or a skill copied
-on its own — you are not blocked and you are not asked to buy anything first. The
-Mosofin gates are skipped and you are asked for what each step needs instead: a trial
-balance, a statement, an export, the documents themselves. **The accounting logic, the
-edge cases and the output standards are identical** — only where the numbers come from
-changes, and the output always says which is which.
+The mistake it catches is the **double reimbursement**: an out-of-pocket claim for something the
+**company card already paid**. It also catches personal spending on a claim, a Corporate Card
+Clearing account that never clears, and an Employee Reimbursement Payable balance that does not
+match what is genuinely owed.
 
-**You choose, and you are asked.** Where a connection exists, the skill asks at the
-start whether to use it for this run or whether you would rather supply the data
-yourself — **a connected gateway is not taken as consent to read your books.** Say no
-and it runs manually without asking again.
+**Works with or without Mosofin.** With Mosofin connected, it reads the real chart of accounts
+(no placeholder coding), the employee list, the transactions already posted including card
+charges, how this entity coded the same merchant before, and the clearing and payable balances;
+if a T&E platform is connected, the report itself too. **It can never read your policy, the
+receipt images, or mileage rates, per-diem tables, deductibility rules and gift caps** — those
+always come from you. Background: [`references/overview.md`](references/overview.md).
 
-### Strict rule — this skill never changes your data
+## Rules that never bend
 
-**This skill will never write, update or delete existing data in any data source.**
-Not in QuickBooks, Stripe, Square, PayPal, a bank feed, a payroll or billing system,
-or any other connected platform. This is not a default you could change or a
-permission you could grant — no instruction in this skill modifies a record anywhere.
+- **Asks before using Mosofin.** A connected account is not permission to read it.
+- **Reads nothing until Stage 1 is answered** and you have confirmed the read-back.
+- **Never writes, updates or deletes anything, in any system.** Every entry it produces is a
+  proposal for a person to post.
+- **Never supplies a jurisdiction-specific number from memory.** It never defaults a mileage rate,
+  a per-diem, a receipt threshold, a deductibility split, a gift cap or an FX source, and never
+  invents an account number.
+- **Without a policy, policy validation is reported as not performed**, never as passed; receipt
+  status is reported **"per the report"**, never as verified.
+- **Never persists** employee names, individual claims, amounts, card numbers, home addresses or
+  travel itineraries.
 
-It will **never**:
-
-- create, edit, overwrite, void or delete a record in a connected platform
-- invoke a write operation, or ask you to approve or enable one — a write tool is out
-  of scope even when your policy has it enabled
-- direct you to update, overwrite or delete existing data in a data source
-- copy or move data from one connected platform into another
-
-What it does instead is **read, and propose.** Every entry, schedule, reconciliation
-and document it produces is a **draft for you to review.** Where it finds a problem —
-a duplicate, a mismatch, a stale balance — it describes the problem and proposes a
-correcting entry as a draft. It does not tell you to delete or overwrite the original,
-and it never acts on one itself.
-
-Whether anything reaches your books is a decision you make outside this skill, in your
-own system, by your own hand. **If you act on none of it, nothing in your data has
-changed.**
-
-### Onboarding — required whenever Mosofin is connected
-
-**If the Mosofin gateway is connected, onboarding is not optional and not per-skill.**
-Before any skill reads anything, the workspace and the data sources in it must be
-confirmed with you. It is the same sequence for every Mosofin skill, so it is kept in
-one place rather than repeated in each:
-
-- in this repo: [`shared/onboarding.md`](../../shared/onboarding.md)
-- installed on its own, or you would rather read the product docs:
-  [docs.mosofin.com/start-here/quickstart](https://docs.mosofin.com/start-here/quickstart)
-
-**Already onboarded this workspace?** Then you have answered it once and will not be
-asked again from scratch — but **the confirmation itself still happens every run.**
-Gate 0 reads your workspace back and waits for an explicit yes; Gate 1 settles which
-company file. Those are not skippable, and no data is read before them.
-
-**No Mosofin connector? The skill still works.** If the gateway is not present at all,
-there is nothing to onboard: the gates are skipped, every step becomes `[manual]`, and
-you are asked for what each step needs — a trial balance, a statement, an export.
-**The accounting work is unchanged**; only the data source is. You will be told this
-once, and you will not be asked to install anything before being helped.
-
-What follows in **Part A** is not more onboarding. It is this skill exploring what your
-confirmed workspace and data sources can actually do — which tools exist, which serve
-this particular request — so the run is shaped around your books rather than a generic
-template.
+Full wording: [`references/mosofin-protocol.md`](references/mosofin-protocol.md). **Read it before
+the first tool call.**
 
 ---
-<!-- shared:onboarding-inline end -->
-# Expense Report Processor (Mosofin)
 
-Reviews employee expense reports for **policy compliance**, codes them to **GL accounts**, flags exceptions,
-and produces a reimbursement-ready summary plus posting instructions. Designed for AP teams processing
-**T&E** (travel and entertainment) and out-of-pocket reimbursements anywhere in the world.
+## Stage 1 — Intake: ask these first, in one message
 
-**In plain words:** staff spend their own money, or the company card, and want it back or accounted for.
-The job is to check each line against the rules, put it in the right account, catch what should not be
-claimed, and work out what the employee is actually owed.
+*Stages 1–6 are this card's. "Steps 0–7" always mean the steps in `references/method.md`.*
 
-This skill is **jurisdiction-agnostic**. **It does NOT bake in any country's mileage rate, per-diem table,
-receipt thresholds, deductibility rules, or gift caps.** All such values come from the user's policy or the
-user's stated jurisdiction's current rules. If the user does not provide them, **ask — never guess
-jurisdiction-specific numbers.**
+Before reading any data, collect the basics in **one short batch**, not one question at a time.
+Ask only what you cannot already see.
 
-It is **workspace-scoped**: the chart of accounts, the employee list, the already-posted transactions and
-the balances come from tool calls against a company file connected to your Mosofin workspace in this
-conversation, or from something you supplied by hand and that is labelled as such.
+| # | Ask | Why it matters | If unanswered |
+|---|---|---|---|
+| **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
+| **B** | *The expense report(s): which employees and which period?* | The claims themselves | **Required — `[manual]`** unless a T&E platform is connected. |
+| **C** | *Your T&E policy, or its parameters: receipt thresholds, caps, class rules, alcohol, pre-approval.* | Policy validation runs only against a supplied policy | **Required for policy validation.** Without it Step 2 does not run, and the output says so; never invent limits. |
+| **D** | *The receipts.* | Receipt images are not on this surface | Recommended. Without them, receipt status is reported per the report only. |
+| **E** | *Tax jurisdiction, and its deductibility and recovery rules.* | Splits meals, entertainment and gifts into deductible and not | Recommended. The split is made **only if you provide the rule**. |
+| **F** | *Mileage rate, per km or per mile.* | Mileage is distance × rate | **Required if mileage is claimed.** Never supplied from memory. |
+| **G** | *Per-diem table.* | Claims are compared to it | **Required if per-diems are claimed.** |
+| **H** | *FX rate source: central bank close, accounting system rate, or report-date rate.* | Converts foreign lines to the functional currency | **Required if multi-currency.** **Do not assume a source.** |
+| **I** | *How are company card charges booked — to a clearing account, or coded to expense from the bank feed?* | Decides whether card-paid lines need an entry or only a recode | **Required if any line is company-paid.** Never assume. |
+| **J** | *Has each report been approved, and by whom?* (an approval status column is enough) | A controller will not pay an unapproved or self-approved report | Recommended. Without it, approval is reported as **not evidenced**. |
 
-**Note it is no longer chart-of-accounts-agnostic in the original's sense.** The original had to work
-without a COA and fall back to placeholders. **Here the real chart of accounts is available**, so coding is
-to real accounts — and that is a change in what the skill claims, stated openly rather than left implied.
+**Then, depending on the answer to A:**
 
-## What the workspace changes about this skill
+**Mosofin path — confirm, don't ask.**
+- Read back the workspace and the company file **by name** and wait for an explicit yes
+  (Gates 0–1 in [`references/gates.md`](references/gates.md)).
+- Check at Gate 1 for a connected **T&E or spend platform** (Concur, Expensify, Brex, Ramp, Pleo,
+  Spendesk, Soldo). If one is live, the report itself is read; if not, it is supplied by hand.
+- The chart of accounts, employees and functional currency are read, not asked. **If the chart
+  read is disabled**, coding degrades to **PLACEHOLDER — REMAP REQUIRED**, and the output says so.
+- For a group, ask **which entity employs each claimant and which bears the cost**; the duplicate
+  check runs against the entity whose card paid.
+- Still ask for the **policy** (C), the **receipts** (D) and any **rates** (F–H).
 
-The original is unusually honest about what it can and cannot do without each input. **Four of those inputs
-stop being asks in a Mosofin workspace**, so the honesty table is rewritten rather than repeated:
+**Upload path — hand over one checklist.**
 
-| Original input | Original fallback | In a Mosofin workspace |
+| Upload | Needed? | Format |
 |---|---|---|
-| **Chart of accounts** | "codes to category names only, labeled **PLACEHOLDER — REMAP REQUIRED**" | **`[auto]`.** The real COA is one read. **No placeholders.** |
-| **Employee details** | Recommended; asked for | **`[auto]`.** Names, IDs, departments where set up. |
-| **Functional currency** | "Default: from data" | **`[auto]`** from the company profile. |
-| **Tax codes / recoverability setup** | Needed jurisdiction input | **`[gated]`.** The tax codes the entity actually uses are readable; **the rules governing them are still `[manual]`.** |
+| **Expense report** — export from the T&E tool, or pasted | **Required** | CSV, XLSX or PDF, or paste it |
+| **T&E policy** document or parameters | **Required for policy validation** — without it, only coding, the maths check and obvious-personal flags run | PDF or DOCX, or type the parameters |
+| **Receipts** | Recommended — otherwise receipt status is per the report | PDF or images |
+| **Chart of accounts** | Recommended — without it every account is labelled **PLACEHOLDER — REMAP REQUIRED** | CSV or XLSX |
+| **Card charges and expenses posted** in the period | Recommended — enables the duplicate check against the books, not just within the report | CSV or XLSX |
+| **GL detail** for Corporate Card Clearing and Employee Reimbursement Payable | Recommended — the clearing test and the payable reconciliation | CSV or XLSX |
+| **Approved-but-unpaid expense reports / open employee bills**, and each employee's recent reimbursements | Recommended — the payable test and the cross-report duplicate check | CSV or XLSX |
+| Employee list; functional currency | Recommended | CSV, or type it in the chat |
+| Mileage rate, per-diem table, FX source, tax jurisdiction | **Required where they apply** | Type it in the chat, or a file |
 
-**And it adds a check the original could not perform at all:**
+**Read back before starting, then wait for a yes:**
 
-**The duplicate test against what is already posted.** The original's duplicate detection compares the
-report against itself — same vendor, amount and date twice. **The workspace lets you compare the report
-against the books.** Corporate card transactions are already in the ledger. **An out-of-pocket claim for
-something the company card already paid is the classic double reimbursement**, and here it is a query rather
-than a hope.
+> *Processing **September's expense report for the sales manager** at **Northbrook Trading**,
+> 34 lines from **the Expensify export you uploaded**, against **your T&E policy (v3, January
+> 2026)**, coded to the chart read from **your Mosofin connection**. Mileage at **your rate of
+> 0.45 per mile**; no per-diems; FX at **the accounting system rate**. Shall I go ahead?*
 
-Two more that follow from the same access:
-
-- **Historical coding.** How this entity has coded airfare, or client meals, or that specific merchant, in
-  the past. **A grounded suggestion beats a generic mapping** — and it is what the reviewer would have
-  checked anyway.
-- **The clearing and payable balances.** Corporate Card Clearing should clear; Employee Reimbursement
-  Payable should reflect what is genuinely owed. **Residual balances in either are unmatched activity**,
-  and they are readable.
-
-**What the workspace still cannot give you:**
-
-- **The policy.** Always `[manual]`. Without it, policy validation does not run — that limit is unchanged.
-- **The receipts.** Receipt *images* are not on this surface. The report's receipt-attached flag is
-  evidence about the T&E tool, not about the receipt.
-- **Mileage rates, per-diem tables, deductibility rules, gift caps.** All `[manual]`, all jurisdiction- and
-  policy-specific.
-- **The submitted report itself**, when it lives in Concur or Expensify rather than in the accounting
-  system.
-
-**Mosofin is read-only.** It cannot approve a claim, reject a line, pay a reimbursement or post an entry.
-Everything below is a *proposal*.
+On the upload path, name each file you received and say what was read from it — the period it
+covers, the row count, the total claimed. Flag anything unreadable, or covering the wrong period
+or a different employee, straight away.
 
 ---
 
-# ONBOARDING — Confirm the workspace and its data sources
+## Stage 2 — Confirm scope and capabilities *(Mosofin path only)*
 
-**Required for every skill, every run — whenever Mosofin is connected.** Gates 0 and 1
-settle *which books this is about*: the workspace, and the data sources inside it.
-**Part A then explores what those confirmed sources can actually do** and personalises
-the run around them. Nothing is read before Gate 0 is answered.
+Run Gates 0–3 in [`references/gates.md`](references/gates.md). They confirm the workspace and the
+company file, check for a T&E platform, build the capability map — a posted transaction is not a
+submitted claim, and a receipt-attached flag is not a receipt — and read the company profile for
+functional currency and country. On the upload path, go straight to Stage 3.
 
-**If the Mosofin tools are not present at all, skip this part.** There is nothing to
-onboard: say so once, then run the skill manually on data the user supplies. See the
-precondition check below.
+## Stage 3 — Read the books and parse the report
 
-Run Gates 0 → 1 → 2 → 3 in this order, before processing anything. This ordering is the contract. Do not
-skip a gate because a previous conversation covered it — connections, permissions, and company files
-change between periods.
+Pull the chart, employees, posted expenses and card charges, the clearing and payable accounts and
+the historical coding in one batch; check the `mock` flag. Parse every line — date, category,
+merchant, purpose, amount with tax and tip, currency, **payment method**, receipt flag — keeping
+splits, flagging low-confidence OCR, separating **company-paid from out-of-pocket**, and matching
+each claimant to an employee record: [`references/method.md`](references/method.md) Steps 0–1.
 
-Call the Mosofin tools by the **bare names your own tool list exposes** — `list_workspaces`,
-`get_agent_datasources`, `get_datasource_tools`, `invoke_datasource_api_tool`, `get_skills`,
-`get_my_skill`, `create_skill`. Do not add a `mosofin_` prefix and do not hardcode a client-side
-`mcp__…` namespace; that string is composed by whichever MCP client is running.
+## Stage 4 — Validate, code and calculate
 
-<!-- shared:scope-protocol start -->
-### First — ask whether to use Mosofin for this run
+Run Step 2's checks: policy validation only if a policy was supplied, the personal-expense
+patterns, and duplicates within the report and **against card transactions already posted**
+(±3 days, near-amount as a review). Code each line to a real account with its historical support, then calculate the net
+reimbursable per employee and reconcile it to the payable:
+[`references/method.md`](references/method.md) Steps 2–4. Check
+[`references/edge-cases.md`](references/edge-cases.md) for foreign currency, conference packages,
+spousal travel, gift cards, tips, a personal charge on the corporate card, prepaid items and
+reverse-charge VAT.
 
-Two things decide how this skill runs, and they are settled **before Gate 0**.
+## Stage 5 — Prepare the posting inputs and present
 
-**1. Are the Mosofin tools present at all?** — `list_workspaces` and the rest of the
-gateway. Check before doing anything else.
+Assemble the posting inputs — expenses by account, recoverable tax, the reimbursable amount and
+the card-paid amount — as a **proposal**, run the Corporate Card Clearing test with its oldest
+item, and build the workpaper with exceptions by severity (an out-of-pocket line matching a posted card charge is a **Reject**)
+and the coverage sheet: [`references/method.md`](references/method.md) Steps 5–6. Ask before
+creating the `.xlsx`. Before presenting, check it against [`references/output.md`](references/output.md).
 
-**2. If they are present, ask the user. Once, in these terms:**
+## Stage 6 — Offer to save *(optional)*
 
-> Do you want me to use your Mosofin connection for this — reading the figures straight
-> from your books — or would you rather provide the data yourself?
+Only after the results have been shown, and only on an explicit yes:
+[`references/method.md`](references/method.md) Step 7. Persist the policy parameters with their
+version, the mileage rate and per-diems with effective dates, the category-to-account map, the
+clearing and payable accounts, the FX source and the match tolerances — **never employee names,
+claims, amounts, card numbers, addresses or itineraries.**
 
-**Wait for the answer.** A connected gateway is **not** consent to read from it, and
-this skill does not open with a data read. Never assume, never auto-pick.
+---
 
-- **Use Mosofin** → onboarding is required. Run Gates 0-1 to confirm the workspace and
-  its data sources, then Part A explores what those sources expose.
-- **Provide the data myself** → **skip Gates 0-2 entirely** and run manually, exactly as
-  though no connector were present. **Do not ask again during the run.** Raise it once
-  more only if the user asks for something their supplied data cannot answer, and then
-  as an offer, not a demand.
+## Files
 
-**If the tools are not present, do not ask** — there is nothing to choose. The skill was
-copied on its own, the connector was never added, or there is no subscription.
-**Do not make connecting a condition of helping.** Say once, plainly, that Mosofin is
-not connected and this run will be manual, then **carry on with the skill's normal
-workflow**: ask for what each step needs — a trial balance, a statement, an export, the
-documents themselves — and do the accounting work on what the user provides.
-
-**In manual mode**, whether chosen or unavoidable:
-
-- every step is `[manual]`; there are no `[auto]` verdicts to claim, and none may be
-  implied
-- the coverage sheet records **why** it was manual — gateway absent, or the user chose
-  to supply the data — not that checks passed
-- the accounting logic, edge cases and output standards are **unchanged**. That is the
-  part of this skill that never depended on a connection
-- mention **once** that connecting Mosofin would automate the manual steps, with a link
-  to [docs.mosofin.com](https://docs.mosofin.com). Do not raise it again, and never
-  withhold work to press the point
-
-#### What a manual run actually does, gate by gate
-
-| Gate | In a manual run |
+| File | Read when |
 |---|---|
-| **Gate 0** — workspace | **Skipped.** There is no workspace to confirm. |
-| **Gate 1** — data sources | **Skipped as a discovery step.** Still ask *which entity or company this work is for*, by name, so every output can be labelled — but record it as **user-asserted**, not confirmed against a connection. |
-| **Gate 2** — capability map | **Skipped.** The map is not empty, it is uniform: **every task is `[manual]`.** |
-| **Gate 3** — profile, then interview | **Runs, and grows.** The profile half cannot run — there is no company-profile tool — so everything it would have derived silently becomes a **question**: base currency, fiscal calendar, country or region, time zone. Then the interview runs in full, and **every row of the Inputs table that would have been `[auto]` becomes something to ask for.** |
-
-Then **Part B runs unchanged** on what the user supplied.
-
-**Ask the user to upload the data, and name the formats.** A manual run does not mean
-retyping anything. Say plainly what to upload, in what form, and what each item is for —
-then read it from the files they provide.
-
-| Ask for | Upload as |
-|---|---|
-| Ledger detail, trial balance, transaction listings | **CSV** or **XLSX** export, or a pasted table |
-| Statements and third-party documents | **PDF** or **CSV**, or a clear photo / scan |
-| Invoices, bills, receipts, remittances | **PDF** or **image** — a single file or a batch |
-| Short facts — a date, a balance, a policy | typed straight into the chat |
-
-**Ask for the whole set up front, as a checklist, not drip-fed.** A person collecting
-exports would rather be given one list than be interrupted six times. Mark which items
-are strictly **required** and which merely improve the result, so they can decide how
-much to gather.
-
-**Confirm what actually arrived before starting the work.** Name each file, say what was
-read from it — period covered, row count, opening and closing balances — and list what
-is still outstanding. If a file is unreadable, covers the wrong period, or does not
-contain what its name suggests, **say so at once**. Never work around a bad input
-silently, and never guess at a column you cannot identify — ask.
-
-**If something cannot be supplied, say what the output will and will not be — before
-doing the work.** Never estimate a figure that was meant to come from the books, never
-fill a gap with a plausible number, and never present a partial result as complete. An
-honest partial answer, clearly labelled, is the correct outcome.
-
-**Everything the user provides is evidence like any other.** Reconcile it, check it,
-and challenge it where it does not tie. Manual input is not more trustworthy than a
-ledger read — it is less, because nothing validated it on the way in.
-
-**Present but not authenticated is not the same as absent.** If the tools are there and
-a call returns a `reconnect_url` or an auth error, surface it and let the user choose —
-reconnect, or continue manually. Do not silently fall back.
-
-### Confirming scope — workspace, then data sources, then tools
-
-**Nothing is read until scope is confirmed, and scope is confirmed in this order.**
-Each step depends on the answer to the one before it, so none of them may be skipped,
-merged, or guessed at.
-
-| # | Question to the user | How it is settled |
-|---|---|---|
-| 1 | **Which workspace?** | `list_workspaces` with **no arguments**. Read the workspace back **by name** and wait for an explicit yes. On `selection_required`, ask whether this is single- or multi-workspace, then which **by name**, then call again with `workspace_ids=[…]` and `mode="single"`/`"multi"`. |
-| 2 | **Which data sources, in that workspace?** | `get_agent_datasources` with the confirmed `workspace_id`. `connected: true` is in scope; `connected: false` is **excluded and named as excluded**, with any `reconnect_url` surfaced. Then settle the entity scenario — single-entity: which company; multi-entity: which set — always by `display_name`. |
-| 3 | **Which tools do those sources actually expose?** | `get_datasource_tools` per in-scope datasource, **and per company file when several are live — permissions are per company.** This is discovery, not a question: read what is there before promising anything. |
-
-**Never auto-pick.** Not the workspace, not the company file, not the entity scenario.
-**Silence is not a yes**, and an answer to one question is not an answer to the next.
-
-**Names, never internal ids.** Name the workspace and refer to companies by
-`display_name`. Never print an internal numeric tenant id, and never show a raw
-`data_source_id` — pass the opaque handle, show the name.
-
-**Only then does the work begin.** Once the workspace, the data sources and their tools
-are confirmed, resolve every task against what was actually found: what is available
-now decides which steps are `[auto]`, which are `[gated]` and which fall to `[manual]`.
-Where the confirmed tools cannot answer the request, say so and ask — do not substitute
-an assumption for a capability.
-
-**The catalogue is authoritative.** Take exact `tool_name` values from the Gate 2
-listing — names are not uniformly styled, some underscored, some hyphenated.
-**Do not invent a tool name.** On `UNKNOWN_TOOL`, read the valid names from the error
-and retry.
-**Never call a tool whose `effective_policy` is `disabled`.**
-
-**This map is built fresh every run** and held only for this run. It is written out in
-the coverage sheet, never written back into this file.
-<!-- shared:scope-protocol end -->
-
-## Gate 0 — Confirm the workspace
-
-Call `list_workspaces` with **no arguments**.
-
-- **One workspace** → read the workspace **name** back and **wait for an explicit yes**.
-- **Two or more** (`selection_required`) → ask **in chat** whether this is single- or
-  multi-workspace, then which workspace(s) **by name**, then call again with `workspace_ids=[…]`
-  and `mode="single"` / `mode="multi"`.
-
-Never auto-pick. Never print an internal numeric tenant id — name the workspace, pass the opaque
-`ws_…` handle.
-
-## Gate 1 — Discover live datasources and settle the entity scenario
-
-Call `get_agent_datasources` with the confirmed `workspace_id`.
-
-- `connected: true` → **in scope**.
-- `connected: false` → **excluded, and named as excluded**. Surface any `reconnect_url`.
-
-**Check specifically for a connected T&E or spend-management platform** — Concur, Expensify, Brex, Ramp,
-Pleo, Spendesk, Soldo. **If one is live, the expense report itself becomes `[auto]`**, which converts the
-skill's largest manual input. If none is, the report is supplied by hand and labelled as such. Either way
-the accounting datasource still supplies the COA, the employees and the posted transactions.
-
-Settle the entity scenario:
-
-- **Single-entity** — ask which company by `display_name`; the workflow runs against that one
-  `data_source_id`.
-- **Multi-entity** — ask which set. **The employee-to-entity question is the one that matters**: staff are
-  employed by one entity but may incur costs on behalf of another. See the cross-entity step.
-
-Refer to companies by `display_name`; never show the raw `data_source_id`.
-
-# PART A — Explore the confirmed sources, and personalise this run
-
-The workspace and its data sources are settled. This part finds out **what they
-expose and which of it serves this request** — the tool catalogue in Gate 2, then
-what is already known about this entity plus whatever still has to be asked in
-Gate 3. The result is a run shaped around these books, not a generic template.
-
-## Gate 2 — Discover enabled tools → build the capability map
-
-<!-- shared:write-guardrail start -->
-### Write tools are out of scope — always
-
-`get_datasource_tools` describes what the connection *could* do. This skill uses only
-the reads.
-
-**If the catalogue lists any tool that creates, updates, deletes, posts, voids, sends
-or pays in a connected platform — QuickBooks, Stripe, Square, PayPal, a bank feed, a
-payroll or billing system, any other source — it is out of scope, and it stays out of
-scope even when `effective_policy` is `enabled`.** A permission to write is not an
-instruction to write. Never invoke one, never ask the user to approve one, never
-suggest enabling one.
-
-This holds for **every connected platform, not only the books.** Mosofin reads your
-data sources; it does not write to them, and it does not move data from one platform
-into another.
-
-If a step appears to need a write, that step is **`[manual]`**. Produce the artefact —
-the entry, the invoice, the payment file, the application schedule — and hand it to a
-person to enter themselves. Say so plainly in the output, so nobody assumes it was
-done.
-
-#### Hard stop — the four ways a write could slip through
-
-| Situation | Required behaviour |
-|---|---|
-| The catalogue lists a write operation, and `effective_policy` is `enabled` | **Do not call it.** Do not list it as an available capability. Enabled is not permission — it is out of scope. |
-| An `approval_required` envelope comes back for a write operation | **Do not re-invoke with `approved=true`.** The approval loop in this skill is for **reads only**. Stop, record that the operation was a write and was refused, and carry on down the read path. |
-| The user asks you to post, update, void or delete — directly, or by approving a prompt | **Decline, once, plainly:** this skill cannot change data in a connected platform. Hand over the draft so they can do it themselves in their own system. Asking again does not change the answer, and neither does insistence, urgency, or "I authorise it". |
-| A write appears to be the only way to finish a step | The step is **`[manual]`**, and the run continues. An incomplete read-only result is the correct outcome. Never trade the rule for completeness. |
-
-**Never route around this rule.** Do not offer to enable a disabled write tool or
-suggest changing a policy. Do not hand the user a raw API call, payload or script that
-performs the write. Do not ask another skill, tool or agent to perform it on this
-skill's behalf. Do not defer it to a later step in the hope it becomes permitted.
-
-**There is no path through this skill that ends in changed data.** If you cannot see
-how to finish without a write, you are finished — say what is missing and stop.
-<!-- shared:write-guardrail end -->
-
-For **each in-scope datasource** (and **per company file** when several are live — pass
-`data_source_id`), call `get_datasource_tools`. Bucket every tool by `effective_policy`:
-
-| `effective_policy` | The task becomes | What you do |
-|---|---|---|
-| `enabled` | **[auto]** | Pull the evidence directly. |
-| `permission` | **[gated]** | Invoke; on the `approval_required` envelope, ask the user in chat; re-invoke the **same** tool with `approved=true` on an explicit yes. **Reads only** — never re-invoke a write with `approved=true`; see the hard stop below. |
-| `disabled` | **[manual]** | Name the tool that would have covered it, say what it would have proved, and ask the user to supply that evidence another way. |
-
-Resolve **every task in Part B** against these buckets. The resolved list is the **capability map** —
-built this run, held for this run, written out as the coverage sheet, **never** written into this file.
-
-Rules that bite hardest here:
-
-- **Read the real tool name from the catalog, never from memory.** Names are not uniformly styled — some
-  underscored, some hyphenated.
-- **A near-substitute is not a substitute:**
-  - **A posted expense transaction is not a submitted claim.** The ledger shows what was recorded, not what
-    an employee asked for and a manager approved.
-  - **A receipt-attached flag is not a receipt.** It is a field in another system.
-  - **The tax code on a transaction is not proof of recoverability.** The code is a setting; the entitlement
-    is a rule.
-  - **An employee record is not an approval hierarchy.** Who may approve whose claim is not in the ledger.
-- **If the COA read is `disabled`, the skill degrades to the original's placeholder behaviour** — say so
-  explicitly rather than quietly coding to invented accounts.
-
-## Gate 3 — Profile the entity, then interview the user
-
-Call the platform's company-profile tool (on QuickBooks, `get_company_info`) for each in-scope entity.
-
-**Derive silently** what the profile answers: legal name, **functional currency**, fiscal calendar,
-country / region.
-
-**Ask the user** what actually changes the work — the original Inputs table, **minus the four the connected
-books now answer**:
-
-| What to confirm | Required? | Notes |
-|---|---|---|
-| **Expense report** | **Required — [manual]** unless a T&E platform is connected | The claims themselves. |
-| **T&E policy document or parameters** | **Required for meaningful policy validation — [manual]** | **Without it, Step 2 does not run.** Say so rather than inventing limits. |
-| **Receipts** | Recommended — **[manual]** | Images are not on this surface. |
-| ~~Employee details~~ | **Now [auto]** | From `search_employees`; confirm only if a claimant is not found. |
-| ~~Chart of accounts~~ | **Now [auto]** | From `search_accounts`. **No placeholder coding.** |
-| **Tax jurisdiction** | Recommended — **[manual]** for the rules | The **codes in use** are `[auto]`; the entitlement rules are not. |
-| **Mileage rate** (per-km or per-mi) | Required if mileage claims present — **[manual]** | **Never supply a prevailing rate from memory.** |
-| **Per-diem table** | Required if per-diems are claimed — **[manual]** | Same rule. |
-| ~~Functional currency~~ | **Now [auto]** | From the company profile. |
-| **FX rate source** | Required if multi-currency — **[manual]** | Central bank close, accounting system rate, or report-date rate. **Do not assume a source.** |
-| **Confirm scope** | **Required** | Read back in-scope and excluded company files by `display_name`, and the report period. |
-| **Confirm any profile contradiction** | **Required if one appears** | e.g. claims in a currency the entity does not transact in. |
-| **Confirm manual evidence** | **Required** | The policy, the rates and the receipts are `[manual]`. Record what was supplied and as at when. |
-
-Ask as **one short batch**. Propose defaults where reasonable — but **never** default a mileage rate, a
-per-diem, a receipt threshold, a deductibility split, a gift cap, or an FX source.
-
-**On later runs**, read stored preferences first (Step 7), confirm in one line, and ask only what changed.
-The policy parameters, the category-to-account map, the rates in force and the FX source persist; **the
-claims and the balances are re-obtained every run**.
-
----
-
-# PART B — The domain work
-
-Every step below is the original procedure, unchanged in count, order, or substance, with plain-language
-wording, an `[auto]` / `[gated]` / `[manual]` verdict, and the typical evidence tool added.
-
-**Never drop a task because no tool covers it.** Policy validation without a policy is the original's own
-documented limit and remains so.
-
-Tool names in *italics* are typical. Resolve real names and policies from your Gate 2 catalog.
-
-## Step 0 — Fetch the evidence (grounding) — Mosofin addition
-
-Pull the `[auto]` / `[gated]` reads **before** parsing, because the COA and the posted transactions are
-what make the coding and the duplicate check real rather than generic.
-
-**Batch independent reads into one message** — the accounts, the employees, the posted expenses and the
-balances do not depend on each other. Never serialize them.
-
-The server is **stateless**: pass `data_source_id` on **every** call, including retries.
-
-Typical opening batch, per in-scope entity:
-
-- *`search_accounts`* — **the real chart of accounts**, including the travel, meals, entertainment, gift
-  and clearing accounts — usually **[auto]**
-- *`search_employees`* — **the claimant list**, with departments where set up — usually **[auto]**
-- *`search_purchases`* / *`search_expenses`* / *`search_bills`* — **transactions already posted in the
-  period**, which is the duplicate-check population — usually **[auto]**
-- *`search_credit_card_charges`* or the card account in *`get_general_ledger`* — **corporate card
-  activity** — usually **[auto]**
-- *`get_general_ledger`* on **Corporate Card Clearing** and **Employee Reimbursement Payable** — usually
-  **[auto]**
-- *`get_balance_sheet`* — the **payable and Due-from-Employee balances** — usually **[auto]**
-- *`search_vendors`* — merchant recognition — usually **[auto]**
-- *`get_profit_and_loss`* by department / class — **historical coding patterns** — usually **[auto]**
-- *`search_departments`* / *`search_classes`* — the dimensions available for allocation — usually **[auto]**
-- *`get_company_info`* — legal name, **functional currency**, country — usually **[auto]**
-
-Handle the envelopes:
-
-- `approval_required` → **reads only:** if the tool reads, ask the user in chat, then re-invoke the same
-  tool with `approved=true`. **If it would write, never re-invoke** — record it as refused and stay on the
-  read path; see the hard stop in Gate 2.
-- `entity_required` → ask by `display_name`, then pass that `data_source_id`.
-- `tool_policy_disabled` → convert that task to **[manual]** and record the gap. **If it is the COA read,
-  say explicitly that coding has degraded to placeholders.**
-- `UNKNOWN_TOOL` → read the valid names from the error; do not guess.
-- Dead connection → surface the `reconnect_url`.
-
-Check the **`mock` flag**. `mock: true` is fixture data — **a duplicate check against fixture transactions
-proves nothing**, and must not be reported as a clean result.
-
-## Step 1 — Parse the report
-
-Extract per line — **[manual]** unless a T&E platform is connected:
-
-- Employee name
-- Expense date
-- Category (Airfare, Lodging, Meals, Ground Transport, Mileage, Supplies, Other)
-- Vendor / merchant
-- Description / business purpose
-- Amount (gross; **tax and tip separately if shown**)
-- Currency
-- Payment method (employee cash / card, corporate card, reimbursement requested?)
-- Receipt attached: Y/N
-- Reference number / unique line ID
-
-**Tool-specific normalization tips:**
-
-- **Concur**: handles **split transactions across categories — preserve splits, don't merge.**
-- **Expensify**: **SmartScan confidence — flag low-confidence OCR'd lines.**
-- **Brex / Ramp / Pleo / Spendesk**: **corporate card transactions already paid — distinguish from
-  out-of-pocket.**
-- **Soldo / Mooncard / Pleo**: **prepaid card transactions — treat as company-paid.**
-
-That distinction is now load-bearing: **company-paid lines are the ones that should already exist in the
-ledger**, and Step 2's duplicate check depends on classifying them correctly.
-
-**Normalize messy data:**
-
-- **Mileage entries** → capture **distance and unit (mi or km), and rate (or flag as missing)**
-- **Foreign currency** → **preserve original**; use the provided FX rate or **flag for the user to supply**
-- **Tip separately captured if shown**
-
-**Mosofin addition — match each claimant to an employee record.** **[auto]** via *`search_employees`*. A
-claimant with no employee record is worth flagging: a leaver, a contractor claiming on an employee form, or
-a misspelling.
-
-## Step 2 — Validate against policy
-
-**Policy validation only runs if the user provided a policy.** If no policy, **skip this step and move to
-Step 3** — GL coding, math check and obvious-personal flags only. **[manual]** on the policy throughout;
-the arithmetic against it is `[auto]`.
-
-When a policy is provided, validate per its rules. Common dimensions:
-
-### Receipt requirements
-
-Apply **the user's** policy thresholds. Common patterns to look for in the policy:
-
-- **A minimum amount above which receipts are required**
-- **Specific categories that always require receipts regardless of amount** — commonly lodging, client
-  entertainment, anything reimbursable cross-border
-- **Tax-authority requirements for the entity's jurisdiction** — if the policy doesn't address this, **flag
-  for the user to confirm**
-
-**Flag missing-receipt items per the policy's stated rules.** **[gated]**: the threshold comparison is
-arithmetic, but **the receipt flag comes from the T&E tool and the image is not visible here.** Report it as
-"per the report", not as verified.
-
-### Per-diem
-
-If the entity uses per-diems for lodging and/or meals — **[manual]** table, `[auto]` comparison:
-
-- **Compare claimed amount to the per-diem table provided**
-- **Flag any claim exceeding the per-diem**
-- **For mixed regimes** (per-diem M&IE + actual lodging) — **flag meal receipts as potential duplicate
-  claims**
-
-### Meals & entertainment
-
-- **Per-person caps from policy**
-- **Alcohol allowed / restricted per policy**
-- **Client meals: require attendees + business purpose per policy**
-- **Deductibility treatment per jurisdiction** (if the user provided the jurisdiction): some jurisdictions
-  allow full deduction, some partial, some none — **split the GL coding accordingly only if the user
-  provided the rule**
-
-**[auto]** contribution: whether the COA *has* separate deductible and non-deductible accounts is readable
-(*`search_accounts`*). If it does not, that is the Step 3 flag, raised early.
-
-### Airfare / rail / sea travel
-
-- **Class restrictions per policy** (economy, premium economy, business)
-- **Booking source restrictions**
-- **Personal segment allocation if the trip extends personal days**
-
-### Lodging
-
-- **Per-night caps from policy**
-- **Resort / cleaning / incidental fees — reimbursable per policy**
-- **Personal nights — non-reimbursable**
-
-### Ground transport
-
-- **Ride-share, taxi, rental car — per policy**
-- **Mileage at the rate provided by the user / policy / jurisdiction's prevailing rate** — **[manual]**,
-  and **never supplied from memory**
-
-### Entertainment
-
-- **Deductibility flag per the entity's jurisdiction** (only if the user provided it)
-- **Per policy: allowed / restricted / requires pre-approval**
-
-### Gifts
-
-- **Cap per recipient per policy**
-- **Deductibility cap per jurisdiction** (only if the user provided the rule)
-
-### Personal-expense patterns (red flags)
-
-**These are universal red flags regardless of jurisdiction** — and they are pattern checks, so `[auto]`
-against the parsed report:
-
-- **Weekend charges in non-business locations**
-- **Personal retail / grocery / liquor / personal services**
-- **Family-member-named travel or accommodation**
-- **Recurring personal subscriptions**
-
-**Flag as "Policy violation — possible personal" for manager review.** *Mosofin note*: a recurring personal
-subscription often also appears in the ledger month after month (*`get_general_ledger`*), which turns a
-suspicion into a documented pattern with a start date.
-
-### Duplicate detection
-
-- **Same vendor + amount + date submitted twice by the same employee** — `[auto]` within the report
-- **Same expense claimed on both employee report and corporate-card reconciliation** — **`[auto]` against
-  the ledger, and this is the check the original could only describe.** Match each claim line against
-  posted card transactions on vendor, amount and a date window. **A claim for a charge the company already
-  paid is a double reimbursement**, and it is the highest-value finding this skill produces.
-
-**Match tolerances**: exact amount and same merchant is a strong match; allow a **±3 day** window for
-posting lag, and treat a near-amount match (tip added later) as a **review**, not a reject. Where the
-merchant name differs between the card feed and the claim, fall back to amount plus date — and say the
-match was made on those alone.
-
-See `duplicate-invoice-detection` for the full matching discipline; the same reasoning applies.
-
-## Step 3 — Code to GL accounts
-
-**Hand off the coding logic to the `gl-coding-assistant` skill's conceptual category mappings.** **Account
-numbers come from the user's COA only. Never invent account numbers.** **[auto]** here — the COA is
-connected.
-
-Common T&E category → conceptual GL category (mapped to the user's COA):
-
-- **Airfare** → Travel — Airfare
-- **Lodging** → Travel — Lodging
-- **Meals (business, deductible portion)** → Meals (deductible)
-- **Meals (non-deductible portion, per jurisdiction)** → Meals (non-deductible)
-- **Ground transport / mileage** → Travel — Local Transport
-- **Conferences / training** → Training & Development
-- **Office supplies** → Office Supplies
-- **Software / subscriptions** → Software Subscriptions
-- **Client gifts (deductible portion)** → Client Gifts
-- **Client gifts (non-deductible portion)** → Non-deductible / disallowed
-- **Entertainment (deductible per jurisdiction)** → Entertainment
-- **Entertainment (non-deductible per jurisdiction)** → Entertainment — Non-Deductible
-- **Communications** → Telephone & Internet
-- **Miscellaneous** → Other — **flag for review**
-
-**If the user's COA does not separately track deductible vs. non-deductible portions, flag and suggest
-creating sub-accounts or using a class / department dimension.** **[auto]** to determine — read the COA and
-the available dimensions and say which is actually available in this entity.
-
-**Mosofin addition — ground each mapping in history.** **[auto]**: before proposing an account, check how
-this entity has coded the same category, and the same merchant, previously (*`get_general_ledger`*,
-*`get_profit_and_loss`*). **Report the suggestion with its support** — "Travel — Airfare (6410); this
-merchant coded there 12 of 12 times" — and **flag where history is inconsistent**, because an inconsistent
-history is itself worth knowing before the reviewer perpetuates it.
-
-## Step 4 — Calculate reimbursement
-
-For each employee:
-
-| Component | Calculation |
-|-----------|-------------|
-| **Total claimed** | Sum of all approved lines |
-| **Less: Corporate-card-paid items** | Reduce reimbursement |
-| **Less: Policy violations / disallowed** | Removed |
-| **Less: Personal portion** | Allocated to employee |
-| **Plus: Mileage at provided rate** | Distance × rate |
-| **Net reimbursable to employee** | Sum |
-
-**[auto]** arithmetic; the rate and the policy calls behind it are `[manual]`.
-
-**Multi-currency: convert to functional currency using a stated FX source** — ask the user: **central bank
-close, accounting system rate, or report-date rate from a stated provider. Do not assume a source.** The
-**functional currency itself is now `[auto]`** from the profile; the *rate source* is not.
-
-**Mosofin addition — reconcile to the payable.** **[auto]**: the proposed net reimbursable, added to the
-existing **Employee Reimbursement Payable** balance, should explain that account's movement once paid.
-**A payable balance that does not correspond to outstanding claims means either a claim was paid twice or
-one was never paid** — both worth surfacing.
-
-## Step 5 — Construct the GL posting
-
-**Hand off to the `journal-entry-builder` skill.** Provide it with:
-
-- **Posting date**
-- **Employee name and period**
-- **Sum of expenses by GL account** (using the user's COA — **`[auto]`, real accounts**)
-- **Sum of input tax recoverable** (if the jurisdiction supports it and the user has provided the rule)
-- **Reimbursable amount** → **AP / Employee Reimbursement Payable**
-- **Corporate-card-paid amount** → **Corporate Card Clearing**
-
-**The JE skill produces the balanced entry. This skill provides the inputs.** **Mosofin does not post** —
-the entry is a proposal, whichever skill assembles it.
-
-**Mosofin addition — the clearing account test.** **[auto]**: **Corporate Card Clearing should clear.**
-Read its balance and its ageing (*`get_general_ledger`*). A persistent residual means card charges posted
-with no matching claim, or claims posted with no matching charge — the two halves that were supposed to
-meet. **Report the residual with its oldest item**, because age is what tells you whether it is timing or a
-genuine break.
-
-## Step 6 — Output
-
-Deliver an `.xlsx` workpaper:
-
-**Sheet 1: Summary**
-- **Employee(s), report period**
-- **Total claimed / approved / rejected**
-- **Reimbursement amount**
-- **Policy violations summary**
-- **Policy assumptions used** — if any were not explicit in the policy doc, **list them here for the user to
-  confirm**
-
-Plus the Mosofin header block: workspace name; the entity by `display_name`; each excluded company file and
-why; whether any figure rests on `mock` data; **and whether a policy was supplied at all**.
-
-**Sheet 2: Line Detail**
-
-| Line # | Date | Category | Vendor | Description | Amount | Currency | FX Rate | Functional Amount | GL Account | Tax Code | Policy Check | Receipt? | Notes |
-
-Add two Mosofin columns: **Already Posted?** (the duplicate-check result, with the matched transaction) and
-**Coding Support** (how this entity coded the same thing before).
-
-**Sheet 3: Exceptions**
-
-| Line # | Issue | Severity | Recommended Action |
-
-Severities:
-- 🔴 **Reject** — Policy violation, must be removed
-- 🟡 **Review** — Manager judgment required
-- 🟢 **Approve with Note** — Minor flag
-
-**A confirmed match against an already-posted card transaction is a 🔴 Reject**, not a review — the money
-has already left the company.
-
-**Sheet 4: GL Posting Inputs** — pass-through to `journal-entry-builder`.
-
-**Sheet 5: Ledger Checks — NEW, Mosofin-specific**
-
-| Check | Result | Detail |
-
-Covering: duplicate matches against posted transactions; the Corporate Card Clearing residual and its
-ageing; the Employee Reimbursement Payable reconciliation; claimants with no employee record.
-
-**Sheet 6: Coverage — NEW, Mosofin-specific**
-
-| Task | Entity (`display_name`) | Verdict (auto / gated / manual) | Tool used / external source | As-at date | Policy | `mock` | Gap |
-
-**If no policy was supplied, every Step 2 row reads `manual — not performed`.** That is the honest entry,
-and it is more useful than a validation that did not happen.
-
-Ask the user whether they want this workpaper as an Excel (`.xlsx`) file, and create it only on a yes, using the file name given for this skill. If they decline, or the host cannot make spreadsheets, give the same sheets as tables in the chat.
-
-**Output naming:** `[Employee]_ExpenseReport_[YYYY-MM].xlsx`
-
-For a batch, `[Batch]_ExpenseReport_[YYYY-MM].xlsx`. Every file states which datasource and `display_name`
-it covers.
-
-**Grounding:** every figure traces to a tool result in this conversation or to labelled user-supplied
-evidence. End with a single **Data sources** line grouping calls by datasource. Where the data does not
-cover something — the policy, the rates, the receipts — **name the source required** instead of estimating.
-
-## Step 7 — Evolve the skill (Mosofin-specific, final step)
-
-**The file you installed is a seed.** After the user has **seen the results** and approved them, ask —
-explicitly, at that point, not earlier — whether to save this as their own customized version. A general
-"yes, go ahead" from earlier does not count.
-
-On an explicit yes, persist the **decisions**:
-
-- **The policy parameters in force**: receipt thresholds, per-person caps, class restrictions, per-night
-  caps, gift caps, alcohol rules, pre-approval requirements — **with the policy version and date**
-- **The mileage rate and per-diem table in force**, with **effective dates** — these change annually, so a
-  stored rate without a date is a liability
-- **The category-to-account map** — the single biggest time saver, and now grounded in the real COA
-- **The clearing and payable account map**: Corporate Card Clearing, Employee Reimbursement Payable, Due
-  from Employee
-- **The deductible / non-deductible treatment** and whether the COA supports it
-- **The FX rate source**
-- **The T&E platform in use** and its parsing quirks — splits, OCR confidence, prepaid vs. card
-- **The duplicate-match tolerances** — the date window and amount tolerance agreed with this client
-- The replay recipe: the exact sequence of reads that produced the COA, the posted-transaction population
-  and the balance checks
-
-Save via `create_skill` — bundle `SKILL.md`, `references/run-recipe.json`, and the preference files; set
-`datasources=` to match the recipe; no `.html`, `.css`, or `.svg` files. Or write preference files
-alongside the installed skill.
-
-**Never persist employee names, individual claims, claim amounts, card numbers, home addresses, or
-travel itineraries.** Expense data is personal data about identifiable people — where they went, when, and
-with whom. **Persist the policy and the mapping; never the claims.**
-
-**Key every preference and asset by datasource + entity `display_name`.** Write "quickbooks / Northbrook
-Trading — receipts required above 25, mileage 0.45/mi effective 2026-01-01, meals 50% non-deductible split
-to 6455, card clearing 2150" — not "receipts above 25". **Thresholds and account numbers differ by
-company file**, and an unlabelled threshold applied to the wrong entity rejects valid claims or passes
-invalid ones. Record the chosen **scenario** (single vs multi) as a preference too.
-
-**Never persist state.** Connections, company files, tool policies, and `mock` status belong to the
-workspace and are re-discovered by Gates 1–2 every run. **Decisions are the user's; state is the
-workspace's** — and the claims, the balances and the clearing residual are all state.
-
-On later runs, match stored entity names against Gate 1's live list. An entity in preferences that is no
-longer connected is **flagged** — never silently dropped, never applied elsewhere.
-
----
-
-## Both entity scenarios
-
-**Single-entity.** The workflow above against one `data_source_id`. One COA, one employee list, one set of
-posted transactions to check against.
-
-**Multi-entity.** Steps 0–6 run **once per entity**, each call targeting exactly one `data_source_id`,
-every claim and account carrying its entity's `display_name`. Then the points specific to expenses:
-
-- **Ask which entity employs each claimant, and which entity bears the cost.** They differ often —
-  an employee of the services company travelling to a client of the trading company. **The duplicate check
-  must run against the entity whose card paid**, which may not be the entity employing the claimant.
-- **A claim charged to the wrong entity is an intercompany balance**, not just a coding error. Flag it for
-  `consolidation-and-eliminations` rather than silently recoding.
-- **Policies may differ by entity** — different countries, different caps, different mileage rates.
-  **Never apply one entity's per-diem table to another's staff.** Store rates keyed by entity.
-- **Corporate cards are often issued centrally.** The clearing account may sit in one entity while the
-  expenses belong to several, so **the clearing test runs where the card is, and the coding runs where the
-  cost is.**
-- **Currency differs by entity**, so the FX conversion and the rate source must be applied per entity, not
-  once for the group.
-
-Capability is checked **per entity** at Gate 2; the coverage sheet shows each task's verdict per company
-file.
-
----
-
-## Tool reference
-
-Mosofin workflow tools — call by these bare names, whatever your client displays:
-
-| Tool | What it does | Key arguments |
-|---|---|---|
-| `list_workspaces` | Lists / confirms the workspace(s). Gate 0. | none on discovery; then `workspace_ids`, `mode` (`single` / `multi`) |
-| `get_agent_datasources` | Lists live connections and their `connected` flag. Gate 1. | `workspace_id` |
-| `get_datasource_tools` | Lists read tools and each one's `effective_policy`. Gate 2. | `workspace_id`, `datasource`, `data_source_id` (required when several files are live) |
-| `invoke_datasource_api_tool` | Reads business data. | `datasource`, `tool_name`, `params`, `data_source_id` (**every call**), `approved` (only after an explicit yes) |
-| `get_skills` | Lists saved skills in this workspace. | `workspace_id` |
-| `get_my_skill` | Fetches one saved skill's bundle. | `skill_id`, `confirmed` |
-| `create_skill` | Persists the evolved skill. Step 7. | `name`, `description`, `destination`, `files`, `datasources`, `confirmed` |
-
-Typical evidence tools — **resolve real names and policies from your Gate 2 catalog**:
-
-| Purpose | Typical tool | Key arguments |
-|---|---|---|
-| **The real chart of accounts — no placeholders** | `search_accounts` / `get_account` | `query`/`name`, `active_only`; `id` |
-| **The claimant list and departments** | `search_employees` / `get_employee` | `query`/`name`, `active_only`; `id` |
-| **Transactions already posted — the duplicate population** | `search_purchases` / `search_expenses` / `search_bills` | `start_date`, `end_date` (required) |
-| **Corporate card activity** | `search_credit_card_charges` / `get_general_ledger` | `start_date`, `end_date`; `account` |
-| **Clearing and payable movements and ageing** | `get_general_ledger` | `start_date`, `end_date`, `accounting_method`, `account` |
-| Payable and Due-from-Employee balances | `get_balance_sheet` / `get_trial_balance` | `start_date`, `end_date`, `accounting_method` |
-| Merchant recognition | `search_vendors` / `get_vendor` | `query`/`name`, `active_only`; `id` |
-| **Historical coding patterns** | `get_profit_and_loss` / `get_general_ledger` | `start_date`, `end_date`, `summarize_column_by` |
-| Dimensions available for allocation | `search_departments` / `search_classes` | `query`/`name`, `active_only` |
-| Legal name, **functional currency**, country | `get_company_info` | none (uses the connected company) |
-
-Each tool's **own description in your Gate 2 catalog is the authority** on its arguments and failure
-envelopes. Where this table and the live description disagree, the live description wins.
-
-**There are no receipt images, no policy documents, no mileage rates and no per-diem tables on this
-surface.**
-
----
-
-## Plain-language glossary
-
-- **T&E (travel and entertainment)** — the category of spending staff incur on the company's behalf.
-- **Out-of-pocket** — the employee paid with their own money and wants it back.
-- **Corporate card** — the company already paid; nothing is owed to the employee. **The distinction drives
-  the whole reimbursement calculation.**
-- **Prepaid card** — a company-funded card loaded in advance; also company-paid.
-- **Per-diem** — a fixed daily allowance instead of reimbursing actual costs. **M&IE** — meals and
-  incidental expenses.
-- **Mileage rate** — an amount per mile or kilometre covering fuel and wear when staff drive their own car.
-- **Deductible / non-deductible** — whether the tax authority lets the business subtract the cost from its
-  taxable profit. Meals and entertainment are commonly restricted.
-- **Input tax recovery** — reclaiming sales tax or VAT paid on a business purchase.
-- **Reverse charge** — a VAT mechanism where the buyer, not the seller, accounts for the tax on a
-  cross-border service.
-- **Clearing account** — a temporary holding account where two halves of a transaction meet. **It should
-  return to zero**; a residual is unmatched activity.
-- **Due from Employee** — money the employee owes the company, usually a personal charge on a company card.
-- **GL coding** — deciding which account each line belongs in.
-- **SmartScan / OCR** — automatic reading of a receipt image; **it makes mistakes, and confidence scores
-  exist for a reason.**
-- **Split transaction** — one charge divided across several categories.
-- **FX rate source** — which published rate is used to convert a foreign amount, and as at when.
-
----
-
-## Edge Cases
-
-All of the original edge cases, plus the ones Mosofin's workspace model introduces.
-
-**International travel with multiple currencies**: **capture in original. Convert at the FX source provided
-by the user (or ask). Flag rates that look off.** *Mosofin note*: the functional currency is `[auto]`; the
-rate source is not.
-
-**Conference packages with mixed components**: a single charge covering registration + meals + lodging —
-**request an itemized receipt. If not available, ask the user how to allocate; do not pick an allocation
-arbitrarily.**
-
-**Spousal / accompanied travel**: **allocate the spousal portion. Mark non-reimbursable per policy, or
-treat as taxable compensation if company-paid** — per the jurisdiction's payroll rules; **flag for the
-user.**
-
-**Gift cards**:
-- **For clients** → reimbursable per policy; deductibility per jurisdiction
-- **For employees** → **typically taxable compensation in most jurisdictions — flag for payroll handling**
-
-**Tips**: **reimbursable per policy. Flag unusual tip percentages for review.** *Mosofin note*: a tip added
-after authorization is why the card amount and the claimed amount can differ slightly — allow for it in the
-duplicate tolerance rather than calling it a non-match.
-
-**Cash transactions without receipts**: **per policy threshold. If no policy, flag every receiptless line.**
-
-**Mileage without logged business purpose / start–end**: **insufficient documentation. Flag for additional
-info.**
-
-**Corp card with personal charge**: **the employee owes the company. Code as Due from Employee, not
-expense.** *Mosofin note*: that balance is readable — **an ageing Due-from-Employee balance is money nobody
-chased.**
-
-**Late submissions**: **per policy.**
-
-**Pre-paid expenses on the report** (a deposit for next quarter's conference): **code to Prepaid Expenses
-(BS), not expense. Flag for amortization via `prepaid-amortization-schedule`.**
-
-**Tax-inclusive receipts in jurisdictions that allow input-tax recovery**: **decompose the receipt total
-into pre-tax + tax. If the receipt doesn't show tax explicitly, ask the user how to handle** — some
-jurisdictions require an explicit tax invoice for recovery.
-
-**Cross-border meals or services**: **may trigger reverse-charge VAT in the entity's jurisdiction. Flag —
-do not silently apply.**
-
-**A claim matches a transaction already posted** — *Mosofin-specific, and the highest-value finding*. The
-company card already paid it. **Reject, do not review** — and check whether earlier periods carry the same
-pattern for the same claimant.
-
-**The Corporate Card Clearing account never clears** — *Mosofin-specific*. Report the residual **with its
-oldest item**. Age distinguishes ordinary timing from a real break.
-
-**A claimant has no employee record** — *Mosofin-specific*. A leaver, a contractor on the wrong form, or a
-misspelling. Ask before coding.
-
-**Historical coding for the same merchant is inconsistent** — *Mosofin-specific*. Say so rather than
-picking the most recent. An inconsistent history usually means the category was never decided.
-
-**The COA read is disabled** — *Mosofin-specific*. **The skill degrades to the original's placeholder
-behaviour.** Label every account **PLACEHOLDER — REMAP REQUIRED** and say why, rather than inventing
-numbers.
-
-**The COA has no non-deductible accounts** — *Mosofin-specific check on an original flag*. Read the COA and
-the available dimensions, then say which of sub-accounts or a class is actually available here.
-
-**A company file is connected but not active** — *Mosofin-specific*. Name it as excluded, and say that
-duplicate checking against that entity's card activity did not run.
-
-**A result comes back with `mock: true`** — *Mosofin-specific*. **A duplicate check against fixture
-transactions proves nothing.** Never report it as clean.
-
-**A stored mileage rate or per-diem is reused without a date** — *Mosofin-specific*. These change annually.
-**Store effective dates, and re-confirm at each year boundary.**
-
-**A stored preference names an entity that is no longer connected** — *Mosofin-specific*. Flag it. Never
-apply one entity's caps to another's staff.
-
-**A tool is `permission`-gated mid-run** — *Mosofin-specific*. Ask in chat, re-invoke with
-`approved=true` (**reads only — never for a write**) after an explicit yes, and record the task as `[gated]` in the coverage sheet.
-
----
-
-## Output Quality Standards
-
-All of the original standards, plus the Mosofin ones.
-
-- **Every line has a GL account suggestion** (from the user's COA) **and a policy check** — or a
-  "no policy provided" note
-- **Currency normalization is documented** — FX rate, source, date
-- **Exceptions categorized by severity**
-- **Reimbursement calculation reconciles line-by-line**
-- **Receipt status tracked per line**
-- **All policy assumptions explicitly listed on the Summary tab**
-- **GL posting balances to the penny** (verified via `journal-entry-builder`)
-- **File naming consistent**: `[Employee or Batch]_ExpenseReport_[YYYY-MM].xlsx`
-- **No invented rates, thresholds, or account numbers**
-
-**Mosofin additions:**
-
-- The workspace was confirmed **by name** and the user said yes before any data was read
-- Every in-scope company file is named by `display_name`; every excluded one is named **as excluded**
-- The capability map was discovered **this run** via Gate 2 — never recalled from a previous conversation
-  or from this file
-- **Coding is to real accounts from the connected COA**; placeholders appear only when the COA read is
-  unavailable, and the degradation is stated
-- **Every claim line was checked against transactions already posted**, and matches are reported as
-  rejections with the matched transaction named
-- **The match tolerances used** — date window and amount tolerance — **are stated**
-- **The Corporate Card Clearing residual is reported with its ageing**, and the Employee Reimbursement
-  Payable is reconciled to outstanding claims
-- **Each coding suggestion carries its historical support**, and inconsistent history is flagged rather
-  than resolved silently
-- **Claimants with no employee record are flagged before coding**
-- Where **no policy was supplied**, Step 2 is reported as **not performed** — never as passed
-- Receipt status is reported **as per the report**, never as verified, since images are not on this surface
-- In a multi-entity run, **the employing entity and the bearing entity are distinguished**, the duplicate
-  check runs against the entity whose card paid, and cross-entity charges are raised as intercompany
-- Every task carries its verdict (`[auto]` / `[gated]` / `[manual]`), the tool or external source used, and
-  its as-at date, in the coverage sheet
-- `mock` status is reported wherever it applies, and **no duplicate check is reported as clean against mock
-  data**
-- Every figure traces to a tool result in this conversation or to labelled user-supplied evidence; the
-  answer ends with a single **Data sources** line
-- Every jargon term carries a plain-language gloss at first mention, with the professional term kept
-  alongside
-- No internal numeric ids and no raw `data_source_id` values appear in anything the user sees
-- **No employee names, individual claims, amounts, card numbers, addresses or itineraries are persisted**
-  into a skill bundle; every persisted preference states the datasource and `display_name` it covers, and
-  stored rates carry effective dates
-- Nothing was written back to any system — no claim approved, rejected, paid or posted
+| [`references/mosofin-protocol.md`](references/mosofin-protocol.md) | Before the first tool call |
+| [`references/gates.md`](references/gates.md) | Stage 2, Mosofin path |
+| [`references/method.md`](references/method.md) | Stages 3–6 |
+| [`references/edge-cases.md`](references/edge-cases.md) | Stage 4, and whenever something looks unusual |
+| [`references/output.md`](references/output.md) | Before presenting |
+| [`references/overview.md`](references/overview.md) | Background, or when a user asks why |
+| [`references/tools-and-glossary.md`](references/tools-and-glossary.md) | When you need a tool name or a term |

@@ -42,6 +42,7 @@ Ask only what you cannot already see.
 | **C** | *Which period? Start and end date.* | Sets every read and every cut-off | **Never default the period.** |
 | **D** | *Are sales recorded one by one, or as one entry per payout?* | The reconciliation is built differently for each, and the workpaper must say which | **Required.** If the user is unsure, show them the clearing-account entries for the period — one per sale, or one per payout — and **let them confirm.** Don't decide for them. |
 | **E** | *Does the processor hold a reserve or delay payouts?* | Held money is your asset and is shown separately | Assume none, and **say that you assumed it.** |
+| **F** | *Optional: your contracted fee rate, if you want fees checked against it.* | Without it only the effective-rate trend is checked | Skip the contract check and say so. |
 
 **Then, depending on the answer to A:**
 
@@ -61,7 +62,7 @@ Ask only what you cannot already see.
 | Processor **transactions or balance** report — charges, fees, refunds, disputes | Required | CSV export |
 | Your books: **GL detail** for the clearing, revenue and fee accounts, or a **trial balance** plus GL export | Required | CSV or XLSX |
 | Clearing account name, base currency and country | Required | Type it in the chat |
-| **Bank statement** for the period | **Required** — the only proof the payouts actually arrived. Without it the skill still runs, ties payouts to the deposits recorded in your books instead, and **says so in the output** | PDF or CSV |
+| **Bank statement** for the period | **Strongly recommended** — the only proof the payouts arrived. Without it, payouts are tied to recorded deposits only, and **the output says so** | PDF or CSV |
 
 **Read back before starting, then wait for a yes:**
 

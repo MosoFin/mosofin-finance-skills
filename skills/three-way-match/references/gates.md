@@ -103,7 +103,7 @@ Fixture data has **POs, receipts and invoices that agree**, because they were ge
 
 Call `get_my_skill` and `get_skills` before asking anything.
 
-Interview for:
+Interview for — only those not already answered at Stage 1:
 
 1. **The tolerance policy** — price %, quantity %, total amount. `[manual]`. **If none is provided, default to exact match and flag every variance** — the original's rule, preserved.
 2. **The approval matrix** — who may approve at what amount. `[manual]`, **and persist it**; it changes rarely and exception 12 cannot run without it.

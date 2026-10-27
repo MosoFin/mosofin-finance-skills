@@ -69,7 +69,7 @@ Settle the entity scenario:
 - **Single-entity** — one company file, one clearing account per processor.
 - **Multi-entity** — ask which set. **One processor account serving several group entities is a listed edge
   case and is common**; each transaction must be attributed, and **the clearing account is per entity.** See
-  the cross-entity step.
+  the cross-entity step under *Both entity scenarios* in [`method.md`](method.md).
 
 Refer to companies by `display_name`; never show the raw `data_source_id`.
 

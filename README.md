@@ -161,16 +161,19 @@ live data, the output says so in the filename and on the first page.
 | `cash-flow-forecast-13-week` | 58% | Weekly direct cash forecast with covenant alerts |
 | `fixed-asset-register-and-depreciation` | 57% | FA register, depreciation, capitalisation and disposals |
 
-**Wave 4** — payment processors, and the lightweight card format (also applied to `bank-reconciliation` and `three-way-match` in Wave 1):
+**Wave 4** — payment processors:
 
 | Skill | Automated | What it's for |
 |---|---:|---|
 | `merchant-and-payment-processor-rec` | 64% | Tie Stripe, Square or PayPal payouts to the books; catch revenue recorded net of fees |
 
-Card-format skills keep `SKILL.md` short — the rules that never bend, an intake step that
-asks the basics in one message, and the stages — and move the full text into
-`references/` inside the skill folder. Each stage names the file it needs. Explained for
-business owners at [mosofin.github.io/mosofin-skill-explainers](https://mosofin.github.io/mosofin-skill-explainers/skills/merchant-and-payment-processor-rec/).
+**Every skill uses the card format.** `SKILL.md` is a short card, about 120–160 lines: the
+rules that never bend, an intake step that asks the basics in one message, and six stages.
+The full text lives in `references/` inside the skill folder — `overview`, `gates`, `method`,
+`edge-cases`, `output`, `tools-and-glossary` where the skill has one, and `mosofin-protocol`
+for the shared blocks. Each stage names the file it needs, so the method is read only when
+the work starts. Several skills are explained for business owners at
+[mosofin.github.io/mosofin-skill-explainers](https://mosofin.github.io/mosofin-skill-explainers/).
 
 **Automated %** is the measured share of `[auto]` versus `[manual]` steps in each skill —
 computed from the files, not estimated. **It is not a quality score.** A low percentage
@@ -214,8 +217,8 @@ alternative, and a one-line check that the copy works.
 Dependency-free. Every skill must carry frontmatter, the four gates, verdict
 annotations, a coverage sheet, a lifecycle section, **the subscription onboarding
 block**, and clean tool naming with no internal identifiers leaked. Runs on every PR.
-For a card-format skill the checks read `SKILL.md` and every `references/*.md` together,
-and `.github/sync-shared.sh` keeps the shared blocks in `references/mosofin-protocol.md`.
+The checks read each skill's `SKILL.md` and every `references/*.md` together, and
+`.github/sync-shared.sh` keeps the shared blocks in `references/mosofin-protocol.md`.
 
 ---
 

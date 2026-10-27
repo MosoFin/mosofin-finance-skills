@@ -14,7 +14,8 @@ be proposed as **candidates** by date. Label them that way.
 
 **No prior reconciliation is available** — opening outstanding items are unknown, so an item
 appearing unmatched may be months old. Say the bridge starts unqualified and recommend
-establishing a baseline.
+establishing a baseline. Never propose an entry for an unmatched bank debit or credit that could
+be an older book item clearing late — read the GL back to the last reconciled date first (Step 0).
 
 **A foreign-currency account carried in the base currency** — the bridge will never balance if one
 side is converted and the other is not. Reconcile in the account's own currency, then translate.
