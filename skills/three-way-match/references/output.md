@@ -18,7 +18,8 @@ Each tool used: name as returned by `get_datasource_tools`, `effective_policy`, 
 Every step, and **every exception type**, with whether it ran.
 
 **Section D — What was not done, and why**
-- **Goods receipts**, where the system does not hold them — **and therefore exceptions 3, 4, 7, 8 and 15**
+- **Goods receipts**, where the system does not hold them — **and therefore exceptions 3 (its receipt comparison), 4, 7, 8 and 15**
+- **Prior bills and payments against the POs**, where not supplied on the upload path — **and therefore the cumulative-billing test and exception 9**
 - **Condition data** (damaged / rejected), which is rarely digitised
 - **Approval status or approver identity**, where not exposed — **and therefore exceptions 11 and 12**
 - **The approval matrix**, where not supplied
@@ -32,6 +33,6 @@ Every step, and **every exception type**, with whether it ran.
 Unmatched lines. Exceptions unresolved by age. Unreceipted invoices outstanding. Undocumented overrides. GRNI not yet accrued. Vendors showing within-tolerance drift.
 
 **Section F — Parameters used**
-Tolerances. Matching precedence. Population and dates. Approval matrix version. **A control test that cannot be reproduced is not evidence** — and this one is a SOX control, so it will be re-performed.
+Tolerances. Matching precedence. Population and dates. Approval matrix version. **A control test that cannot be reproduced is not evidence** — keep the parameters so it can be re-performed.
 
 ---

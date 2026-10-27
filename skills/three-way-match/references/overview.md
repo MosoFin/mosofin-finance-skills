@@ -32,9 +32,9 @@ The match has three legs, and a connected accounting system holds them to very d
 
 The original is written **document by document**: *"uploading a PO + receipt + invoice trio."* That is how manual three-way matching works, because a person can only look at one trio at a time.
 
-**A connected workspace changes the unit of work.** Every open invoice, every PO, every receipt is readable together, so the match runs across **the whole population, every period**, unattended.
+**A connected workspace changes the unit of work.** Every open invoice, every PO, every receipt is readable together, so the match can run across **the whole population, every period**, once you confirm the run.
 
-That converts a per-invoice clerical check into **a standing control** — and it is precisely one of the ledger-evidenced controls that a SOX controls review can test at full population rather than by sample. **The exceptions found are the same; the coverage is not.**
+That converts a per-invoice clerical check into **a standing control** — and one a controls reviewer (SOX, where it applies) can test at full population rather than by sample. **The exceptions found are the same; the coverage is not.**
 
 ### Three near-substitutes
 

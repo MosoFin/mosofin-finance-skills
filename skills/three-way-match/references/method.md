@@ -21,7 +21,7 @@
 
 ## How to read the verdicts
 
-- **`[auto]`** — Mosofin can do this from live reads, unattended.
+- **`[auto]`** — Mosofin can do this from live reads, once you have confirmed the run.
 - **`[gated]`** — the gateway asks first. Explain, get consent, re-invoke with `approved=true` (**reads only — never for a write**) and the `data_source_id`.
 - **`[manual]`** — not on this surface, or not a machine's judgment. **The step stays. The user performs it.**
 
@@ -40,7 +40,8 @@ All six preserved.
 | **Vendor invoice(s)** | PDF, XLSX, CSV, or pasted | **Required** | **`[auto]`, always** — bills in the AP ledger | `[auto]` |
 | Tolerance policy | Price %, quantity %, total amount | Recommended | Not in the books; **persist it** | `[manual]` |
 | Vendor master | For payment terms verification | Optional | **`[auto]`** | `[auto]` |
-| Approval matrix | Who can approve a PO at what amount | Optional | **Not in the books.** Persist it. | `[manual]` |
+| Approval matrix | Who can approve a PO at what amount | Recommended | **Not in the books.** Persist it. | `[manual]` |
+| Prior bills and payments against these POs | For progress / partial billing and exception 9 | **Required on the upload path** where a PO has earlier invoices | **`[auto]`** — bills in the AP ledger | Conditional |
 
 > **If a goods receipt is not applicable — a services-only PO — the match becomes effectively a two-way match (PO ↔ invoice) plus a service-completion confirmation. Confirm with the user.**
 
@@ -56,11 +57,11 @@ All six preserved.
 
 All three field sets preserved in full.
 
-**Purchase Order fields** — PO number; PO date; vendor; buyer (entity); PO total; currency; payment terms; delivery terms (Incoterms, address); **approval signatures / approval status; approval timestamp**; and line items: line #, description, SKU/code, quantity ordered, unit price, line total, expected delivery date.
+**Purchase Order fields** — PO number; PO date; vendor; buyer (entity); PO total; currency; payment terms; delivery terms (Incoterms — the standard trade terms for who pays freight and bears risk — address); **approval signatures / approval status; approval timestamp**; and line items: line #, description, SKU/code, quantity ordered, unit price, line total, expected delivery date.
 
 `[auto]` for most where POs are held. **Approval status and timestamp depend on Gate 2's third question** — and they are what exceptions 11 and 12 run on.
 
-**Goods Receipt / Service Confirmation fields** — GRN number; receipt date; PO reference; vendor; receiving entity; **receiver name**; and line items: line #, description, SKU, quantity received, **condition (accepted / damaged / rejected)**. For services: confirmation of completion, hours or units delivered, service period.
+**Goods Receipt / Service Confirmation fields** (GRN — goods receipt note, the record of what arrived) — GRN number; receipt date; PO reference; vendor; receiving entity; **receiver name**; and line items: line #, description, SKU, quantity received, **condition (accepted / damaged / rejected)**. For services: confirmation of completion, hours or units delivered, service period.
 
 **Two fields here are rarely in an accounting system even where receipts are**: the **receiver's name** and the **condition**. Condition is what exception 15 needs, and its absence means that test does not run. Say so rather than reporting no damaged-goods exceptions.
 
@@ -80,6 +81,10 @@ All three field sets preserved in full.
 - **Vendor name matches across all three** — **allow for legal name versus DBA differences; flag**
 - **Currency matches**
 - **Entity (buyer / receiver / bill-to) matches**
+
+**Also compare payment terms** on the invoice with the PO and, where supplied, the vendor master. Terms
+shorter than agreed (Net 15 against Net 45) send cash out early and can lose an early-pay discount —
+report a difference as a **Low** note on the line, alongside the fifteen tests.
 
 **Then match at line-item level.** For each invoice line:
 
@@ -123,8 +128,8 @@ All three field sets preserved in full.
 |---|---|---|---|---|
 | 1 | **Price overbilling** | Invoice price > PO price | High | `[auto]` |
 | 2 | **Price underbilling** | Invoice price < PO price | Low (favourable, but flag) | `[auto]` |
-| 3 | **Quantity overbilling** | Invoice qty > GRN qty | High | **`[auto]` — needs the receipt leg** |
-| 4 | **Short-shipment billed in full** | Invoice qty > GRN qty | High | **`[auto]` — needs the receipt leg** |
+| 3 | **Quantity overbilling** | Invoice qty (cumulative across invoices on that PO line) > PO qty; or, with the receipt leg, invoice qty > GRN qty where exception 4 does not apply | High | **`[auto]` — the PO comparison needs only the PO leg and runs on a two-way match; the GRN comparison needs the receipt leg** |
+| 4 | **Short-shipment billed in full** | GRN qty < PO qty and invoice qty = PO qty | High | **`[auto]` — needs the receipt leg** |
 | 5 | **Item not on PO** | Invoice line has no matching PO line | High | `[auto]` — needs the PO leg |
 | 6 | **Item on PO not invoiced** | PO line has no matching invoice line | Low (open commitment) | `[auto]` |
 | 7 | **Item received not billed** | GRN line has no matching invoice line | **Information → see below** | **`[auto]` — needs the receipt leg** |
@@ -137,6 +142,8 @@ All three field sets preserved in full.
 | 14 | **Tax mismatch** | Tax on invoice doesn't reconcile to expected | Medium | `[auto]` |
 | 15 | **Damaged goods on GRN but full billing** | GRN flagged damage or rejection, invoice billed full | High | **`[manual]` — condition is rarely digitised** |
 
+**One line raises one quantity exception** — where both 3 and 4 would fire, report 4. **Exception 3's PO comparison is the quantity test a two-way match relies on**; for services, compare billed hours or units with the PO and with the service confirmation.
+
 #### One correction to exception 7's severity
 
 The original marks **"item received not billed"** as **Information**, on the reasoning that the vendor may simply be late invoicing. **From an AP-control standpoint that is right.**
@@ -144,6 +151,14 @@ The original marks **"item received not billed"** as **Information**, on the rea
 **From an accounting standpoint it is a liability.** Goods received and not yet invoiced is **goods received not invoiced (GRNI)** — **the business owes for them, and the obligation must be accrued at period end** whether or not the invoice has arrived. An unrecorded GRNI at a year end understates both liabilities and, depending on what was received, either inventory or expense.
 
 **So exception 7 is Information to AP and a close item to the accountant**, and it should be flagged as both. `[auto]` to quantify the whole GRNI population at any date, which is exactly what the accrual needs and is a query nobody usually runs. See `month-end-close-checklist` and `accruals-and-deferrals`.
+
+**Quantifying GRNI without overstating it:** match receipts against **all** bills recorded for that PO — open or paid, in any period — not just this run's invoices. **Exclude any receipt record that already posts to Accounts Payable** (e.g. a QuickBooks Desktop item receipt), or the liability is counted twice. Value each line at **received qty × PO unit price**, in PO currency. Then propose the draft accrual, in the real account names, as a **proposal**:
+
+```
+DR  Inventory (or the expense account on the PO line)    $received qty × PO price
+    CR  Accrued Liabilities – GRNI                          $same
+Memo: Goods received not invoiced at [period end]; reverses on day 1 of next period
+```
 
 #### Exception 8, and where it leads
 
@@ -171,6 +186,14 @@ These two are **authority** exceptions, not arithmetic ones, and they are the on
 - **Approve override** — **with documented reason and authority**
 - **Partial payment** — pay the matched portion, dispute the remainder
 
+**Choosing the recommendation** — `[auto]` to apply, a person decides:
+
+- **Reject** — vendor mismatch (13), or the invoice is a duplicate (9).
+- **Hold** — any Critical or High exception open; approval not confirmed (11 or 12 not run); or goods with no receipt leg (two-way by omission).
+- **Pay** — everything else.
+
+**Matched amount** = the sum, over lines within tolerance, of min(PO qty, GRN qty, invoice qty) × PO price (without a receipt leg, min(PO qty, invoice qty), and say so). **Disputed amount** = invoice total − matched amount. These are the figures for a partial payment.
+
 **The override deserves its qualifier preserved.** An override without a documented reason and a named authority is not a resolution; **it is the control being switched off for one invoice**, and a population of undocumented overrides is the finding that matters more than any of them individually. `[auto]` to count them.
 
 ---
@@ -184,8 +207,9 @@ An `.xlsx` workpaper. All four of the original's sheets, plus two additions.
 - Header-level match status
 - Line-level match counts — matched / exception
 - **Overall recommendation: Pay / Hold / Reject**
+- **Matched amount and disputed amount** (Step 5)
 
-**Header carries, in bold: which match was actually performed** — three-way, two-way by design, or two-way by omission — **and which of the fifteen tests could not run**, with the reason. Plus the fixture flag.
+**Header carries, in bold: which match was actually performed** — three-way, two-way by design, or two-way by omission — **and which of the fifteen tests could not run**, with the reason. Plus the fixture flag (whether the data is test data, not your books).
 
 **Sheet 2: Line-by-Line Match**
 | Inv Line | Description | PO Qty | GRN Qty | Inv Qty | PO Price | Inv Price | PO Total | Inv Total | Variance | Tolerance Applied | Status |
@@ -193,7 +217,7 @@ An `.xlsx` workpaper. All four of the original's sheets, plus two additions.
 **Add a Match Basis column** — line #, SKU, description, or unmatched — per the Step 2 caution.
 
 **Sheet 3: Exceptions**
-| # | Exception Type | Severity | Description | Recommended Action | Resolution Owner |
+| # | Exception Type | Severity | Description | Amount | Recommended Action | Resolution Owner |
 
 **Every row has an owner.** Exception 7 flagged as both Information and a close item.
 
@@ -206,7 +230,7 @@ What only a population view shows:
 | Finding | Vendor / scope | Count | Value | Period | Action |
 |---|---|---|---|---|---|
 
-Variances consistently just inside tolerance. Receipts posted in bulk on one date. Same user across multiple stages. Vendors with recurring unreceipted invoices. Undocumented overrides. **Total GRNI at the period end.**
+Variances consistently just inside tolerance. Receipts posted in bulk on one date. Same user across multiple stages. Vendors with recurring unreceipted invoices. Undocumented overrides. **Total GRNI at the period end**, quantified per exception 7's note.
 
 **Sheet 6: Coverage and Provenance** *(Mosofin addition)*
 The mandatory coverage sheet, **including which legs were available.**

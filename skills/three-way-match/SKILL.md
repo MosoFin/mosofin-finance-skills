@@ -5,17 +5,18 @@ description: "Matches a vendor invoice to its purchase order and goods receipt b
 
 # Three-way match: order, receipt, invoice
 
-Checks that three documents agree before money goes out: the **purchase order** (what you agreed
-to buy), the **goods receipt** (what arrived, and in what condition) and the **vendor invoice**
+Checks that three documents agree before money goes out: the **purchase order** (PO — what you agreed
+to buy), the **goods receipt** (GRN — what arrived, and in what condition) and the **vendor invoice**
 (what the supplier wants paid). It compares them header first, then line by line, applies your
 tolerance, runs fifteen exception tests, and recommends **Pay, Hold or Reject** with the matched
 and disputed amounts. A person acts on the recommendation.
 
 **Works with or without Mosofin.** With Mosofin connected it reads the bills, and the purchase
 orders where the system holds them. **No accounting system reliably holds the goods receipt**, so
-it checks at Gate 2 which legs exist and asks for the rest. **If it has invoices and orders but no
-receipts, it runs a two-way match and says so** in the summary and the file name; the five tests
-that need the receipt are listed as not run, never as passed.
+it checks at Gate 2 (its check of which data the connection exposes) which legs exist and asks
+for the rest. **If it has invoices and orders but no receipts, it runs a two-way match and says so** in the summary and the file name; the tests that
+need the receipt are listed as not run, never as passed, while billed quantity is still checked
+against the order.
 Background: [`references/overview.md`](references/overview.md).
 
 ## Rules that never bend
@@ -68,6 +69,7 @@ question at a time. Ask only what you cannot already see.
 | **Purchase order(s)** | Required | PDF, XLSX, CSV, or pasted |
 | **Goods receipt, proof of delivery, or signed service confirmation** | **Required for goods.** Without it the match is two-way and the output says so | PDF, XLSX, CSV, or pasted |
 | **Vendor invoice(s)** | Required | PDF, XLSX, CSV, or pasted |
+| **Prior bills and payments against these POs** (AP transactions or a bills-by-vendor export for the PO's life) | **Required for progress or partial billing** and the duplicate test; without it those tests are listed as not run | CSV, XLSX or PDF |
 | Tolerance policy (B) and approval matrix (C) | Recommended | Type it in the chat |
 | Vendor master, for payment-terms checks | Optional | CSV or pasted |
 
