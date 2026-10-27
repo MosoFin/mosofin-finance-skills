@@ -22,8 +22,8 @@ Typical evidence tools — **resolve real names and policies from your Gate 2 ca
 | Balances as presented (current / non-current) | `get_balance_sheet` | `start_date`, `end_date`, `accounting_method`, `summarize_column_by` |
 | Transaction detail behind a balance; roll-forwards | `get_general_ledger` | `start_date`, `end_date`, `accounting_method`, `account` |
 | Chart of accounts; find suspense / clearing accounts | `search_accounts` / `get_account` | `query`/`name`, `active_only`; `id` |
-| A/R supporting side | `get_aged_receivables` / `get_customer_balance` | `report_date`, `customer`, `aging_method`, `num_periods` |
-| A/P supporting side | `get_aged_payables` / `get_vendor_balance` | `report_date`, `vendor`, `aging_method`, `num_periods` |
+| A/R supporting side | `get_aged_receivables` (`get_customer_balance` is **total only — not a substitute for the aging**; without the aging the support side is [manual]) | `report_date`, `customer`, `aging_method`, `num_periods` |
+| A/P supporting side | `get_aged_payables` (`get_vendor_balance` is **total only — not a substitute for the aging**; without the aging the support side is [manual]) | `report_date`, `vendor`, `aging_method`, `num_periods` |
 | A/R activity for the roll-forward | `search_invoices` / `search_payments` / `search_credit_memos` | `start_date`, `end_date` (required), `customer_id` |
 | A/P activity for the roll-forward | `search_bills` / `search_bill_payments` / `search_vendor_credits` | `start_date`, `end_date` (required), `vendor_id` |
 | Manual entries (a frequent reconciling item) | `search_journal_entries` / `get_journal_entry` | `start_date`, `end_date` (required); `id` |

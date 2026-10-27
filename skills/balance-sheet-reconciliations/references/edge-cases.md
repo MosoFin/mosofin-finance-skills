@@ -13,8 +13,9 @@ current and non-current portions): reclass via JE. The total is right, the prese
 
 **Account that should always be zero** (e.g. Suspense, Clearing): any non-zero balance requires
 immediate investigation. **Don't roll forward an open clearing balance.** *Mosofin note*: this
-account is fully `[auto]` — both sides come from the GL — so it is the fastest genuine win in
-the whole workpaper. Run it first.
+account is fully `[auto]` — the test is not a two-source tie but "balance should be zero; every
+line explained", all readable from the GL — so it is the fastest genuine win in the whole
+workpaper. Run it first.
 
 **Multi-currency accounts**: reconcile in the functional currency for the GL, but **also
 reconcile in the original currency** where applicable (e.g. a foreign-currency bank account). FX
@@ -37,7 +38,7 @@ is `[auto]`, so this check should always be performed rather than skipped.
 of carry-forward and recommend establishing the prior-period baseline.
 
 **Adjustments to the opening balance**: typically prior-period adjustments — flag for
-review as a possible restatement.
+review as a possible restatement. The Step 6 opening check is what detects them.
 
 **Account that's been merged or split mid-period**: rebuild the reconciliation respecting the
 merge or split, with a memo explaining. *Mosofin note*: a renamed or merged account may return a
@@ -56,7 +57,10 @@ which accounts are therefore unreconciled. Surface any `reconnect_url`.
 
 **Both sides came from the same source** — *Mosofin-specific, and the subtlest failure here*. If
 the "supporting balance" is just another view of the same GL, the account has not been
-reconciled. Mark the support side `[manual]` and say what independent evidence is needed.
+reconciled by that tie alone. An integrated subledger tie (A/R, A/P aging to control) is reported
+as **"agrees to subledger (same system)"** and is not counted as independent support; the account
+is reconciled only with the aging review plus at least one independent test. Say what independent
+evidence is needed, and mark it `[manual]` where it lies outside the books.
 
 **A result comes back with `mock: true`** — *Mosofin-specific*. Fixture data can demonstrate the
 workpaper format but cannot support a signed reconciliation, because the reconciliation is itself

@@ -19,7 +19,7 @@ agreeing with itself is never passed off as assurance.
 **Works with or without Mosofin.** With Mosofin connected, the **GL side is almost always read
 directly** — the trial balance, the balance and the transactions behind it — and so is the
 support for **A/R, A/P and suspense / clearing accounts**, where the subledger lives in the same
-books. Where both entities are connected company files, the **intercompany mirror balance** is
+books; an A/R or A/P aging tie is only a mechanical check, so independent support is still needed. Where both entities are connected company files, the **intercompany mirror balance** is
 readable too, and a connected payroll, inventory or payments platform can change other rows.
 **It cannot read** support that lives outside the connected books — prepaid schedules, fixed asset
 registers, lease and loan schedules, tax filings, bank statements — so it asks for each. Background:
@@ -69,7 +69,8 @@ Ask only what you cannot already see.
   (Gates 0–1 in [`references/gates.md`](references/gates.md)).
 - Check at Gate 1 whether **both sides of any intercompany balance** are connected, and whether a
   **payroll, inventory or payments platform** is — each changes an account's support verdict.
-- Confirm the **cleanup / suspense account** for proposed entries by its real name in the chart.
+- Ask for the **approved write-off limit** for immaterial residuals and the **P&L account** it goes
+  to, by its real name in the chart — never a balance sheet suspense account.
 - A **vendor or customer balance** report is not an aging: it can confirm a total, not which items
   make it up.
 
@@ -88,8 +89,8 @@ Ask only what you cannot already see.
 **Read back before starting, then wait for a yes:**
 
 > *Reconciling **all balance sheet accounts** of **Northbrook Trading** at **30 September**, with
-> the GL read from **your Mosofin connection**. A/R, A/P and the clearing account will be supported
-> from the books; the **prepaid schedule** and **loan amortization schedule** you uploaded support those
+> the GL read from **your Mosofin connection**. A/R and A/P will be tied to their agings in the books
+> and tested against subsequent receipts and payments; the clearing account should be zero; the **prepaid schedule** and **loan amortization schedule** you uploaded support those
 > two; the **fixed asset register** is still outstanding, so fixed assets will show as **not
 > reconciled**. Materiality **$500**; prepared by the bookkeeper, reviewed by the controller.
 > Shall I go ahead?*
@@ -115,7 +116,7 @@ one batch, and check the `mock` flag. Assign every account its reconciliation so
 method table — **if an account type isn't listed, ask what its support is; never guess** — then
 capture the GL balance and the supporting balance, **each with its source and date**:
 [`references/method.md`](references/method.md) Steps 0–2. Run suspense and clearing accounts
-first: both sides come from the GL, and any non-zero balance is investigated at once.
+first: the balance should be zero, and any non-zero balance is investigated at once.
 
 ## Stage 4 — Find and investigate the differences
 
@@ -129,8 +130,8 @@ accounts, informal support, and both sides from the same source.
 
 ## Stage 5 — Propose corrections, roll forward, age, and present
 
-Propose a correcting entry for each **permanent** difference — reclass, small residual write-off,
-or reverse and rebook — in the real account names; document timing items without adjusting them;
+Propose a correcting entry for each **permanent** difference — reclass, approved immaterial
+write-off to a P&L account, or reverse and rebook — in the real account names; document timing items without adjusting them;
 log investigating items with an owner and a target date. Roll forward the activity-based accounts
 and tie the movements to the activity; age every item against materiality, escalating anything
 over three months: [`references/method.md`](references/method.md) Steps 5–8. One tab per account,
@@ -142,7 +143,7 @@ with the two-sided coverage sheet. Before presenting, check it against
 Only after the results have been shown, and only on an explicit yes:
 [`references/method.md`](references/method.md) Step 9. Persist the account-to-source map with
 owners, the materiality threshold and escalation ages, preparer and reviewer, known recurring
-timing items, the cleanup account and its limit, and the always-zero accounts, keyed by datasource
+timing items, the write-off account and its approved limit, and the always-zero accounts, keyed by datasource
 and entity — never balances, reconciling-item detail or the workpaper itself.
 
 ---

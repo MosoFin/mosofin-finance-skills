@@ -45,9 +45,10 @@ Typical opening batch, per in-scope entity:
   clearing accounts — usually **[auto]**
 - *`get_general_ledger`* — transaction detail behind any account, and the raw material for every
   roll-forward — usually **[auto]**
-- *`get_aged_receivables`* / *`get_customer_balance`* — the A/R supporting side — usually **[auto]**
-- *`get_aged_payables`* / *`get_vendor_balance`* — the A/P supporting side — policies often differ
-  from the receivables one
+- *`get_aged_receivables`* — the A/R supporting side — usually **[auto]**
+- *`get_aged_payables`* — the A/P supporting side — policies often differ from the receivables one
+- *`get_customer_balance`* / *`get_vendor_balance`* — **total only — not a substitute for the
+  aging**; if the aging tool is disabled, the support side is **[manual]** (request an aging export)
 - *`search_journal_entries`* — manual entries, a frequent source of reconciling items — usually
   **[auto]**
 - *`get_company_info`* — period-end and base currency — usually **[auto]**
@@ -73,10 +74,19 @@ Different balance sheet accounts reconcile to different sources. The verdict col
 **typical** case — confirm each against your Gate 2 capability map, since a connected payroll or
 inventory platform changes several rows at once.
 
+**Integrated subledgers (A/R, A/P).** In the connected books the aging is generated from the same
+transactions as the control account, so it ties by construction. That tie is still a necessary
+mechanical check — it catches journal entries posted to A/R or A/P without a customer or vendor
+name, cash- vs accrual-basis report settings and report-date errors — but it is reported as
+**"agrees to subledger (same system)"** and is **not counted as independent support**. The account
+is **reconciled** only with the aging review in Step 4 plus at least one independent test
+(subsequent receipts or payments, vendor statements, customer confirmations). The same applies to
+an aging exported from the same file on the upload path.
+
 | GL Account | Reconcile to | Typical GL side | Typical support side |
 |---|---|---|---|
 | Cash / Bank | Bank statement (use `bank-reconciliation` skill) | **[auto]** | **[manual]** — the statement is outside the books |
-| Accounts Receivable | A/R sub-ledger / open invoice listing | **[auto]** | **[auto]** — *`get_aged_receivables`*, *`search_invoices`* |
+| Accounts Receivable | A/R sub-ledger / open invoice listing | **[auto]** | **[auto] — integrated tie (mechanical)**, *`get_aged_receivables`*, *`search_invoices`*; independent support: subsequent receipts **[auto]**, customer confirmations **[manual]** |
 | Allowance for Doubtful Accounts | Allowance calculation | **[auto]** | **[manual]** — the calculation is a schedule |
 | Inventory | Inventory subledger / physical count (see `inventory-to-gl-reconciliation`) | **[auto]** | **[gated]** — *`search_items`* gives the master; counts and valuation usually **[manual]** |
 | Prepaid Expenses | Prepaid amortization schedule (see `prepaid-amortization-schedule`) | **[auto]** | **[manual]** |
@@ -86,7 +96,7 @@ inventory platform changes several rows at once.
 | Intangible Assets | Intangibles register | **[auto]** | **[manual]** |
 | Right-of-Use Assets | Lease schedules | **[auto]** | **[manual]** |
 | Goodwill | Acquisition history + impairment tests | **[auto]** | **[manual]** |
-| Accounts Payable | A/P sub-ledger / open bill listing | **[auto]** | **[auto]** — *`get_aged_payables`*, *`search_bills`* |
+| Accounts Payable | A/P sub-ledger / open bill listing | **[auto]** | **[auto] — integrated tie (mechanical)**, *`get_aged_payables`*, *`search_bills`*; independent support: subsequent payments **[auto]**, vendor statements **[manual]** (see `vendor-statement-reconciliation`) |
 | Accrued Expenses | Accruals schedule (see `ap-accrual-cutoff`, `accruals-and-deferrals`) | **[auto]** | **[gated]** — booked entries **[auto]**, the calculations behind them **[manual]** |
 | Customer Deposits / Deferred Revenue | Contract / customer schedule | **[auto]** | **[gated]** — receipts **[auto]**, the service periods **[manual]** |
 | Sales Tax / VAT / GST Payable | Tax filing return + post-period activity | **[auto]** | **[manual]** for the return; post-period activity **[auto]** |
@@ -96,7 +106,11 @@ inventory platform changes several rows at once.
 | Long-Term Debt | Loan amortization schedule + lender confirmation | **[auto]** | **[manual]** |
 | Intercompany Accounts | Counterparty entity's mirror balance | **[auto]** | **[auto] if the counterparty is a connected company file**, otherwise **[manual]** |
 | Equity Accounts | Stock register / capital movements log | **[auto]** | **[manual]** |
-| Suspense / Clearing | Should be zero or near-zero; investigate every line | **[auto]** | **[auto]** — *`get_general_ledger`*; fully supported, and the highest-value quick win here |
+| Suspense / Clearing | Not a two-source tie: the balance should be zero, and every line in it is explained | **[auto]** | **[auto]** — *`get_general_ledger`*; age and explain every line — the highest-value quick win here |
+| Undeposited Funds / Payments to deposit | Should clear within days; age every line, as for Suspense / Clearing | **[auto]** | **[auto]** — *`get_general_ledger`*, *`search_deposits`* |
+| Credit Card Liability | Card statement (use `credit-card-reconciliation` skill) | **[auto]** | **[manual]** — the statement is outside the books |
+| Shareholder / Owner Loans | Loan agreement + owner confirmation | **[auto]** | **[manual]** |
+| Retained Earnings | Prior-year closing retained earnings + prior-year net income − distributions | **[auto]** | **[auto]** — *`get_general_ledger`* across the year end |
 
 **If the user's account type isn't listed, ask what the supporting source is.** Do not guess a
 source — a reconciliation to the wrong support is worse than none, because it looks complete.
@@ -161,6 +175,10 @@ For any difference — each of these is **[auto]** or **[gated]** where the GL s
 - **Cross-check for FX revaluation differences** (the subledger may not have been revalued) —
   **[gated]**: multi-currency activity is visible, the revaluation policy is not
 - **Cross-check rounding** (sum of many sub-items vs the GL total) — **[auto]**
+- **For A/R and A/P, review the aging** — list journal entries posted to the control account
+  without a customer or vendor name, credit balances, unapplied payments and credits, and items
+  over 90 days — **[auto]** (*`get_aged_receivables`*, *`get_aged_payables`*,
+  *`search_journal_entries`*)
 
 **Document the investigation steps and results** — including the checks that found nothing. A
 reconciliation that lists only what was found does not show what was looked for.
@@ -171,7 +189,11 @@ For **permanent** differences, propose a JE to clear (hand off to `journal-entry
 Examples:
 
 - **Reclass between accounts** if posted incorrectly
-- **Write off small immaterial residuals** to a cleanup account
+- **Write off an immaterial residual** only below the approved limit, after the Step 4 checks are
+  documented, to a P&L account (e.g. Miscellaneous expense / Reconciliation differences), with
+  reviewer approval. Never to a balance sheet suspense account — that only moves the difference to
+  another account that must itself reconcile to zero. **Ask the user for the approved limit**; never
+  assume one
 - **Reverse and rebook** if a prior JE is wrong
 
 For **timing** differences, **document but do not adjust** — they'll clear naturally. Adjusting a
@@ -195,6 +217,13 @@ Opening balance
 +/- Other adjustments
 = Closing balance
 ```
+
+**Opening check:** the opening balance must equal the GL balance on the prior period's
+reconciliation. If the prior rec is not supplied, use the closing balance at the prior period end
+as read today, and say so. Any difference means a closed period changed: list the transactions
+dated on or before the prior period end that were created or modified after it — **[auto]**
+(*`get_general_ledger`*, *`search_journal_entries`*) — and log them as a possible prior-period
+adjustment.
 
 **The closing balance should tie to the GL. Movements should tie to the relevant activity**
 (sales register, payment register, etc.) — **[auto]** for the comparison where the activity lives
@@ -228,6 +257,7 @@ Deliver an `.xlsx` workpaper, ideally **one tab per account** being reconciled.
 - Supporting balance (and source)
 - Difference
 - Preparer / Reviewer
+- Prepared on / Reviewed on (dates) — left blank for the humans; the skill fills in neither
 - Materiality threshold
 - **Added:** entity `display_name`; the tool and timestamp behind each `[auto]` balance; the
   document and supplier behind each `[manual]` one; `mock` status
@@ -238,7 +268,7 @@ Deliver an `.xlsx` workpaper, ideally **one tab per account** being reconciled.
 
 Sub-totaled to the adjusted balance, ending in:
 
-| Reconciled difference | $X | Status (Tied / Within tolerance / Investigating) |
+| Reconciled difference | $X | Status (Reconciled / Reconciled — immaterial residual, approved write-off proposed / Investigating / Not reconciled — support not supplied) |
 
 **Section 3: Reconciling Items Detail**
 
@@ -266,7 +296,7 @@ visible.
 
 Optionally, a **master workbook** listing all account reconciliations with:
 
-- Account, GL balance, status (tied / within tolerance / unreconciled), materiality breach Y/N
+- Account, GL balance, status (Reconciled / Reconciled — immaterial residual, approved write-off proposed / Investigating / Not reconciled — support not supplied), materiality breach Y/N
 - **Added:** support-side coverage, so the controller can see at a glance how much of the balance
   sheet is genuinely evidenced
 
@@ -300,8 +330,8 @@ On an explicit yes, persist the **decisions**:
 - **Preparer and reviewer** per account, or per account group
 - **Known recurring timing items** and the window in which each normally clears — so a familiar
   deposit-in-transit is recognised rather than re-investigated every month
-- The cleanup / suspense account to use for immaterial residuals, and the limit above which
-  nothing may be written off
+- The P&L account to use for approved write-offs of immaterial residuals, and the approved limit
+  above which nothing may be written off
 - Accounts that must always be zero, so a non-zero balance is escalated immediately
 - The replay recipe: the exact sequence of reads that produced this period's workpaper
 

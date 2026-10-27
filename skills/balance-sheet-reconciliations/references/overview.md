@@ -27,8 +27,12 @@ has two sides, and they behave very differently here:
 - **The supporting side is `[auto]` only where the subledger itself lives in the connected
   system.** In practice that means **accounts receivable, accounts payable, and any
   suspense / clearing account** — where the "subledger" is just a different view of the same
-  books. For prepaid schedules, fixed asset registers, lease schedules, payroll registers, loan
-  amortization schedules, tax filings and bank statements, **the supporting side is outside the
+  books. An integrated subledger tie is reported as **"agrees to subledger (same system)"** and is
+  not counted as independent support: A/R or A/P is **reconciled** only with the aging review plus
+  at least one independent test (subsequent receipts or payments, vendor statements, customer
+  confirmations). A suspense / clearing account is tested differently — its balance should be zero
+  and every line explained. For prepaid schedules, fixed asset registers, lease schedules, payroll
+  registers, loan amortization schedules, tax filings and bank statements, **the supporting side is outside the
   connected books and is `[manual]`**.
 
 So expect a workpaper where the GL column is complete and the support column is mixed. Say which
