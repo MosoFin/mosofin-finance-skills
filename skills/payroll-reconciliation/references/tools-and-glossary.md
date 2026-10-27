@@ -52,7 +52,8 @@ envelopes. Where this table and the live description disagree, the live descript
   authority.**
 - **Unremitted liability past its due date** — money withheld from employees and not passed on. **Penalties,
   interest, and in many places personal liability for directors.**
-- **Negative liability balance** — the accounts say the authority owes you. **Always an error.**
+- **Negative liability balance** — the accounts say the authority owes you. **Always an exception**: an error,
+  a claim, or a prepayment to reclassify.
 - **Wage statement** — the annual summary given to each employee for their own tax return. **Must agree to
   the filings and the GL before it is issued.**
 - **Off-cycle run** — a payroll outside the normal schedule: a bonus, a correction, a final payment.

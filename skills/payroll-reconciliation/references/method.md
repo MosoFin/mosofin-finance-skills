@@ -35,8 +35,9 @@ The server is **stateless**: pass `data_source_id` on **every** call, including 
 Typical opening batch, per in-scope entity:
 
 - *`search_accounts`* — **every payroll expense and liability account** — usually **[auto]**
-- *`get_profit_and_loss`* — **wages and employer cost expense for the period** — the Step 1 target — usually
-  **[auto]**
+- *`get_profit_and_loss`* — **wages and employer cost expense for the period, on every account that receives
+  payroll** (direct labour in cost of sales, officer pay, departmental wages — the list confirmed with the
+  user) — the Step 1 target — usually **[auto]**
 - *`get_balance_sheet`* / *`get_trial_balance`* at both period ends — **the liability roll-forward anchors**
   — usually **[auto]**
 - *`get_general_ledger`* on **every payroll account** — **movements, ageing, and the manual adjustments** —
@@ -73,10 +74,11 @@ employee wage statements**, and a fixture-based tie means nothing to either.
 
 **Build a register-to-GL bridge reconciling any difference to explained items.**
 
-**Mosofin contribution — four of the five listed causes are detectable.** **[auto]**:
+**Mosofin contribution — five of the six causes are detectable.** **[auto]**:
 
 | Cause | How it shows |
 |---|---|
+| **Accrued wages** | **closing accrued payroll less opening accrued payroll** (and its reversal) — the register is on a pay-date basis, GL expense on an earned basis — from the accrued-payroll GL |
 | **Missing runs** | **a pay period with no journal** — the payroll journal pattern has a gap |
 | **Manual adjustments** | **a journal to a payroll account with no payroll run behind it** — see below |
 | **Misclassified postings** | **payroll-cycle amounts in a non-payroll account**, or the reverse |
@@ -119,11 +121,12 @@ the register — though the payroll journal's credit is a stated proxy.**
 Flag:**
 
 - **Unremitted liabilities past their due date** — **penalty risk** — **[gated]**: the balance and its age
-  are `[auto]`, **the due date is `[manual]`**
+  are `[auto]`, **the due date is `[manual]`** — a fixed day, or a rule applied **per pay date** (for
+  example, the Wednesday after a Saturday–Tuesday pay date)
 - **Liabilities that should be zero but aren't** — over-accrual, missed remittance, or misposting —
   **[auto]** given the expected pattern; see `payroll-clearing-reconciliation` Step 0b
-- **Negative liability balances** — over-remittance or posting error — **[auto]**, ⭐ **and always wrong.**
-  One query, run it every period
+- **Negative liability balances** — **[auto]**, ⭐ **always an exception**: a posting error, an over-remittance to claim back, or a prepayment to reclassify. Never left in a liability account at a reporting date. One query, run it
+  every period
 
 **The overdue flag is the one with consequences.** **An unremitted withholding past its due date accrues
 penalties and interest**, and in many jurisdictions **payroll taxes carry personal liability for
@@ -137,7 +140,8 @@ dates, the flag is arithmetic; without them it cannot be raised.** Ask for them.
 
 - **Total taxable wages per the GL / register = taxable wages on the filing**
 - **Total tax withheld / contributed per the GL = tax reported on the filing**
-- **Year-end employee wage statements (totals) = sum of registers = GL wages**
+- **Year-end employee wage statements (totals) = sum of registers = filed totals**, agreed to **GL wages
+  through a bridge**: accrual movement, capitalised labour, pre-tax deductions, imputed income
 - **Reconcile any differences** — e.g. non-taxable items, pre-tax deductions affecting taxable wage bases
   differently
 
@@ -145,9 +149,10 @@ dates, the flag is arithmetic; without them it cannot be raised.** Ask for them.
 tax filings.**
 
 **Note the first bullet contains the Step 5 problem.** **"Taxable wages per the GL" is not available** — the
-GL holds gross, not taxable. **Where the register is absent, this comparison runs on gross and will differ
-by exactly the pre-tax deductions and capped amounts.** **Say that**, rather than reporting an unexplained
-difference.
+GL holds gross, not taxable. **Where the register is absent, the taxable-wages comparison is NOT PERFORMED**,
+for the same reason as Step 5. Tie only **tax reported on the filing to tax credited to the liability
+accounts (per GL)**, and gross per GL to the filing's gross or total-pay line where the form has one. Report
+any gross-to-taxable gap as **unexplained, needs register**.
 
 **The year-end statement tie has a deadline.** **Differences must be resolved before statements are issued
 to employees**, because a wrong statement means amended filings and employees amending their own tax
@@ -172,6 +177,10 @@ pre-tax deductions, some capped at a ceiling. **Reconcile each tax's wage base:*
 employees have collectively earned well above a ceiling may still have most of them below it. **There is no
 aggregate arithmetic that recovers a per-employee capped base**, and **pre-tax deductions vary by employee
 election.** **The GL's single gross figure cannot be decomposed into them.**
+
+**With the register, per-employee arithmetic is done in the session only**, to test caps and pre-tax
+elections. **Only aggregates and counts are reported** — *"14 employees at the cap; capped base 1,982,400;
+tax per register agrees"* — and an exception is referred to by reference number.
 
 **Where the register is unavailable, report this step as NOT PERFORMED**, name what it would have shown, and
 **do not present a gross-based rate check as a substitute** — it will mismatch for every affected employee
@@ -200,7 +209,7 @@ Deliver an `.xlsx` reconciliation workpaper:
 **Sheet 1: Reconciliation Summary** — **each reconciliation (register↔GL, net pay↔bank, liabilities,
 filings) with status (tied / exceptions) and total unreconciled.** Add the Mosofin header: workspace name;
 the entity by `display_name`; **which sources were read and which supplied**; **whether Step 5 was
-performed**; whether any figure rests on `mock` data.
+performed**; whether any figure rests on `mock` data; **Prepared by / date; Reviewed by / date**.
 
 **Sheet 2: Register-to-GL Bridge** — **gross and employer cost, register vs. GL, reconciling items**, with
 **the manual adjustments listed separately**.
@@ -208,7 +217,8 @@ performed**; whether any figure rests on `mock` data.
 **Sheet 3: Net Pay to Bank** — **disbursements tie-out**, stating **recorded or bank-verified**.
 
 **Sheet 4: Liability Roll-Forward** — **per liability: opening + accrued − remitted = closing, vs. GL, with
-overdue / anomaly flags.** **Negative balances listed explicitly.**
+overdue / anomaly flags**, and **Opening agreed to prior reconciliation: Y/N**. **Negative balances listed
+explicitly.**
 
 **Sheet 5: Filing Reconciliation** — **wages and taxes per GL vs. filings vs. wage statements** (quarter and
 year-end).

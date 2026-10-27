@@ -48,7 +48,8 @@ read is not one.**
    register-to-GL break. **A journal entry to a payroll account with no payroll run behind it** is readable,
    and it is usually the explanation.
 2. **Negative and anomalous liability balances.** **[auto]**, trivially. **A negative payroll liability is
-   always wrong** — over-remittance or a posting error — and it is one query.
+   always an exception** — a posting error, an over-remittance to claim back, or a prepayment to reclassify,
+   never left in a liability account at a reporting date — and it is one query.
 3. **The liability roll-forward's GL anchors.** **[auto]** at both ends, so **the roll-forward has to
    land**, and any difference is real.
 

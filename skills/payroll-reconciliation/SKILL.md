@@ -12,7 +12,7 @@ forward, the filings to the books — and catches mispostings, unremitted liabil
 register-to-GL gaps **before they become filing or audit problems**.
 
 The GL side alone surfaces three things worth having: **manual adjustments to payroll accounts**,
-usually the reason the register-to-GL tie breaks; **negative liability balances**, always wrong; and
+usually the reason the register-to-GL tie breaks; **negative liability balances**, always an exception; and
 **the liability roll-forward's anchors at both ends**, so the roll-forward has to land. And it holds
 one honest limit: **the GL does not hold taxable wage bases**, so the wage-base check needs the
 register and is never approximated.
@@ -30,8 +30,8 @@ Background: [`references/overview.md`](references/overview.md).
 - **Reads nothing until Stage 1 is answered** and you have confirmed the read-back.
 - **Never writes, updates or deletes anything, in any system.** Every entry it produces is a
   proposal for a person to post.
-- **Payroll data is personal.** Reconciles **at account and total level, never employee by
-  employee.** Individual pay, deductions and garnishments do not appear in the workpaper; an item
+- **Payroll data is personal.** Reports **at account and total level, never employee by
+  employee** — per-employee arithmetic for caps stays in the session. Individual pay, deductions and garnishments do not appear in the workpaper; an item
   that concerns one person is referred to **by reference number**; **never persists any
   individual's payroll data.**
 - **Never substitutes a gross-based check for the wage-base reconciliation.** Without the register,
@@ -57,10 +57,10 @@ Ask only what you cannot already see.
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *Which entity? In a group, does one payroll service run several entities?* | Each entity's GL holds only its share; filings are per employer | **Never auto-pick.** Run per entity, against that entity's slice of the register. |
 | **C** | *Which period — month, quarter or year?* | The filing and wage-base steps apply at quarter and year end | **Required.** |
-| **D** | *The payroll register(s) for the period, including off-cycle runs.* | The other side of Steps 1, 4 and 5, and the only source of taxable wage bases | **Required.** Read if a payroll platform is connected. Otherwise those steps are partial, and **Step 5 is NOT PERFORMED.** |
+| **D** | *The payroll register(s) for the period, including off-cycle runs.* | The other side of Steps 1, 4 and 5, and the only source of taxable wage bases | **Required.** Read if a payroll platform is connected; **otherwise ask the user to upload it**. Without it those steps are partial, and **Step 5 is NOT PERFORMED.** |
 | **E** | *The bank statement, or the payment records, for net pay.* | Recorded disbursements prove the bookkeeping; the statement proves the money left | **Required.** Without the statement, the tie is to recorded disbursements, and the output says so. |
 | **F** | *Liability remittance records — what was paid to each authority and provider.* | The "remitted" line of every liability roll-forward | **Required for the liability reconciliation.** On the Mosofin path, payments are read; the authority's receipt is not. |
-| **G** | *The remittance due date for each liability.* | The overdue flag is arithmetic given the dates | **Required for the overdue flag. Never default it** — without it the flag cannot be raised. |
+| **G** | *The remittance due date for each liability — a fixed day, or the rule (e.g. "Wednesday after a Saturday–Tuesday pay date")?* | The overdue flag is arithmetic given the dates | **Required for the overdue flag. Never default it** — without it the flag cannot be raised. |
 | **H** | *The taxable wage base rules per tax — pre-tax deductions, caps, ceilings.* | Each tax is charged on its own base, not on gross | **Required for Step 5. Never default it.** |
 | **I** | *Does a third-party provider remit the taxes?* | The entity remains liable if the provider fails to remit | **Required.** Confirming actual remittance is manual, from the authority. |
 
@@ -72,8 +72,8 @@ Ask only what you cannot already see.
 - Check at Gate 1 whether a **payroll platform** is also connected — the single most consequential
   connection here. If one is, the register and the wage bases are read, and Steps 1, 4 and 5 become
   complete rather than partial.
-- Confirm which payroll accounts are in scope.
-- Still ask for the bank statement (E), the due dates (G), the wage base rules (H), the provider
+- Confirm which payroll accounts are in scope, including every expense account that receives payroll.
+- Still ask for the register (D) if no payroll platform is connected, the bank statement (E), the due dates (G), the wage base rules (H), the provider
   arrangement (I) and any filing figures — none of them is on this surface.
 
 **Upload path — hand over one checklist.**

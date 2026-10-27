@@ -26,8 +26,9 @@ entity remains liable even if the provider fails to remit.** **The most importan
 **a provider's failure to remit is the employer's problem**, and the accounts will look perfectly settled
 while the liability is unpaid. **Confirming remittance is `[manual]`, from the authority.**
 
-**Year-end wage statement reconciliation**: **the sum of employee wage statements must equal the GL wages
-and the filed totals. Differences must be resolved before statements are issued to employees.**
+**Year-end wage statement reconciliation**: **the sum of employee wage statements must equal the filed totals,
+and agree to GL wages through a bridge** — accrual movement, capitalised labour, pre-tax deductions, imputed
+income. Differences must be resolved before statements are issued to employees.**
 
 **Capitalized labor**: **legitimately not in wage expense; ensure the register-to-GL bridge accounts for it
 rather than flagging it as an error.** **[auto]** to detect — a payroll-dated debit to an asset account.

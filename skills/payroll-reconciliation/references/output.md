@@ -28,7 +28,8 @@ All of the original standards, plus the Mosofin ones.
 - **Step 5 is reported as NOT PERFORMED where the register is unavailable**, with what it would have shown
   — **never substituted by a gross-based check**
 - **Manual adjustments to payroll accounts are listed separately** in the register-to-GL bridge
-- **Negative liability balances are listed explicitly**, since all of them are errors
+- **Negative liability balances are listed explicitly**, each explained as a posting error, a claim or a
+  prepayment to reclassify
 - **The overdue flag names the due date and its source**, and its consequence — penalties, interest,
   personal liability — is stated
 - **The net pay tie states whether it was to recorded disbursements or to the bank statement**
