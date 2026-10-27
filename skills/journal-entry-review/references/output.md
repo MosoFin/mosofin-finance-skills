@@ -22,8 +22,8 @@ All of the original standards, plus the Mosofin ones.
   since JE testing is a required procedure
 - The capability map was discovered **this run** via Gate 2 — never recalled from a previous conversation
   or from this file
-- **The screen covered the entire population**, with the population size stated and the completeness
-  asserted explicitly
+- **The screen covered the entire population**, with the population size stated and completeness shown by
+  the Step 1 tie-out to the period's ledger movement — "complete" only when the difference is nil
 - **Every criterion carries its verdict**, and **criteria that could not run are listed in Sheet 8** with
   what they would have shown — **the four approval-based indicators named specifically**
 - **The baseline was derived from prior periods**, not asserted, and "unusual" is defined against it

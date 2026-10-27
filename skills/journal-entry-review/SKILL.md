@@ -32,7 +32,7 @@ population at all. Background: [`references/overview.md`](references/overview.md
   proposal for a person to post.
 - **An anomaly is not a finding.** A flagged list is a list of questions, not of suspects; a user
   name is not a person; escalation is not an accusation.
-- **Screens the whole population and says so**, and reports every criterion it could not run — above
+- **Screens the whole population and proves it** against the ledger's movement, and reports every criterion it could not run — above
   all the four approval-based ones — as **NOT RUN**, never omits it.
 - **Never defaults an authorization threshold, a materiality level, or a conclusion about an entry**,
   and **never persists flagged entries, risk scores, user names, explanations or any anomaly.**
@@ -55,9 +55,10 @@ Ask only what you cannot already see.
 | **B** | *Which period is under review?* | Sets the population and the timing criteria, which depend on the period ends | **Required.** Nothing is screened without it. |
 | **C** | *What are the authorization thresholds?* | The just-below-threshold test | **Required for that test, and never defaulted.** Without them the test is meaningless; name it as not run. |
 | **D** | *What materiality threshold should apply?* | Magnitude screening and the below-threshold test | **Never default it.** Recommended; ask. |
-| **E** | *Do topside or consolidation entries exist, and where are they made?* | They are the higher-risk population and may not be in this one at all | **Required.** The output must state whether they are in the population. |
+| **E** | *Are any adjustments made outside the books — by your accountant at year end, in tax software, or in a consolidation spreadsheet?* (Sometimes called topside entries.) | They are the higher-risk population and may not be in this one at all | **Required.** The output must state whether they are in the population. |
 | **F** | *Who may see the output?* | It names people | **Required.** |
-| **G** | *Can you supply the approval log — who approved, approval status?* | Four People-and-process indicators depend on it | Recommended, usually `[manual]`. Without it those four are **NOT RUN**, with what they would have shown. |
+| **G** | *Is anyone required to approve a manual journal entry before or after it is posted? If yes, can you export who approved each one?* | Four People-and-process indicators depend on it | Recommended, usually `[manual]`. No approval step: those four are **"Control not in place"**. A step but no log: **NOT RUN**, with what they would have shown. |
+| **I** | *What date were the books closed or locked through, and when was the close done?* | The after-close, prior-closed-period and back-dating tests | **Required for those tests.** Without it they are **NOT RUN**. |
 | **H** | *Which accounts are sensitive here, and any known risk areas?* | Focuses the account-combination criteria and the review | Recommended. Revenue, reserves, equity and suspense are readable by account type; the rest is `[manual]`. |
 
 **Then, depending on the answer to A:**
@@ -69,15 +70,16 @@ Ask only what you cannot already see.
   topside entries are not in the population — a material limit, said plainly.
 - Do not ask for the population or for expected posting patterns: the population is read in full and
   "normal" is **derived from prior periods** (Step 1), which beats a stated expectation.
-- **Establish the field list the entry read returns** — posting versus effective date, user,
-  description, source — before designing the screen, and record each criterion lost to a missing field.
+- **Establish the field list the entry read returns** — transaction date versus created timestamp,
+  created by, description, transaction type — before designing the screen, and record each criterion lost to a missing field.
 - Still ask for the **approval log** (G) and the **thresholds** (C, D). Neither is on this surface.
 
 **Upload path — hand over one checklist.**
 
 | Upload | Needed? | Format |
 |---|---|---|
-| **Journal entries for the period** — every entry, with posting date, effective date, user, description, source, accounts and amount | **Required** — this is the population; the criteria you can test depend on the fields present | CSV or XLSX |
+| **Journal for the period, all transaction types** — QBO *Journal* report (or Audit Log) with Transaction date, Create date, Created by, Last modified by, Transaction type; Xero *Journal Report* with Date and Created/Posted columns — plus the first month after the period | **Required** — this is the population; the criteria you can test depend on the fields present | CSV or XLSX |
+| **Opening and closing trial balance** for the period | **Required** — proves the population is complete | CSV or XLSX |
 | **Journal entries for several prior periods** | Recommended — the baseline for "normal", and Step 5's patterns need several periods | CSV or XLSX |
 | **Chart of accounts** with account types, sensitive accounts noted | Recommended — drives the account-combination criteria | CSV or XLSX |
 | **Approval log** — who approved each entry, approval status | Recommended — without it the four approval-based indicators are NOT RUN | CSV or XLSX export |
@@ -118,8 +120,8 @@ Report the profile before the flags.
 
 ## Stage 4 — Screen, score and find the patterns
 
-Screen every entry against the nineteen indicators — fifteen run as queries; the four approval-based
-ones are **NOT RUN** without approval data. Score with **weighted combinations, not single criteria**,
+Screen every entry against the twenty-one indicators — ten run as queries, seven need a threshold or a
+field; the four approval-based ones are **NOT RUN** without approval data. Score with **weighted combinations, not single criteria**,
 and state the weights. Analyse the high-priority flags (three of five checks need a person), then run
 the pattern tests across the population and several periods, including reserves against earnings:
 [`references/method.md`](references/method.md) Steps 2–5. Check
@@ -135,7 +137,7 @@ profile, criteria and screening, risk-scored flags, detailed review, **patterns 
 controls, **criteria not run**, and coverage: [`references/method.md`](references/method.md)
 Steps 6–8. Ask before creating the `.xlsx`; otherwise give the sheets as tables. Before presenting,
 check it against [`references/output.md`](references/output.md). The header states the population
-size, that the screen was complete, and whether topside entries are in it.
+size, the completeness tie-out (Step 1), and whether topside entries are in it.
 
 ## Stage 6 — Offer to save *(optional)*
 

@@ -46,6 +46,8 @@ Typical opening batch, per in-scope entity:
 - *`get_profit_and_loss`* / *`get_balance_sheet`* by period — **for the reserves-move-with-earnings test** —
   usually **[auto]**
 - *`get_company_info`* — legal name, **period ends** — usually **[auto]**
+- *`search_journal_entries`* **for the first month after the period** — **reversal pairs and post-close
+  entries** — usually **[auto]**
 
 **Pull prior periods deliberately.** **"Unusual" is meaningless without a baseline**, and Step 5's patterns
 need several periods by construction.
@@ -66,11 +68,22 @@ anomalies attributed to real-sounding users.** Stop.
 
 ## Step 1 — Understand the JE population
 
+**Prove the population first** (AU-C 240.32 and A47–A48; PCAOB AS 2401.58–61). Sum the debits and credits
+of the extracted entries by account and agree them to the period's movement — *`get_general_ledger`* on the
+Mosofin path, the opening and closing trial balance on the upload path. **Report the difference.** A
+journal-entry search on QuickBooks Online or Xero returns only Journal Entry / Manual Journal transactions:
+hand-keyed deposits, cheques or spend money, transfers and inventory adjustments fall outside it. **Say so**,
+and either screen the full transaction journal (all transaction types — the GL detail, or on upload the QBO
+*Journal* report / Xero *Journal Report*) or state that those manual transaction types are outside the
+screen. **The screen is "complete" only when this tie-out is nil**; otherwise "N entries screened; population
+not proven complete — difference $X".
+
 **Profile the population** — **[auto]** throughout:
 
 - **Total number and value of entries**
 - **Split by source: system-generated** (automated, lower risk) **vs. manual** (higher risk — **the focus of
-  most review**)
+  most review**). From a journal-entry-type read alone this split cannot be computed — everything it returns
+  is manual by type; it needs the transaction type from the full journal
 - **By account, by user, by period**
 - **Normal patterns**, so anomalies stand out
 
@@ -93,13 +106,16 @@ verdict:
 
 ### Timing
 
-- **Entries posted at period-end or after the close cutoff** — to hit targets — **[auto]**
+- **Entries posted at period-end or after the close cutoff** — to hit targets — **[auto]** for period-end;
+  **after the close cutoff needs the close date from Stage 1**, otherwise **NOT RUN**
 - **Entries posted on weekends / holidays or outside business hours** — **[gated]**: **weekends are `[auto]`
   from the date; hours need a timestamp**, which may not be exposed
-- **Back-dated entries** — posting date later than effective date — **[auto]** where both dates are
-  returned. **One of the strongest single indicators available**, and it depends entirely on the field
-  being present
-- **Entries to prior closed periods** — **[auto]**
+- **Back-dated entries** — **created date/time later than the transaction date**, especially into a period
+  before the close date — **[gated]**: runs only where a created timestamp is returned (QBO: Create date /
+  Created by; Xero: Created / Posted columns); otherwise **NOT RUN**. **One of the strongest single
+  indicators available**, and it depends entirely on the field being present
+- **Entries to prior closed periods** — **[gated]**: needs the closed-through date from Stage 1; without it
+  **NOT RUN**
 
 ### Account combinations
 
@@ -122,11 +138,13 @@ verdict:
 - **Entries by users who don't normally post** — e.g. senior management overriding — **[gated]**: **`[auto]`
   where a user field exists and a baseline of usual posters has been derived**; **a user name is not a
   person**
-- **Entries lacking approval or self-approved** — **[manual]**. **Approval data is generally not on this
-  surface. NOT RUN**
+- **Entries lacking approval** — **[manual]**. **Approval data is generally not on this surface. NOT RUN**
+- **Self-approved entries** — **[manual]**. **NOT RUN** without approval data
 - **Entries with missing, vague, or generic descriptions** — "adjustment," "reclass," blank — **[auto]**,
   and a good one: a length-and-content test over the memo field
-- **One person both posting and approving (SoD failure)** — **[manual]**. **NOT RUN** without approval data
+- **One person both posting and approving the same entry** — **[manual]**. **NOT RUN** without approval data
+- **Segregation of duties (SoD) across the user population** — who can both post and approve — **[manual]**.
+  **NOT RUN** without approval data
 
 ### Other
 
@@ -135,8 +153,10 @@ verdict:
 - **Duplicate entries** — **[auto]**; see `duplicate-invoice-detection` for the matching discipline
 - **Entries to seldom-used or dormant accounts** — **[auto]**: account activity frequency is readable
 
-**Fifteen of the nineteen indicators run as queries; four depend on approval data that is generally
-unavailable.** **Report the four as NOT RUN** — and note that **they are precisely the segregation-of-duties
+**Of the twenty-one indicators, ten run as queries, seven need a threshold or a field (a close date, a
+timestamp, a user field) and four depend on approval data that is generally unavailable.** Where the user
+has said no approval step exists (Stage 1, G), record the four as **"Control not in place"** in Sheet 7;
+otherwise **report the four as NOT RUN** — and note that **they are precisely the segregation-of-duties
 indicators**, which is a meaningful hole in a control-focused review, not a rounding error.
 
 ## Step 3 — Score and flag entries
@@ -211,7 +231,9 @@ scope.** Read it before proceeding.
 **The review informs control assessment** (the kind a SOX controls review performs) — **[gated]**:
 
 - **Are JE approval controls operating?** — **[manual]**; **the review cannot answer this without approval
-  data**, and saying so *is* the control observation
+  data**, and saying so *is* the control observation. **If the user says no approval step exists, that is a
+  control finding in its own right** (a design deficiency, in AU-C 265 terms) — record "Control not in place",
+  not NOT RUN
 - **Is SoD enforced (post vs. approve)?** — **[manual]**; same
 - **Are descriptions and support required and present?** — **descriptions `[auto]`**, support `[manual]`.
   **The proportion of entries with blank or generic descriptions is a directly measurable control
@@ -229,8 +251,9 @@ Deliver an `.xlsx` review workpaper:
 
 **Sheet 1: Population Profile** — **volume / value, manual vs. system, by account / user / period.** Add
 **the derived baseline** from prior periods. Plus the header block: workspace name; the entity by
-`display_name`; excluded company files; **the population size and the statement that the screen was
-complete**; whether any read returned `mock` data; **and whether topside entries are in the population**.
+`display_name`; excluded company files; **the population size and the Step 1 tie-out — "screen complete"
+only when the difference is nil, otherwise "population not proven complete — difference $X"**, and which
+transaction types were in the screen; whether any read returned `mock` data; **and whether topside entries are in the population**.
 
 **Sheet 2: Risk Criteria & Screening** — **the criteria applied and how many entries each flagged.** Add
 **the verdict per criterion**, and **a clearly separated block for criteria NOT RUN**, with the reason.
@@ -248,6 +271,8 @@ approval data is not exposed** — the column's emptiness is itself information.
 any summary**; it is where the workspace contributes most.
 
 **Sheet 6: Follow-Up & Escalation** — items needing explanation, correction, or escalation.
+
+| JE# | Why flagged | Asked of (role) | Date asked | Due | Support obtained (document ref) | Resolution | Reviewed by / date |
 
 **Sheet 7: Control Observations** — implications for JE controls, **with the measurable ones quantified**.
 

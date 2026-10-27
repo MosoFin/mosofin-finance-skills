@@ -28,7 +28,8 @@ matter."* That is right about review and no longer right about screening.**
 > top** — the same reasoning as an internal audit workpaper, where a readable population removes sampling
 > risk.
 >
-> **Report the population size and state that the screen was complete.** "All 4,812 entries screened; 63
+> **Report the population size and, once the extract agrees to the ledger's movement, state that the
+> screen was complete.** "All 4,812 entries screened; 63
 > flagged; 12 high-risk reviewed" is a materially stronger sentence than any sample-based version, and it is
 > what an auditor wants to hear about JE testing.
 

@@ -50,13 +50,14 @@ they are the segregation-of-duties ones.** Report NOT RUN; ask for the approval 
 entries all break the link.
 
 **The screen was sampled** — *Mosofin-specific*. **Screening is a query; screen the whole population** and
-say so.
+say so — after the Step 1 tie-out proves it is the whole population.
 
 **"Unusual" asserted without a baseline** — *Mosofin-specific*. **Derive normal from prior periods**; it is
 one more read.
 
-**A back-dating test run without both dates** — *Mosofin-specific*. **It depends entirely on the posting
-date and effective date both being returned.** Check the field list before claiming the test ran.
+**A back-dating test run without both dates** — *Mosofin-specific*. **It depends entirely on the
+transaction date and a created timestamp both being returned** — two columns that both mean transaction
+date prove nothing. Check the field list before claiming the test ran.
 
 **Patterns skipped in favour of individual flags** — *Mosofin-specific*. **Patterns are the strongest
 evidence here and the cheapest to compute.** Lead with them.
