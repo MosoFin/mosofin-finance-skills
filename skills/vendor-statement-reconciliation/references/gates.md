@@ -100,7 +100,7 @@ Label it in the file name and on the reconciliation summary.
 
 Call `get_my_skill` and `get_skills` before asking anything.
 
-Interview for:
+Interview for — only those not answered at Stage 1:
 
 1. **The vendor statement(s).** `[manual]` — the whole point, and not obtainable from the workspace.
 2. **The cutoff date.** `[manual]` — and see Step 1; **a statement's cutoff and yours frequently differ.**

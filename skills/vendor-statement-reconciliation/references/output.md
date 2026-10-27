@@ -7,7 +7,9 @@ All four of the original's outputs preserved, plus two additions. Delivered as a
 **Sheet 1: Reconciliation Summary**
 | Statement balance | Ledger balance | Difference | Explained | Unexplained |
 
-**With both cutoff dates shown**, per Step 1, and the fixture flag.
+**With both cutoff dates shown**, per Step 1, and the fixture flag. **The summary proves itself:** statement balance, then plus or minus each reconciling category (each subtotal ties to Sheet 3, with the timing items between the two dates listed one by one), equals the ledger balance at the same date. **Unexplained = Difference − the sum of the itemised explained amounts.**
+
+**Below it, separately: Subledger to GL difference** — the AP ageing total against the AP control account, per Step 1. It is not part of the statement reconciliation.
 
 **Sheet 2: Matched Item List**
 | Statement doc | Ledger doc | Type | Date | Amount | Match tier | Notes |
@@ -20,10 +22,12 @@ All four of the original's outputs preserved, plus two additions. Delivered as a
 **Root cause, owner and next action are the original's** — **Age is added**, for recurring reconciliations.
 
 **Sheet 4: Recommended JEs**
-Book errors and confirmed missing entries. **Marked PROPOSED — NOT POSTED**, and **accruals distinguished from invoice postings.**
+| Date | Account | Dr | Cr | Vendor | Support (doc ref) | Type (Accrual-reversing / Bill / Credit / Reclass) | Reversal date |
+
+Book errors and confirmed missing entries, per the table in Step 5. **Marked PROPOSED — NOT POSTED**, and **accruals distinguished from invoice postings.**
 
 **Sheet 5: Vendor Prioritisation** *(Mosofin addition)*
-The Step 0 ranking — which suppliers should be reconciled, which never have been, which carry credit balances, which show a broken invoice pattern.
+The Step 0 ranking — which suppliers should be reconciled, which never have been, which carry debit balances in your AP (overpaid), which show a broken invoice pattern.
 
 **Sheet 6: Coverage and Provenance** *(Mosofin addition)*
 The mandatory coverage sheet.
@@ -79,6 +83,7 @@ Every step. **A reader should see that one side of this reconciliation was read 
 - **Invoice copies** for confirmed missing items — **required before posting, not before accruing**
 - **Contact with the supplier**
 - **Posting.** The gateway is read-only
+- **On the upload path, any classification the files could not support** — payments in transit, misapplied payments and the paid half of a duplicate without payment detail; entered-late without activity after the cutoff; "missing invoice" without the vendor list or cross-vendor search
 
 **Section E — Unknowns carried forward**
 Unmatched items on both sides. Missing invoices awaiting copies. Credits not yet claimed. Exceptions open from prior reconciliations, with their age. Vendors on the Step 0 list not yet reconciled.

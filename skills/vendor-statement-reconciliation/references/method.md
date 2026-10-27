@@ -36,14 +36,14 @@
 | **Largest AP balances at the cutoff** | Where a difference is most material. |
 | **Largest annual spend** | Where the volume of transactions makes error most likely. |
 | **Vendors never reconciled** | **The highest risk of all** — an unrecorded liability that has never been looked for. |
-| **Vendors with a credit balance in AP** | **Almost always wrong.** A debit balance on the supplier's account means either a payment misapplied, a duplicate payment made, or a credit note that should have been claimed. **Money, usually yours.** |
+| **Vendors with a debit balance in your AP** (shown as a credit on the supplier's statement) | **Almost always wrong.** A credit balance in AP is normal — it is what you owe. A **debit** balance on the supplier's account in your AP means either a payment misapplied, a duplicate payment made, or a credit note that should have been claimed. **Money, usually yours.** |
 | **Vendors with old open items** | Invoices unpaid for months are either disputed, already paid and misapplied, or never should have been recorded. |
 | **Vendors whose invoice pattern broke** | **Regular monthly billing that stopped** — either the relationship ended, or invoices are arriving and not being entered. |
 | **High GRNI** | Goods received not invoiced — see `three-way-match` exception 7. The supplier's statement will show those invoices. |
 
-**Rank by amount, and report which vendors have never been reconciled.**
+**Rank by amount, and report when each vendor was last reconciled.** **Reconciliation history comes from saved runs or from the user** — no accounting system records it. On a first run, ask for the date each top-ranked vendor was last reconciled, and report "not known" where none is given. **Never infer "never reconciled" from the ledger.**
 
-**The credit-balance row deserves emphasis** because it is money and it is free to find: **a supplier account in credit means the business has paid more than it owes**, and the causes — duplicate payment, misapplied payment, unclaimed credit note — are all recoverable. **One query across the whole ledger.**
+**The debit-balance row deserves emphasis** because it is money and it is free to find: **a supplier account with a debit balance in your AP means the business has paid more than it owes**, and the causes — duplicate payment, misapplied payment, unclaimed credit note — are all recoverable. **One query across the whole ledger.**
 
 **The last row is the completeness signal**: a supplier who invoiced monthly for two years and has sent nothing for three months is either gone or **their invoices are not reaching the ledger.** The second case is exactly an unrecorded liability, and the pattern break is visible without any statement at all.
 
@@ -59,7 +59,7 @@ All five preserved.
 | **AP ageing / vendor ledger** | Export | **Required** | **`[auto]`, in full detail** — no export needed | **`[auto]`** |
 | Payment register | AP payments + bank info | Recommended | **`[auto]`** | `[auto]` |
 | Dispute log | Notes of disputed invoices | Recommended | **Not in the books** — disputes are correspondence | `[manual]` |
-| **Cutoff date** | Month-end date | **Required** | **`[auto]` for yours; the statement carries its own** — see Step 1 | Split |
+| **Cutoff date** | Month-end date | **Required** | **Required — the period end is yours to state; the profile's year-end is only a cue.** The statement carries its own — see Step 1 | Split |
 
 ---
 
@@ -79,13 +79,17 @@ Standardise all five fields:
 
 **`[auto]` for the ledger side, completely** — every field is a database field.
 
+**Agree the subledger to the general ledger first.** The AP ageing total at the cutoff should equal the Accounts Payable control account on the trial balance. `[auto]` on the Mosofin path where both can be read; on the upload path, ask for both. Bills journalled straight to the AP account, or AP entries with no vendor, show up only here. **Report any difference on the Summary as "Subledger to GL difference", separate from the statement reconciliation** — a statement agreed to a subledger that does not agree to the GL proves nothing about the balance-sheet figure.
+
 **`[manual]` for the statement**, which is a PDF. Where it arrives as CSV, extraction is mechanical; where it is a scanned image, it is not. See `invoice-data-extractor` for the extraction discipline.
 
 #### Three normalisation traps, all `[auto]` to handle and all routinely missed
 
 **Document numbers are text.** Leading zeros, prefixes, and the supplier's internal reference versus the number printed on the invoice. **`INV-0042`, `42` and `0042` are one document**, and a match on the raw string finds none of them. Normalise both sides the same way and **record the normalisation applied** — the same discipline an AR aging applies to preserving document numbers as text.
 
-**Cutoff dates differ.** **The supplier's statement cutoff is very often not your period end.** A statement dated the 25th against a ledger at the 30th will show five days of legitimate difference in both directions. **Establish both dates explicitly** and treat the gap as a known reconciling window rather than a set of exceptions.
+**Cutoff dates differ.** **The supplier's statement cutoff is very often not your period end.** A statement dated the 25th against a ledger at the 30th will show five days of legitimate difference in both directions. **Establish both dates explicitly** and treat the gap as a known reconciling window rather than a set of exceptions. **Reconcile at the statement date:** take the ledger balance as at the statement date, or list every ledger item dated between the two dates individually as a timing item. **The window is a set of listed items, never a lump** — an invoice dated inside it can still be genuinely missing.
+
+**Before matching, agree the statement's own closing balance to the sum of the open items it lists.** A statement that does not add up is itself an exception, raised with the supplier.
 
 **Sign conventions differ.** Suppliers present credits and payments with varying signs and column layouts. **Normalise to a consistent convention before matching**, or credits will present as invoices and the reconciliation will not converge.
 
@@ -100,7 +104,9 @@ Standardise all five fields:
 3. **PO + amount**
 4. **Fuzzy reference / description**
 
-**The order is a confidence hierarchy and it should be respected as one.** Tier 1 is near-certain; tier 4 is a suggestion.
+**The order is a confidence hierarchy and it should be respected as one.** Tier 1 is near-certain; tier 4 is a suggestion. (A *tier* is simply which of the four tests made the match.)
+
+**Balance-forward statement** (it starts from last period's balance and lists only this period's activity): agree the statement's opening balance to your ledger balance for that supplier at the prior statement date, and explain any difference there first. Then match the period's invoices, credits and payments line by line in the same four tiers, and roll forward on both sides: **opening + invoices − credits − payments = closing.**
 
 **Two Mosofin requirements**, both carried across from `three-way-match`'s line matching, because the failure mode is identical:
 
@@ -114,7 +120,7 @@ Standardise all five fields:
 
 ### Step 3 — Explain differences
 
-**All six preserved, and the verdicts differ sharply.**
+**All six preserved, plus one common cause, and the verdicts differ sharply.**
 
 | Difference | Meaning | Verdict |
 |---|---|---|
@@ -124,6 +130,7 @@ Standardise all five fields:
 | **Misapplied payment** | Paid, but they applied it to a different invoice | **`[auto]` to detect** — the payment appears on both sides against different documents |
 | **Duplicates** | The same invoice recorded twice on either side | **`[auto]`** — see `duplicate-invoice-detection` |
 | **Disputes** | Withheld deliberately | **`[manual]`** — the dispute log is correspondence, not ledger data |
+| **Short-payment / charges** *(Mosofin addition)* | An early-payment discount taken that the supplier did not allow, a bank or wire charge deducted, a small FX difference, a freight or late fee | **`[auto]` to detect** from payment against invoice amount; propose a write-off or a claim — **ask the user for their write-off limit**, never assume one |
 
 #### Missing invoices, and why they are the point
 
@@ -179,7 +186,18 @@ A credit note on the statement and not in your ledger is **a reduction in what y
 
 **Where the liability is confirmed and the document has not yet arrived, the answer is an accrual, not an invoice posting.** They are different entries with different consequences: an accrual reverses and is replaced when the invoice arrives; a posted invoice without the document leaves a payable nobody can support and, in a VAT jurisdiction, an input tax claim that may be disallowed.
 
-Hand drafted entries to `journal-entry-builder`. **Marked PROPOSED — NOT POSTED.**
+**The drafts, by case** (accounts follow the business's own chart; the expense or inventory account comes from the PO or the supplier's coding history, and is confirmed by a person):
+
+| Case | Proposed entry | Type |
+|---|---|---|
+| Confirmed missing invoice, document not yet received | Dr expense or inventory / Cr Accrued liabilities, reversing on day 1 of the next period | Accrual — reversing |
+| Confirmed missing invoice, document in hand | Dr expense or inventory (and input tax, per the invoice) / Cr Accounts Payable | Bill |
+| Missing credit, credit note in hand | Dr Accounts Payable / Cr the account the original invoice was coded to (and input tax, per the credit note) | Credit |
+| Duplicate bill | Dr Accounts Payable / Cr the account on the duplicate bill, in the current open period | Reclass / reversal |
+| Mis-posting to the wrong vendor or account | Dr / Cr between the two, per the support | Reclass |
+| Debit balance in your AP at a period end | Ask whether the user wants material debit balances reclassified to Other receivables for reporting; if yes, Dr Other receivables / Cr Accounts Payable, reversing | Reclass — reversing |
+
+Every line carries a support reference — the invoice, credit note or bill it rests on. Hand drafted entries to `journal-entry-builder`. **Marked PROPOSED — NOT POSTED.**
 
 ---
 

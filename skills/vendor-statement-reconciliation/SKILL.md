@@ -54,8 +54,8 @@ Ask only what you cannot already see.
 | **A** | *Use Mosofin as the data source for this run, or upload the data yourself?* | Decides the path. Mosofin is the connection to the user's books and other linked platforms; with it the skill reads from there, without it the user uploads and the checks are the same | **Never assume.** Ask only if the Mosofin tools are present. If they are absent, skip this and say once that the run is manual. |
 | **B** | *The vendor statement for each supplier to reconcile — PDF or CSV.* | The one side Mosofin cannot see | **Required, always.** On the Mosofin path, Step 0 can still rank which suppliers need a statement requested. |
 | **C** | *Which entity is the statement addressed to, and what account reference does it carry?* | A statement for a sibling entity, reconciled against the wrong ledger, shows every invoice as missing | **Never assume.** Check the account reference against the entity being reconciled before matching. |
-| **D** | *Your cutoff date — and the date on the statement, if different.* | A statement at the 25th against a ledger at the 30th shows five days of legitimate difference both ways | **Required.** Establish both dates; the gap is a known reconciling window, not exceptions. |
-| **E** | *Is the statement a full open-item list, overdue items only, or balance-forward?* | An overdue-only statement makes every current invoice look unmatched; open-item and balance-forward cannot be compared line for line | Confirm before matching. |
+| **D** | *Your cutoff date — and the date on the statement, if different.* | A statement at the 25th against a ledger at the 30th shows five days of legitimate difference both ways | **Required.** Establish both dates; reconcile at the statement date, and list each ledger item between the two dates individually — never as a lump. |
+| **E** | *Is the statement a full open-item list, overdue items only, or balance-forward?* | An overdue-only statement makes every current invoice look unmatched; open-item (every unpaid invoice listed) and balance-forward (last period's balance plus this period's activity) cannot be compared line for line | Confirm before matching; a balance-forward statement is rolled forward from its opening balance (Step 2). |
 | **F** | *The dispute log — any invoices deliberately withheld?* | Disputes are correspondence, not ledger data | Recommended. Without it, the coverage sheet lists it as not done. |
 | **G** | *Which vendors are on the reconciliation programme, how often, and who owns the exceptions?* | Every exception needs an owner and a target date | Step 0 informs the vendor list. The next action is proposed per exception; **the owner and the date are human commitments** — leave them to a person. |
 
@@ -68,8 +68,8 @@ Ask only what you cannot already see.
   across all the connected ones, then split by entity. A connection needing reconnection stops
   the run — a partial ledger makes recorded invoices look missing.
 - Run **Step 0** before any single reconciliation: rank suppliers by balance, spend, never
-  reconciled, overpaid, old open items, a broken invoice pattern and high GRNI, and report which
-  have never been reconciled.
+  reconciled, overpaid, old open items, a broken invoice pattern and high GRNI (goods received,
+  not yet invoiced); last-reconciled dates come from saved runs or the user, else "not known".
 - Read **beyond the cutoff date**, so payments in transit and post-cutoff activity can explain
   differences.
 - Still ask for the **statement** (B) and the **dispute log** (F).
@@ -79,7 +79,9 @@ Ask only what you cannot already see.
 | Upload | Needed? | Format |
 |---|---|---|
 | **Vendor statement** | **Required** | PDF or CSV |
-| **AP ageing or vendor ledger** for that supplier | **Required** | CSV or XLSX export |
+| **Vendor ledger / transaction detail** (invoices, credits, payments) for that supplier, from the prior statement date to **today** — an ageing alone is not enough | **Required** | CSV or XLSX export |
+| **Vendor list**, or a bill search by the statement's invoice numbers across all vendors | **Required** for any item you would call missing | CSV or XLSX export |
+| **AP ageing total and trial balance** at the cutoff | Recommended — agrees the subledger to the GL | CSV or XLSX export |
 | Cutoff date, the entity the statement addresses and its account reference | **Required** | Type it in the chat |
 | **Payment register** — AP payments with bank detail | Recommended — explains payments in transit and misapplied payments | CSV or XLSX export |
 | **Dispute log** — notes of disputed invoices | Recommended | Any format, or type it in the chat |
@@ -91,7 +93,8 @@ Without a connection, Step 0's prioritisation does not run; the reconciliation i
 > *Reconciling **Harbor Supply's** statement to **Northbrook Trading**'s AP ledger, account
 > reference **NT-4471**, with the ledger and payments read from **your Mosofin connection** and
 > the **open-item statement you uploaded**. Ledger cutoff **30 September**, statement dated
-> **25 September** — the five days between are a known window. Shall I go ahead?*
+> **25 September** — I'll reconcile at 25 September and list each ledger item dated 26–30 September
+> separately. Shall I go ahead?*
 
 On the upload path, name each file you received and say what was read from it — the cutoff it
 covers, the item count, the closing balance. Flag anything unreadable, or a statement for a

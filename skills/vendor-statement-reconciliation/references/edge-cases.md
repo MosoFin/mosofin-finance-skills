@@ -8,9 +8,9 @@
 
 **The supplier exists twice in the vendor master.** Half the invoices sit under the other record. **Run the duplicate-vendor check first.**
 
-**Different cutoff dates.** A window of legitimate difference in both directions. Establish both dates and treat the gap as known, not as exceptions.
+**Different cutoff dates.** A window of legitimate difference in both directions. Establish both dates and treat the gap as known, not as exceptions — **but list each ledger item inside the window individually**, per Step 1; a lump hides a missing invoice.
 
-**The statement is an open-item list; your ledger is a balance-forward.** Or the reverse. **The two cannot be compared line for line** until one is converted. Establish which each is before matching.
+**The statement is an open-item list; your ledger is a balance-forward.** Or the reverse. **The two cannot be compared line for line** until one is converted. Establish which each is before matching; for a balance-forward statement, use the opening-balance roll-forward in Step 2.
 
 **A statement showing only overdue items.** Some suppliers issue chasing statements rather than full ones. **Reconciling to it will show every current invoice as unmatched** — which is meaningless. Confirm the statement's scope.
 
