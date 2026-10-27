@@ -122,10 +122,10 @@ answered:
 |---|---|---|
 | **Credit card statement** — PDF, CSV or XLSX from the issuer | **Required — [manual]** unless a card platform is connected | Ask for it explicitly. Without it, say what the output will and will not be. |
 | **Receipts for the period** | **Required for receipt matching — [manual]** | Or a receipt-tool export. Attachment metadata is not a receipt. |
-| **Cardholder name** | **Required — [manual]** | And which employee or role each card belongs to. |
+| **Cardholder** (role; a name only if the user offers it) | **Required — [manual]** | Which role each card belongs to. |
 | **Statement period** — date range | **Required** | Note whether it matches the accounting period — see the edge case. |
 | **Statement balances** — opening, charges, payments, closing | **Required — [manual]** | From the statement. |
-| **GL credit card liability balance at period end** | **Required for tie-out — usually [auto]** | Pulled from the trial balance. Confirm which account. |
+| **GL credit card liability balance at the statement closing date** (and at period end, for cut-off) | **Required for tie-out — usually [auto]** | Pulled from the GL or trial balance. Confirm which account. |
 | **Chart of accounts** | **Required — usually [auto]** | Pulled. |
 | **Tax jurisdiction** | Required if tax recoverability applies — **[manual]** | Drives Step 5. |
 | **Receipt policy threshold** — below which no receipt is required | Recommended — **[manual]** | Needed to distinguish an acceptable missing receipt from an exception. |

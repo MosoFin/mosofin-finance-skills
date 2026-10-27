@@ -26,8 +26,10 @@ resolves.** The statement may show the disputed amount as both a charge and a cr
 cashback as Other Income** (or contra-expense per policy). Both are **[auto]** to spot in the liability
 account's movement.
 
-**Card payments from non-business funds** (e.g. an owner pays a personal card with business funds — a
-common small-business error): **flag as a related-party / equity transaction, not as expense.**
+**Business funds used to pay a personal card, or personal funds paying the business card** (a common
+small-business error): **flag as a related-party / equity transaction, not as expense** — an owner draw
+(or loan to the owner) for the first, an owner contribution or loan from the owner for the second; ask
+the user which.
 **[auto]** to detect the reverse and equally common case: a business card paying for something personal.
 
 **Recurring subscriptions on the card**: **these accumulate; periodically review for unused
@@ -41,8 +43,8 @@ Fixed Asset coding, not expense.** **[auto]** once the threshold is known.
 by the issuer. Document the dispute.**
 
 **Statement period crossing the entity's accounting period** (e.g. a 16th-to-15th statement against
-calendar-month reporting): **cut by accounting period dates and accrue charges in the period of
-incurrence.** This is the single most common source of a card reconciliation that will not tie, and it is
+calendar-month reporting): **tie the GL to the statement as of the statement closing date (Step 2); then
+cut by accounting period dates and accrue charges in the period of incurrence.** This is the single most common source of a card reconciliation that will not tie, and it is
 structural rather than an error.
 
 **Brex / Ramp / Pleo and similar with integrated receipt capture**: data is more structured, but **verify

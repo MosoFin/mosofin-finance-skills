@@ -42,8 +42,8 @@ Typical opening batch, per in-scope entity:
   amount, date and coding — usually **[auto]**
 - *`get_general_ledger`* on the card liability account — **the full movement: charges, payments,
   interest, fees** — usually **[auto]**
-- *`get_balance_sheet`* / *`get_trial_balance`* — **the card liability balance at period end** — usually
-  **[auto]**
+- *`get_balance_sheet`* / *`get_trial_balance`* / *`get_general_ledger`* — **the card liability balance at
+  the statement closing date and at period end** — usually **[auto]**
 - *`search_bill_payments`* / *`search_transfers`* — **payments made to the card** — usually **[auto]**
 - *`search_purchases`* over **several prior months** — **the recurring-subscription and duplicate tests**
   — usually **[auto]**
@@ -94,6 +94,12 @@ Capture — **[manual]** from the statement:
 are all readable from the card liability account's movement. That gives you the book side of every
 statement total, which is what Step 2 needs.
 
+**Prove the statement before using it:** opening + charges − credits + interest/fees − payments =
+closing. Agree the opening balance to the prior statement's closing balance. A gap usually means a
+missing page or a misread line — resolve it before Step 2. Ask for last month's reconciling items
+(recommended intake); confirm each has cleared this period, and **escalate any that has not** — a
+book-only charge that never reaches the statement is a duplicate or an error, not timing.
+
 ## Step 2 — Tie statement balance to GL
 
 The credit card liability on the GL should reconcile to the statement closing balance, considering —
@@ -104,20 +110,35 @@ The credit card liability on the GL should reconcile to the statement closing ba
 - **Payments in transit** → reconciling item
 - **FX revaluation differences** (for foreign-currency cards)
 
-Format:
+**Tie-out date.** Read the GL liability balance **as of the statement closing date**, not the accounting
+period end — otherwise every charge and payment between the two dates becomes a bridge item.
+Separately, confirm that all charges from the statement close to the period end are recorded (from the
+next statement or the issuer's online activity), and propose an accrual for any that are not.
+
+**Match each statement line to a posted charge first** — exact amount and transaction date within the
+posting lag (state the window used), then amount and merchant, then reference. Record the method for
+each match. Unmatched statement lines are `$Z`; unmatched book lines are `$Y`, or duplicates and
+mis-postings to investigate.
+
+Format (the card liability is a credit balance — what you owe the issuer):
 
 ```
-GL Credit Card Liability balance              $X
-+ Charges in GL not yet on statement          $Y
-- Charges on statement not yet in GL          $Z
-+ Payments in transit                         $A
-+/- FX revaluation timing differences         $B
-= Adjusted GL                                 $X+Y-Z+A+B
+GL Credit Card Liability balance (at statement close)    $X
+- Charges in GL not yet on statement                     $Y
++ Charges on statement not yet in GL                     $Z
++ Payments in transit (in GL, not yet on statement)      $A
++/- Credits/refunds, issuer interest/fees on one side only  $C
++/- FX revaluation timing differences                    $B
+= Adjusted GL                                            $X−Y+Z+A±C±B
 
-Statement Closing Balance                     $W
+Statement Closing Balance                                $W
 
-Reconciled difference                         $X+Y-Z+A+B − $W  (should be 0)
+Reconciled difference                                    Adjusted GL − $W  (should be 0)
 ```
+
+*Worked example:* the statement closes at $950. The GL holds $1,000 because a $50 charge was booked on
+30 September and reaches the card on 1 October. $1,000 − $50 = $950 = statement; difference nil. A
+charge on the statement but missing from the books makes the statement higher, so it is added.
 
 **[auto]** for `$X` and for identifying charges posted near the period boundary that are likely to be the
 `$Y` items. **[manual]** for `$W` and `$Z`. **If no statement was supplied, do not build this bridge** —
@@ -198,7 +219,9 @@ For each statement — verdicts vary sharply, so mark each:
 - **Possible personal-use charges** (groceries, personal services, weekend non-business locations) —
   patterns from `expense-report-processor` — **[gated]**: merchant names and dates are **[auto]**, the
   judgment is not
-- **Duplicate transactions on the same day** — **[auto]**, and worth running every month
+- **Duplicate transactions** — same merchant and amount within a few days (transaction vs posting
+  date, or the same charge imported twice); same-day is the high-confidence tier — **[auto]**, and worth
+  running every month
 - **Disputed charges** (cardholder marked or known issues) — **[manual]**
 - **Charges from sanctioned countries** (compliance flag) — **[manual]**; merchant country is rarely in
   the books, and **no sanctions list is available**; screening belongs to whoever owns sanctions compliance
@@ -225,9 +248,9 @@ The posting depends on when the entity records card activity.
 using receipt management tools that sync to GL):
 
 ```
-DR  Expense accounts (per coding)               $charges
+DR  Expense accounts (per coding)               $net of tax
 DR  Input Tax Recoverable                       $tax (if applicable)
-    CR  Credit Card Liability                      $charges + tax
+    CR  Credit Card Liability                      $card amount (gross)
 Memo: Card transactions for [cardholder] [period]
 ```
 
@@ -243,10 +266,14 @@ Memo: Card payment [date]
 
 ```
 At statement receipt:
-DR  Expense accounts                            $statement charges (split by code)
-    CR  Credit Card Liability                     $statement closing balance
+DR  Expense accounts                            $new charges − credits (split by code)
+    CR  Credit Card Liability                     $new charges − credits
 Memo: Card statement [period]
 ```
+
+Interest and fees go in their own lines (template below). **Payments are recorded when made (DR
+Liability / CR Bank), not in this entry** — crediting the closing balance would double-count the opening
+balance or expense the payments.
 
 **Recommend Option A for better visibility.**
 
@@ -262,6 +289,17 @@ whether this step proposes entries or reviews existing ones.
 DR  Interest Expense / Bank Fees                 $interest / fee
     CR  Credit Card Liability                       $interest / fee
 ```
+
+**Personal charge confirmed by the reviewer** — propose only after a person confirms the charge is
+personal:
+
+```
+DR  Owner's Draws / Shareholder Loan (owner's card) or Due from Employee (staff card)   $amount
+    CR  [expense account originally coded]                                              $amount
+```
+
+Which owner account applies (draws, distribution or loan) depends on the entity type and the owner's
+policy — **ask**, never choose.
 
 Use the **real account names from the connected chart of accounts** (*`search_accounts`*, **[auto]**).
 

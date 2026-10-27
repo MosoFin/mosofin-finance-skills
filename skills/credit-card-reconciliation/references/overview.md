@@ -30,7 +30,8 @@ account code — rather than as a single monthly total. So a great deal is `[aut
 - **The card liability balance** and its movement, including payments made to the card
 - **Three tests worth running every month**, each of which the original raises and none of which needs a
   statement:
-  - **Duplicate charges** — same merchant, same amount, same day
+  - **Duplicate charges** — same merchant, same amount, within a few days (same day is the strongest
+    signal)
   - **Recurring subscriptions** — same merchant, same amount, month after month. The original notes that
     these "accumulate; periodically review for unused subscriptions". **Here that review is a query**,
     and it routinely finds software nobody has opened in a year

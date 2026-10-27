@@ -70,8 +70,9 @@ Ask only what you cannot already see.
 |---|---|---|
 | **Card statement** for the period — or the opening and closing balances plus every statement line | **Required** — without it there is no reconciliation, only a review of posted charges, and the output says so | PDF, CSV or XLSX |
 | **Receipts** for the period, or a receipt-tool export | **Required for receipt matching** | PDF, images, or a CSV/XLSX export |
-| Your books: **GL detail** for the card liability account and the accounts the card is coded to — date, merchant, amount, account — plus the **liability balance** at period end (a trial balance works) | Required | CSV or XLSX |
+| Your books: **GL detail** for the card liability account and the accounts the card is coded to — date, merchant, amount, account — plus the **liability balance** at the statement closing date and at period end | Required | CSV or XLSX |
 | Card name(s), cardholder role(s), base currency | Required | Type it in the chat |
+| **Last month's reconciliation** — its open reconciling items | Recommended — lets the run confirm they cleared | Any format |
 | **Receipt and capitalisation thresholds**; tax jurisdiction if tax is recovered | Recommended — enables the receipt-exception, capital-purchase and tax tests | Type it in the chat |
 | **Chart of accounts** | Recommended — needed to check and propose coding | CSV or XLSX |
 
