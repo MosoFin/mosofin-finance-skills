@@ -36,7 +36,9 @@ Pull the `[auto]` / `[gated]` reads. **Batch independent reads into one message*
 balance, the chart of accounts, the P&L and the prior-year balance sheet do not depend on each
 other. Never serialize them.
 
-The server is **stateless**: pass `data_source_id` on **every** call, including retries.
+The server is **stateless**: pass `data_source_id` on **every** call, including retries. Pass the
+**accounting basis the user confirmed at intake** (cash or accrual) as `accounting_method` on every
+read — the two give different net income and retained earnings.
 
 Typical opening batch, per in-scope entity:
 
@@ -53,6 +55,8 @@ Typical opening batch, per in-scope entity:
   and whether a closing entry already exists — usually **[auto]**
 - *`get_trial_balance`* **at the first day of the new fiscal year** — the auto-close test — usually
   **[auto]**
+- *`get_balance_sheet`* **at the first day of the new fiscal year** — the retained-earnings roll test
+  and the Step 8 tie-out — usually **[auto]**
 - *`get_company_info`* — fiscal year end and currency — usually **[auto]**
 
 Handle the envelopes:
@@ -79,16 +83,25 @@ available in this skill.
 - **Search for an explicit closing journal entry** around the year-end date
   (*`search_journal_entries`*, **[auto]**) — a large entry to retained earnings on or near the last
   day of the year.
-- **Compare retained earnings** at the prior year end and the current year end
-  (*`get_balance_sheet`*, **[auto]**). If it has already moved by the year's net income, the roll has
-  happened.
+- **Compare retained earnings** on the balance sheet dated the **first day of the new year** with
+  retained earnings **plus** the separate "Net Income" / "Current Year Earnings" line at the year end
+  (*`get_balance_sheet`*, **[auto]**). If they agree, the roll has happened. Platforms that show the
+  current year on its own line report retained earnings at the year end *before* this year's result,
+  so comparing RE at two year ends measures last year's result, not this one's.
+
+On the upload path the same three tests run on the uploaded new-year trial balance (or balance sheet)
+and the equity GL. Without those files the state is reported as **user-asserted, not tested**.
 
 Report which of three states applies:
 
 1. **Not closed** — proceed with Steps 1–9 and propose the entries.
-2. **Auto-closed by the platform** — **do not propose closing entries.** Produce the trial balances,
-   the tie-outs and the documentation, and state explicitly that the system performs the roll. This
-   is Step 9's "document the system's behavior", answered with evidence.
+2. **Auto-closed by the platform** — **do not propose entries closing revenue or expense.** Produce the
+   trial balances, the tie-outs and the documentation, and state explicitly that the system performs
+   the roll. This is Step 9's "document the system's behavior", answered with evidence. **Still
+   propose** the Step 5 dividends / distributions / draws entry and, for a partnership or LLC, the
+   allocation of the year's income from retained earnings to each member's capital account — the
+   platform's roll touches only income and expense — unless the equity GL shows these were already
+   posted.
 3. **Already closed by an explicit entry** — verify it rather than repeating it. Run Step 8's
    tie-outs against the entry that exists.
 
@@ -107,6 +120,9 @@ Before any closing entries:
 3. **Confirm all reconciliations are tied out** — **[manual]**; see `balance-sheet-reconciliations`
 4. **Confirm material variances reviewed** — **[manual]**
 5. **Confirm management has approved the financial statements** — **[manual]**
+6. **Agree opening retained earnings (or total capital) to last year's final statements or tax
+   return**, supplied by the user — **[manual]**. A difference means the prior year changed after it
+   was reported. Stop and ask before closing on top of it.
 
 **If the TB does not balance, investigate before closing.** Common causes:
 
@@ -147,6 +163,10 @@ Two categories in a standard closing — **[auto]** to classify from account typ
 Classify on **type**, never on name — and list any account whose type and name seem to disagree as an
 exception for the user to confirm. A revenue-typed account called "Deferred Revenue" is a real
 misconfiguration and closing it would move a liability into retained earnings.
+
+**Exception to classify-by-type:** dividends, distributions and draws accounts are **equity-typed**
+on most platforms, yet they are closed each year. Identify them from the equity GL (Step 0) and the
+account's detail type, and confirm the list with the user.
 
 ## Step 3 — Two-step or four-step closing
 
@@ -216,6 +236,15 @@ DR  Retained Earnings                          $(C + D + E + F)
 Memo: Close expenses to RE — FY[YYYY]
 ```
 
+Close each account by the **opposite of its own balance**. A debit-balance revenue account (sales
+returns, discounts — contra-revenue) is credited, and a credit-balance expense account (a refund) is
+debited. The category total is the net.
+
+For a **partnership / LLC**, Entries 1–2 credit (or, for a loss, debit) **each member's capital
+account** in the profit-sharing ratio the user gave at intake, not Retained Earnings —
+`CR [Member A] Capital $NI × A%`, `CR [Member B] Capital $NI × B%` — or close to Income Summary and
+then allocate it. For a **sole proprietor**, Entries 1–2 close to **Owner Capital**.
+
 **Closing Entry 3 — Close Dividends / Distributions**
 
 For a **corporation**:
@@ -263,11 +292,11 @@ Comprehensive Income (AOCI)**, a separate equity account that carries forward.
 
 Closing entry for OCI:
 ```
-DR  OCI — [item]                               $X (if a loss)
-    CR  AOCI                                       $X
-or
 DR  AOCI                                       $X
-    CR  OCI — [item]                              $X (if a gain)
+    CR  OCI — [item]                              $X (if a loss — debit balance)
+or
+DR  OCI — [item]                               $X (if a gain — credit balance)
+    CR  AOCI                                       $X
 ```
 
 **OCI items that are later "recycled" (reclassified to net income) follow the recycling rules of the
@@ -306,12 +335,14 @@ Verify — **[auto]** for all four:
 Opening RE                          $W
 + Net Income                        $X
 - Dividends declared                $Y
-+/- OCI items closed to AOCI        $Z  (or kept separate)
-= Closing RE                        $(W + X − Y + Z)
+= Closing RE                        $(W + X − Y)
+
+Opening AOCI ± OCI for the year     = Closing AOCI   (its own roll-forward, never inside RE)
 ```
 
 **Reconcile to the equity section of the closing balance sheet** — **[auto]**
-(*`get_balance_sheet`*). This is the proof that the whole exercise worked, and it is fully
+(*`get_balance_sheet`*): agree Closing RE to the RE line on the **first day of the new year**, or to
+RE + Net Income at the year end on platforms that show the current year separately. This is the proof that the whole exercise worked, and it is fully
 evidenced in a connected workspace.
 
 ## Step 9 — Lock and roll
@@ -335,7 +366,7 @@ Deliver an `.xlsx` workpaper.
 
 **Sheet 1: Pre-Closing Trial Balance** — all accounts with debits and credits, summed. Add a header
 block: workspace name; the entity by `display_name`; each excluded company file and why; the fiscal
-year end; **the Step 0b closed-state finding**; whether any figure rests on `mock` data.
+year end; the **accounting basis** (cash or accrual) used on every read; **the Step 0b closed-state finding**; whether any figure rests on `mock` data.
 
 **Sheet 2: Closing Entries** — the journal entries with full detail **per account**, marked as
 **proposals**. Where Step 0b found the year already closed, this sheet says so instead.
@@ -346,7 +377,9 @@ year end; **the Step 0b closed-state finding**; whether any figure rests on `moc
 
 **Sheet 5: Statement of Retained Earnings (or Statement of Equity Changes)**
 
-| Opening RE | + Net Income | − Dividends | + OCI to AOCI | = Closing RE |
+| Opening RE | + Net Income | − Dividends | = Closing RE |
+
+AOCI is shown as its own roll-forward: Opening AOCI ± OCI for the year = Closing AOCI.
 
 If equity has multiple components, the full statement of changes in equity is a separate piece of work.
 

@@ -123,12 +123,15 @@ answered:
 |---|---|---|
 | **Fiscal year end date** | **Required — usually [auto]** | Derived from the profile; **read it back and confirm**, since a changed year-end is common and the profile may lag. |
 | **Pre-closing trial balance** | **Required — usually [auto]** | Pulled at the year-end date. Confirm it is the **final** TB, after adjusting entries. |
-| **Entity type** — corporation / partnership / LLC / sole proprietor / nonprofit | **Required — [gated]** | Legal form is not a ledger field, but the **equity account names are a strong signal** (Owner's Draw, Member Capital, Net Assets). Propose what the accounts suggest and **have the user confirm** — Step 5's entry differs entirely by type. |
+| **Entity type** — corporation / partnership / LLC / sole proprietor / nonprofit | **Required — [manual]** (proposed from equity account names) | Legal form is not a ledger field, but the **equity account names are a strong signal** (Owner's Draw, Member Capital, Net Assets). Propose what the accounts suggest and **have the user confirm** — Step 5's entry differs entirely by type. |
 | **Chart of accounts with account types** | **Required — usually [auto]** | Pulled. This drives the temporary / permanent split. |
 | **Functional currency** | **Required — usually [auto]** | Derived. |
 | **Dividends / distributions declared during the year** | If applicable — usually **[auto]** | Readable as movement on the dividends or draws account. |
-| **Prior year's retained earnings** (closing balance) | **Required for continuity — usually [auto]** | Pulled from the balance sheet at the prior year end. |
-| **Reporting framework** — US GAAP / IFRS / Local GAAP / Other | Recommended — **[manual]** | Affects OCI treatment. |
+| **Profit-sharing between members** — partnership / LLC only | **Required for those types — [manual]** | Percentages, or per the operating agreement, and whether capital is kept per member. Drives the Step 5 allocation; **ask, never assume equal shares**. |
+| **Accounting basis** — cash or accrual | **Required — [manual]** | Passed as `accounting_method` on every read and stated in the Sheet 1 header. |
+| **Prior year's retained earnings** (closing balance) | **Required for continuity — usually [auto]** | Pulled from the balance sheet: RE + Net Income at the prior year end, or RE on the first day of this year. |
+| **Last year's final statements or tax return** | Recommended — **[manual]** | Opening RE / capital is agreed to it (Step 1); a difference means the prior year changed after it was reported. |
+| **Reporting framework** — US GAAP / IFRS / Local GAAP / Other | Recommended — **[manual]**, never defaulted | Affects OCI treatment. |
 | **Other comprehensive income items** | Recommended — **[gated]** | OCI accounts are readable where they exist; whether an item belongs in OCI is **[manual]**. |
 | **Whether the platform auto-closes the year** | **Required** | See the banner above and Step 0b. **Test it, then confirm with the user.** |
 | **Whether the audit is complete** | Recommended | Determines preliminary versus final close — see the edge case. |

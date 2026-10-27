@@ -32,7 +32,8 @@ Background: [`references/overview.md`](references/overview.md).
 - **Never proposes a closing entry before the closed-state test.** If the year is already closed —
   by the platform or by an explicit entry — it verifies, it does not close again.
 - **Classifies temporary versus permanent on account type, never on name**, and lists every
-  name / type mismatch as an exception for you to confirm.
+  name / type mismatch as an exception for you to confirm. Draws and distributions, equity-typed on
+  most platforms, are the one exception: identified from the equity GL and confirmed with you.
 - **Never reports the period as locked.** Locking is a human action in the accounting system; the
   output names who will do it. **Never defaults the fiscal year end, the entity type or the
   framework**, and never builds a closing entry on `mock` data.
@@ -55,11 +56,13 @@ Ask only what you cannot already see.
 | **B** | *Which company — or, for a group, which entities?* | **Each entity closes its own books**; there is no group closing entry, and trial balances are never combined before closing | On the Mosofin path, list the connected company files **by name** and ask. Never auto-pick. |
 | **C** | *What is the fiscal year end?* | Defines the closing date and the first day of the new year; the wrong year-end closes the wrong twelve months | **Never default it.** On the Mosofin path read it from the profile, then **read it back and confirm** — a changed year-end is common. |
 | **D** | *What is the entity type — corporation, partnership, LLC, sole proprietor or nonprofit?* | The dividends / distributions entry (Step 5) differs entirely by type | **Never default it.** Propose what the equity account names suggest, then **have the user confirm**. |
+| **D2** | *If a partnership or LLC: how is profit shared between members (percentages, or per the operating agreement), and is capital kept per member?* | The year's income is allocated to each member's capital account (Step 5) | **Required for those types.** Never assume equal shares. |
 | **E** | *Which reporting framework — US GAAP, IFRS, local GAAP or other?* | Affects OCI treatment | **Never default it.** Ask. |
 | **F** | *Is this the final trial balance — are all adjusting entries posted?* | Closing runs on the final TB, after depreciation, accruals, deferrals, prepaid amortization and the tax provision | **Required.** A missing expected entry is flagged as a signal, but the full list is the user's to confirm. |
 | **G** | *Does your accounting system close the year automatically when you advance it?* | Prevents the double close | **Required.** On the Mosofin path it is **tested, then confirmed** with the user (Step 0b). |
 | **H** | *Is the audit complete?* | Decides preliminary versus final close | Recommended. A preliminary close that is later adjusted needs the tie-outs re-run. |
 | **I** | *Do you close two-step (straight to retained earnings) or four-step (through Income Summary)?* | Both reach the same end state; consistency year to year matters more than the choice | Check which was used historically and propose it. |
+| **J** | *Do you report on a cash or accrual basis?* | Net income and retained earnings differ by basis; the closing entries must tie to the statements and the return | **Required.** Passed on every read and stated in the workpaper header. |
 
 **Then, depending on the answer to A:**
 
@@ -79,7 +82,9 @@ Ask only what you cannot already see.
 |---|---|---|
 | **Pre-closing trial balance** at the fiscal year end — the **final** TB, after adjusting entries | **Required** | CSV or XLSX |
 | **Chart of accounts with account types** — this drives the temporary / permanent split | **Required** | CSV or XLSX |
-| **Prior year's closing retained earnings** — e.g. the balance sheet at the prior year end | **Required for continuity** | CSV, XLSX or PDF |
+| **Prior year's closing retained earnings** — RE + Net Income lines at the prior year end, or RE on the first day of this year | **Required for continuity** | CSV, XLSX or PDF |
+| **Trial balance (or balance sheet) dated the first day of the new fiscal year**, and the **retained earnings / equity GL** for the year and the first month after | **Required for the closed-state test** — without them the state is user-asserted, not tested | CSV or XLSX |
+| **Last year's final statements or tax return** — to agree opening retained earnings or capital | Recommended | PDF, CSV or XLSX |
 | Fiscal year end, entity type, functional currency; whether the system auto-closes the year | **Required** | Type it in the chat |
 | **Dividends / distributions declared** during the year — GL detail for the dividend, draw and equity accounts | If applicable | CSV or XLSX |
 | Reporting framework; any **OCI** items; whether the audit is complete | Recommended | Type it in the chat |
@@ -118,15 +123,16 @@ If the TB does not balance, investigate before closing — see
 
 ## Stage 4 — Classify the accounts and build the closing entries
 
-Only if Stage 3 found the year **not closed**. Classify every account as temporary or permanent on
+Only if Stage 3 found the year **not closed** — or auto-closed, for the draws / distributions entry
+and the member allocation only. Classify every account as temporary or permanent on
 its type, listing name / type mismatches; settle the two-step or four-step method; compute the
 category totals and **cross-check net income against the P&L**; construct the closing entries for
 the entity type, **every account listed individually** in the real chart names; and close OCI to
 AOCI, not retained earnings: [`references/method.md`](references/method.md) Steps 2–6. Check
 [`references/edge-cases.md`](references/edge-cases.md) for owner-capital and nonprofit equity,
 multi-currency, treasury stock, stock-based compensation, OCI never recycled, and audit adjustments
-after a preliminary close. If the year was already closed, propose no entries and verify the
-existing one, or document the system's roll.
+after a preliminary close. If the year was already closed by an explicit entry, propose no entries
+and verify it; if auto-closed, document the system's roll and propose only what it leaves (Step 0b).
 
 ## Stage 5 — Prove the result and present it
 
