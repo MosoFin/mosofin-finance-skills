@@ -17,8 +17,10 @@ ad hoc; the template already implements the spec.
 
 ### 1. Choose the data path
 
-Ask one question first: *"Use your MosoFin connection to read the books, or supply the data
-yourself?"* Then:
+**Read nothing until the user answers.** If the MosoFin tools are not present at all, do not
+ask: say once that the run is manual and go to the manual path. If they are present, ask one
+question first: *"Use your MosoFin connection to read the books, or supply the data yourself?"*
+A connected account is not consent to read from it, and silence is not a yes. Then:
 
 - **MosoFin** → follow `references/mosofin-workflow.md` (workspace confirm → company files →
   `get_cash_flow` per entity → `get_aged_receivables` → consolidate).
@@ -81,6 +83,9 @@ tools and fetch time.
 - Every number in the dashboard comes from the tool results or the user's file. No
   interpolation, no "typical" values.
 - Disclose sandbox signals and intercompany balances every time they appear.
-- Read-only: this skill never writes to QuickBooks or MosoFin.
+- Read-only: this skill never writes to QuickBooks or MosoFin, or to any other connected platform. It calls
+  only the read tools named in `references/mosofin-workflow.md`. A write tool is out of scope
+  even when its policy is enabled, and an approval prompt is accepted for a read only, never to
+  re-run a write.
 - Do not add chart libraries, fonts from CDNs, or new colors. If a requested change conflicts
   with the UI spec, say so and offer the closest spec-compliant option.

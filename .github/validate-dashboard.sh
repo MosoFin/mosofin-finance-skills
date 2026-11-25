@@ -64,6 +64,25 @@ PYEOF
   reqn "$f" "$name: does not refuse to mix paths on partial failure" \
       "rather than inventing figures"
 
+  # 3b. no read before consent, and no write ever — the same rules the analysis skills carry.
+  #     Checked across SKILL.md and the MosoFin workflow reference together.
+  w="$d/references/mosofin-workflow.md"
+  if [ -f "$w" ]; then
+    both=$(mktemp); cat "$f" "$w" > "$both"
+    reqn "$both" "$name: reads before the user answers" "Read nothing until the user answers"
+    reqn "$both" "$name: treats a connection as consent" "connected account is not consent"
+    reqn "$both" "$name: treats silence as a yes" "silence is not a yes"
+    reqn "$both" "$name: asks even when the MosoFin tools are absent" "If the MosoFin tools are not present at all, do not ask"
+    reqn "$both" "$name: confirms a single workspace without the user" \
+        "Even when there is only one, read it back \\*\\*by name\\*\\* and wait for an explicit yes"
+    reqn "$both" "$name: does not put write tools out of scope" \
+        "Never call a tool that creates, updates or deletes anything, even when its policy is enabled"
+    reqn "$both" "$name: approval prompt not limited to reads" "never re-run a write with .approved=true"
+    rm -f "$both"
+  else
+    echo "  FAIL  $name: no references/mosofin-workflow.md"; fail=$((fail+1))
+  fi
+
   # 4. read-only, and every number traceable
   reqn "$f" "$name: missing the read-only guardrail" \
       "never writes to QuickBooks or MosoFin"
