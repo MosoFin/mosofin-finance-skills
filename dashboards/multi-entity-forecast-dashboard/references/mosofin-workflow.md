@@ -64,16 +64,14 @@ containing "Sandbox". Put one sentence in `notes` under `where: "report"`.
 
 ```
 mode: "mosofin"
-mcpUrl: the connected MosoFin server URL from the session's connector list
 source: "QuickBooks Online · via MosoFin"
 fetched: "Fetched D Mon YYYY, HH:MM UTC"   (from provenance.fetched_at)
 asOf: "D Month YYYY"
 provenance: tools used, "mock: false · read-only"
 ```
 
-## Live buttons in the dashboard
+## The dashboard makes no calls of its own
 
-The template's **Sync from QuickBooks** button and **Ask** drawer POST to
-`https://api.anthropic.com/v1/messages` with `mcp_servers: [{type:"url", url: DATA.mcpUrl}]`.
-They work only when the file runs inside Claude with the MosoFin connector attached; elsewhere
-they fail gracefully into the amber strip. Tell the user this once.
+The generated file is static. It holds the figures this run read and nothing else: no sync
+button, no assistant, no request to any API or MCP server. Every read happens in this skill,
+after the consent step above. To refresh, the user runs the skill again.

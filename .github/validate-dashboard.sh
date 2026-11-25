@@ -99,6 +99,17 @@ PYEOF
     grep -q '__DATA__' "$t" || { echo "  FAIL  $name: $(basename "$t") has no __DATA__ placeholder"; fail=$((fail+1)); }
   done
 
+  # 7b. the dashboard is static: no live calls of its own. Every read happens in the skill,
+  #     after the user's consent; the generated file never calls an API or an MCP server.
+  #     Checked across the template, the example data and the generator.
+  live='fetch\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|api\.anthropic\.com|mcp_servers|mcpUrl|MCP_URL|urllib|urlopen|http\.client|requests\.(get|post)|socket\.'
+  for t in "$d"/assets/* "$d"/scripts/*; do
+    [ -f "$t" ] || continue
+    if grep -nE "$live" "$t" >/dev/null; then
+      echo "  FAIL  $name: $(basename "$t") makes or configures a live call ($(grep -oE "$live" "$t" | sort -u | tr '\n' ' '))"; fail=$((fail+1))
+    fi
+  done
+
   # 8. the generator and its example data actually work together
   for s in "$d"/scripts/*.py; do
     [ -e "$s" ] || continue

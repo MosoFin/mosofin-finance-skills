@@ -36,15 +36,10 @@
   .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
   .search{height:31px;width:210px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:12.5px;color:var(--ink)}
   .search::placeholder{color:var(--tertiary)}
-  .ask{height:31px;padding:0 12px;background:var(--teal-soft);color:var(--teal);border:0;border-radius:6px;font-weight:500;font-size:12.5px}
-  .ask kbd{font-family:inherit;opacity:.7;margin-left:4px}
   .src{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--meta)}
   .src i{width:12px;height:12px;border-radius:3px;background:var(--qb);display:inline-block;flex:none}
 
   /* ---------- warning strip ---------- */
-  .strip{background:var(--amber-bg);color:#7a5209;border-bottom:1px solid #f1e2bf;padding:9px 28px;font-size:12.5px;display:none}
-  .strip.show{display:block}
-  .strip strong{color:#5f3f05;font-weight:600}
 
   /* ---------- layout ---------- */
   .main{flex:1;padding:28px 28px 60px;display:flex;flex-direction:column;gap:22px}
@@ -56,17 +51,15 @@
   .btn:hover{background:var(--hover)}
   .btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
   .btn.primary:hover{background:#185f6e}
-  .btn.connect{background:var(--qb);border-color:var(--qb);color:#fff}
   .btn:disabled{opacity:.55;cursor:default}
   .btn .sq{width:10px;height:10px;border-radius:2.5px;background:var(--qb)}
-  .btn.primary .sq,.btn.connect .sq{background:#fff;opacity:.9}
+  .btn.primary .sq{background:#fff;opacity:.9}
 
   /* status */
   .pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px 0 8px;border-radius:20px;font-size:11.5px;font-weight:500;white-space:nowrap}
   .pill i{width:6px;height:6px;border-radius:50%;display:inline-block}
   .pill.ok{background:var(--green-bg);color:#0f7a50}.pill.ok i{background:var(--green)}
   .pill.warn{background:var(--amber-bg);color:#8a5c0a}.pill.warn i{background:var(--amber)}
-  .pill.busy{background:var(--blue-bg);color:#2f6f89}.pill.busy i{background:var(--blue);animation:pulse 1.1s ease-in-out infinite}
   .pill.idle{background:var(--neutral-bg);color:var(--secondary)}.pill.idle i{background:var(--neutral)}
   .dot{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--secondary)}
   .dot i{width:6px;height:6px;border-radius:50%;display:inline-block}
@@ -129,33 +122,8 @@
   .report .rfoot{margin-top:28px;padding-top:14px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--secondary)}
   .report code{font-family:inherit;background:var(--canvas);padding:1px 5px;border-radius:4px;font-size:11.5px}
 
-  /* drawer */
-  .scrim{position:fixed;inset:0;background:rgba(16,38,46,.12);display:none}
-  .scrim.open{display:block}
-  .drawer{position:fixed;top:0;right:0;bottom:0;width:396px;background:#fff;border-left:1px solid var(--border);display:none;flex-direction:column;z-index:20}
-  .drawer.open{display:flex;animation:slidein .18s ease-out}
-  .dhead{height:60px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--border);gap:12px}
-  .dhead strong{font-weight:600;font-size:13.5px}
-  .dhead .src{margin-left:auto}
-  .dhead .x{background:none;border:0;color:var(--secondary);font-size:18px;padding:4px;margin-left:6px}
-  .dbody{flex:1;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
-  .msg-a{font-size:13px;white-space:pre-wrap}
-  .msg-u{align-self:flex-end;max-width:85%;background:#eef7fb;color:#26647d;border-radius:12px 12px 4px 12px;padding:9px 12px;font-size:13px}
-  .chips{display:flex;flex-wrap:wrap;gap:6px}
-  .chips button{border:1px solid var(--border);background:#fff;border-radius:10px;padding:5px 10px;font-size:12px;color:var(--secondary);text-align:left}
-  .chips button:hover{background:var(--hover);color:var(--ink)}
-  .dfoot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
-  .dfoot input{flex:1;height:34px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:12.5px}
-  .dfoot input::placeholder{color:var(--tertiary)}
 
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#fff;border:1px solid var(--border);box-shadow:0 6px 26px rgba(16,44,54,.09);border-radius:8px;padding:10px 14px;font-size:12.5px;display:none;animation:popin .16s ease-out;z-index:30}
-  .toast.show{display:block}
-  .spin{width:12px;height:12px;border:1.6px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
 
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  @keyframes popin{from{opacity:0;transform:translate(-50%,6px) scale(.985)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-  @keyframes slidein{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
-  @keyframes spin{to{transform:rotate(360deg)}}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -174,11 +142,9 @@
     <div class="nav-right">
       <span class="src" id="nav-src"><i></i></span>
       <input class="search" placeholder="Search accounts" aria-label="Search accounts" id="search">
-      <button class="ask" id="ask-btn">Ask <kbd>⌘</kbd></button>
     </div>
   </nav>
 
-  <div class="strip" id="strip"></div>
 
   <main class="main">
     <div class="page-head">
@@ -192,7 +158,6 @@
       </div>
       <div class="head-actions">
         <div class="seg" role="group" aria-label="Entity"></div>
-        <button class="btn connect" id="sync"><span class="sq"></span>Sync from QuickBooks</button>
       </div>
     </div>
 
@@ -267,29 +232,14 @@
   </main>
 </div>
 
-<div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" aria-label="Assistant">
-  <div class="dhead"><strong>Assistant</strong><span class="src" id="drawer-src"><i></i></span><button class="x" id="close" aria-label="Close">×</button></div>
-  <div class="dbody" id="dbody">
-    <div class="msg-a">Ask about anything in these books. I'll read QuickBooks through MosoFin and answer from what's actually there.</div>
-    <div class="chips" id="chips">
-      <button>Which customers are most overdue?</button>
-      <button>What drove the biggest month of operating cash flow?</button>
-      <button>Pull the latest month's P&amp;L for each entity</button>
-    </div>
-  </div>
-  <div class="dfoot"><input id="q" placeholder="Ask about the books"><button class="btn primary" id="send">Send</button></div>
-</aside>
-<div class="toast" id="toast"></div>
 
 <script>
 "use strict";
-/* ======================= DATA (from MosoFin reads, 1 Sep 2026 21:02-21:03 UTC, mock:false) ======================= */
+/* ======================= DATA (written in by scripts/build_dashboard.py; this file makes no network calls) ======================= */
 var DATA=/*__DATA__*/null;
 if(!DATA){DATA={group:"Untitled group",mode:"manual",source:"No data loaded",fetched:"",year:2026,months:[],entities:{},order:[],notes:[]}}
 var MONTHS=DATA.months.slice();
 var ORDER=DATA.order.slice();
-var MCP_URL=DATA.mcpUrl||"https://mcp.mosofin.com/mcp";
 var HORIZON=6;
 
 /* ======================= helpers ======================= */
@@ -358,7 +308,7 @@ function drawAging(){
   var host=$("chart-aging");host.innerHTML="";
   var ag=scope.aging;
   if(!ag){var ce=ORDER.filter(function(x){return DATA.entities[x].aging});$("aging-sub").textContent=current==="group"?(ce.length?"Bucket detail exists for "+ce.map(function(x){return DATA.entities[x].short}).join(", "):"No bucket detail loaded"):"No aging detail for this company file";
-    $("aging-flag").innerHTML="<strong>Receivables total "+money(scope.ar,2)+".</strong> "+(current==="group"?"A group split would require inventing numbers for files without aging detail; switch to a single entity to see its buckets.":"Total derived from the A/R movement on this file's cash flow statement. Sync again after running <code>get_aged_receivables</code> for bucket detail.");return}
+    $("aging-flag").innerHTML="<strong>Receivables total "+money(scope.ar,2)+".</strong> "+(current==="group"?"A group split would require inventing numbers for files without aging detail; switch to a single entity to see its buckets.":"Total derived from the A/R movement on this file's cash flow statement. Run the skill again with <code>get_aged_receivables</code> read for bucket detail.");return}
   $("aging-sub").textContent=scope.short+", at "+(DATA.asOf||"");
   $("aging-flag").innerHTML=scope.arIc?"<strong>Buckets include "+money(scope.arIc)+"</strong> owed by sister entities.":"";
   var keys=Object.keys(ag),W=420,H=190,L=44,R=12,T=12,B=28,pw=W-L-R,ph=H-T-B,mx=nice(Math.max.apply(null,keys.map(function(q){return ag[q]}).concat([1])));
@@ -424,90 +374,18 @@ function syncLabels(){var c=controls();$("ocf-val").textContent=money(c.rate);$(
 function refreshForecast(){syncLabels();drawMain();renderOutlook();renderReport()}
 function applyPreset(w){var p=presets();$("ocf").value=Math.round(p[w]);$("growth").value=0;$("capex").value=0;Array.prototype.forEach.call(document.querySelectorAll("#presets button"),function(b){b.setAttribute("aria-pressed",String(b.dataset.preset===w))});refreshForecast()}
 function buildSeg(){var seg=document.querySelector(".seg");seg.innerHTML='<button data-entity="group" aria-pressed="'+(current==="group")+'">Group</button>'+ORDER.map(function(x){return'<button data-entity="'+x+'" aria-pressed="'+(x===current)+'">'+DATA.entities[x].short+'</button>'}).join("");bindSeg()}
-function renderAll(){scope=scopeOf(current);$("meta-fetched").textContent=DATA.fetched;$("meta-src").textContent=DATA.source;$("nav-src").innerHTML="<i></i>"+DATA.group+" · "+ORDER.length+" company file"+(ORDER.length===1?"":"s");$("drawer-src").innerHTML="<i></i>"+DATA.group;document.title=DATA.group+" — Forecast";
-  var manual=DATA.mode==="manual";$("sync").style.display=manual?"none":"";$("ask-btn").style.display=manual?"none":"";
-  if(manual){setStatus("idle","Uploaded data")}else if($("status").textContent.trim()===""){setStatus("ok","Live data")}
+function renderAll(){scope=scopeOf(current);$("meta-fetched").textContent=DATA.fetched;$("meta-src").textContent=DATA.source;$("nav-src").innerHTML="<i></i>"+DATA.group+" · "+ORDER.length+" company file"+(ORDER.length===1?"":"s");document.title=DATA.group+" — Forecast";
+  if(DATA.mode==="manual"){setStatus("idle","Uploaded data")}else{setStatus("ok","Read through MosoFin")}
   buildSeg();renderKpis();renderMonthly();renderAccounts();drawAging();applyPreset("base")}
 
-/* ======================= MosoFin sync via Anthropic API + MCP ======================= */
+/* ======================= status ======================= */
 function setStatus(cls,t){$("status").className="pill "+cls;$("status").innerHTML="<i></i>"+t}
-function toast(t){var e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove("show")},3200)}
-function strip(t){var s=$("strip");if(!t){s.classList.remove("show");s.innerHTML="";return}s.innerHTML=t;s.classList.add("show")}
-
-function todayISO(){var d=new Date();return d.toISOString().slice(0,10)}
-function monthEnd(){var d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().slice(0,10)}
-
-async function callClaude(prompt,system,maxTokens){
-  var r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    model:"claude-sonnet-4-6",max_tokens:maxTokens||1000,system:system||"",
-    messages:[{role:"user",content:prompt}],
-    mcp_servers:[{type:"url",url:MCP_URL,name:"mosofin"}]})});
-  if(!r.ok)throw new Error("API "+r.status);
-  var d=await r.json();
-  if(d.error)throw new Error(d.error.message||"API error");
-  return{text:(d.content||[]).filter(function(b){return b.type==="text"}).map(function(b){return b.text}).join("\n"),calls:(d.content||[]).filter(function(b){return b.type==="mcp_tool_use"}).length};
-}
-
-var SYNC_SYSTEM=function(){return "You are a data extraction agent with MosoFin MCP tools. Follow the tool prerequisites exactly: call list_workspaces, then confirm the workspace named '"+DATA.group+"' with mode 'single' and its workspace_id, then get_agent_datasources for that workspace. For EVERY quickbooks datasource that is connected, call invoke_datasource_api_tool (datasource 'quickbooks', pass workspace_id and that row's data_source_id on every call) for tool 'get_cash_flow' with the given dates and summarize_column_by 'Month'. Respond with ONLY a compact JSON object, no prose, no markdown fences."};
-
-function syncPrompt(){
-  return"start_date 2026-01-01, end_date "+monthEnd()+". From each get_cash_flow result read the monthly columns (exclude the Total column). Build: {\"fetched_at\":\"<ISO>\",\"months\":[\"Jan\",...],\"entities\":[{\"name\":\"<display_name>\",\"ocf\":[per-month 'Net cash provided by operating activities'],\"icf\":[investing summary],\"fcf\":[financing summary],\"ni\":[Net Income row],\"ar\":<negative of the sum of the 'Accounts Receivable (A/R)' adjustment row across all months>,\"ap\":<sum of 'Accounts Payable (A/P)' row>,\"inv\":<negative of sum of 'Inventory Asset' row>}]}. Use 0 for blank cells. Round to 2 decimals. Output the JSON only.";
-}
-function shortName(n){var g=DATA.group.replace(/ (Group|Holdings|Inc\.?|LLC)$/i,"");var m=n.indexOf(g)===0?n.slice(g.length).trim():n;m=m.replace(/\b(LLC|Inc\.?|Ltd\.?|Corp\.?)\b/g,"").trim();return m.split(/\s+/)[0]||n}
-function applySync(j){
-  if(!j||!j.entities||!j.entities.length)throw new Error("No entities in response");
-  var months=j.months||MONTHS;MONTHS=months;DATA.months=months;if(j.year)DATA.year=j.year;
-  var next={},keys=[];
-  j.entities.forEach(function(e){var key=shortName(e.name).toLowerCase();keys.push(key);var old=DATA.entities[key]||{};
-    next[key]={label:e.name,short:shortName(e.name),ocf:e.ocf,icf:e.icf,fcf:e.fcf,ni:e.ni,ar:+e.ar||0,arIc:old.arIc||0,ap:+e.ap||0,inv:+e.inv||0,aging:old.aging||null,customers:old.customers||null}});
-  DATA.entities=next;ORDER=keys;
-  var d=new Date(j.fetched_at||Date.now());DATA.fetched="Fetched "+d.toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC"})+" UTC";
-  if(!next[current])current="group";
-}
-async function runSync(){
-  var btn=$("sync");btn.disabled=true;btn.innerHTML='<span class="spin"></span>Syncing';setStatus("busy","Syncing from QuickBooks");strip("");
-  try{
-    var res=await callClaude(syncPrompt(),SYNC_SYSTEM(),1600);
-    var clean=res.text.replace(/```json|```/g,"").trim();var start=clean.indexOf("{");if(start>0)clean=clean.slice(start);
-    var j=JSON.parse(clean);applySync(j);renderAll();
-    setStatus("ok","Live data");toast("Synced "+j.entities.length+" company files from QuickBooks");
-  }catch(err){
-    setStatus("warn","Sync failed");
-    var msg=String(err.message||err);
-    var isNet=/Failed to fetch|NetworkError|API 4|API 5/.test(msg);
-    strip("<strong>Sync did not complete.</strong> "+(isNet?"The MosoFin connector can only be reached when this dashboard runs inside Claude with the connector attached. The figures shown are the last successful read.":msg+" Figures shown are the last successful read."));
-  }finally{btn.disabled=false;btn.innerHTML='<span class="sq"></span>Sync from QuickBooks'}
-}
-
-/* ======================= assistant ======================= */
-var chatLog=[];
-function addMsg(cls,t){var d=document.createElement("div");d.className=cls;d.textContent=t;$("dbody").appendChild(d);$("dbody").scrollTop=1e6;return d}
-async function ask(q){
-  if(!q.trim())return;$("q").value="";var chips=$("chips");if(chips)chips.remove();
-  addMsg("msg-u",q);var a=addMsg("msg-a","");a.innerHTML='<span class="pill busy"><i></i>Reading QuickBooks</span>';
-  chatLog.push({role:"user",content:q});
-  try{
-    var r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
-      system:"You are a finance assistant for "+DATA.group+", a multi-entity QuickBooks group ("+ORDER.map(function(x){return DATA.entities[x].label}).join(", ")+") connected through MosoFin. Before reading data: list_workspaces, confirm '"+DATA.group+"' with mode 'single', get_agent_datasources, then invoke_datasource_api_tool with the right data_source_id. Answer only from returned data. Keep answers under 150 words, plain prose, no markdown headers. End with one 'Data sources' line.",
-      messages:chatLog,mcp_servers:[{type:"url",url:MCP_URL,name:"mosofin"}]})});
-    var d=await r.json();if(d.error)throw new Error(d.error.message);
-    var t=(d.content||[]).filter(function(b){return b.type==="text"}).map(function(b){return b.text}).join("\n").trim()||"No answer returned.";
-    a.textContent=t;chatLog.push({role:"assistant",content:t});
-  }catch(e){a.innerHTML='<span class="pill warn"><i></i>Couldn\'t reach the connector</span><div style="margin-top:8px;color:var(--secondary)">The assistant needs to run inside Claude with MosoFin attached. '+String(e.message||"")+'</div>';chatLog.pop()}
-}
-function openDrawer(){$("drawer").classList.add("open");$("scrim").classList.add("open");setTimeout(function(){$("q").focus()},50)}
-function closeDrawer(){$("drawer").classList.remove("open");$("scrim").classList.remove("open")}
 
 /* ======================= events ======================= */
 function bindSeg(){Array.prototype.forEach.call(document.querySelectorAll(".seg button"),function(b){b.addEventListener("click",function(){current=b.dataset.entity;Array.prototype.forEach.call(document.querySelectorAll(".seg button"),function(x){x.setAttribute("aria-pressed",String(x.dataset.entity===current))});renderAll()})})}
 Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){b.addEventListener("click",function(){Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(x){x.setAttribute("aria-current",String(x===b))});Array.prototype.forEach.call(document.querySelectorAll("[data-panel]"),function(p){p.hidden=p.dataset.panel!==b.dataset.tab});if(b.dataset.tab==="overview")drawMain();if(b.dataset.tab==="accounts")drawAging()})});
 Array.prototype.forEach.call(document.querySelectorAll("#presets button"),function(b){b.addEventListener("click",function(){applyPreset(b.dataset.preset)})});
 ["ocf","growth","capex"].forEach(function(id){$(id).addEventListener("input",function(){Array.prototype.forEach.call(document.querySelectorAll("#presets button"),function(b){b.setAttribute("aria-pressed","false")});refreshForecast()})});
-$("sync").addEventListener("click",runSync);
-$("ask-btn").addEventListener("click",openDrawer);$("close").addEventListener("click",closeDrawer);$("scrim").addEventListener("click",closeDrawer);
-$("send").addEventListener("click",function(){ask($("q").value)});$("q").addEventListener("keydown",function(e){if(e.key==="Enter")ask($("q").value)});
-document.addEventListener("click",function(e){if(e.target.closest("#chips button"))ask(e.target.textContent)});
-document.addEventListener("keydown",function(e){if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();openDrawer()}if(e.key==="Escape")closeDrawer()});
 $("search").addEventListener("input",function(){var q=this.value.toLowerCase();Array.prototype.forEach.call(document.querySelectorAll("#cust-body tr"),function(r){r.style.display=r.firstChild.textContent.toLowerCase().indexOf(q)>-1?"":"none"})});
 window.addEventListener("resize",function(){drawMain();drawAging()});
 renderAll();

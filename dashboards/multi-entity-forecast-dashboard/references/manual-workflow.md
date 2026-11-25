@@ -36,7 +36,7 @@ columns and mismatched month ranges with a plain message — relay it, don't pat
 
 ## What changes in the dashboard
 
-- Status pill is neutral "Uploaded data"; sync button and Ask drawer are hidden.
+- Status pill is neutral "Uploaded data".
 - Provenance reads "Uploaded CSV" (or whatever you pass to `--source`).
 - No aging chart or customer table unless the user also supplies aging data (add `aging` and
   `customers` to the entity objects by hand via `--data` JSON if they do).
