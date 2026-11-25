@@ -50,7 +50,7 @@ than single entries. Here they are also cheaper.**
 > system-generated entries all break that link — the same caveat that applies in
 > fraud investigation, internal audit and IPO-readiness work.
 
-**One more inherited discipline:** **this skill escalates to the fraud skill and inherits its rules.** **An
+**One more inherited discipline:** **this skill escalates to a fraud investigation and follows its disciplines.** **An
 anomaly is not a finding.** Entries are posted by identifiable people; **a flagged list is a list of
 questions, not of suspects**, and **nothing from it is persisted.**
 

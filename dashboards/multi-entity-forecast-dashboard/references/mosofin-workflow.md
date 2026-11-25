@@ -1,14 +1,20 @@
 # MosoFin path — pulling multi-entity data
 
 Follow the gates in order. The MCP server is stateless; pass `workspace_id` and `data_source_id`
-on every call. Everything is read-only.
+on every call. Everything is read-only: call only the read tools named below. Never call a tool
+that creates, updates or deletes anything, even when its policy is enabled. If a read returns
+`approval_required`, ask the user and re-run that same read on a yes; never re-run a write with
+`approved=true`. The generated file makes no calls of its own, so these reads are the only
+time this skill touches the books.
 
 ## Gates
 
 1. **Consent.** Ask: "Use your MosoFin connection to read the books, or supply the data yourself?"
-   If they decline → `manual-workflow.md`.
+   Wait for the answer; call no tool before it. A connected account is not consent, and silence
+   is not a yes. If they decline → `manual-workflow.md`.
 2. **Workspace.** `list_workspaces` (no args). If more than one, ask which by name — never
-   auto-pick. Confirm with `list_workspaces(workspace_ids=[id], mode="single")`.
+   auto-pick. Even when there is only one, read it back **by name** and wait for an explicit yes.
+   Then confirm with `list_workspaces(workspace_ids=[id], mode="single")`.
 3. **Company files.** `get_agent_datasources(workspace_id)`. Collect every row with
    `connector_key == "quickbooks"` and `connected == true`. If more than one, ask:
    one file / each separately / consolidated. This skill's dashboard always shows both per-entity
@@ -64,16 +70,14 @@ containing "Sandbox". Put one sentence in `notes` under `where: "report"`.
 
 ```
 mode: "mosofin"
-mcpUrl: the connected MosoFin server URL from the session's connector list
 source: "QuickBooks Online · via MosoFin"
 fetched: "Fetched D Mon YYYY, HH:MM UTC"   (from provenance.fetched_at)
 asOf: "D Month YYYY"
 provenance: tools used, "mock: false · read-only"
 ```
 
-## Live buttons in the dashboard
+## The dashboard makes no calls of its own
 
-The template's **Sync from QuickBooks** button and **Ask** drawer POST to
-`https://api.anthropic.com/v1/messages` with `mcp_servers: [{type:"url", url: DATA.mcpUrl}]`.
-They work only when the file runs inside Claude with the MosoFin connector attached; elsewhere
-they fail gracefully into the amber strip. Tell the user this once.
+The generated file is static. It holds the figures this run read and nothing else: no sync
+button, no assistant, no request to any API or MCP server. Every read happens in this skill,
+after the consent step above. To refresh, the user runs the skill again.

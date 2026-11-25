@@ -1,14 +1,14 @@
 ---
 name: multi-entity-forecast-dashboard
-description: Build an interactive, single-file cash forecast dashboard for a multi-entity business (several QuickBooks company files) in a fixed "quiet analytics" visual style, with per-entity and consolidated views, P10/P90 forecast band, accounts/receivables detail, and a paper-style report. Pulls live data through the MosoFin connector when the user agrees, or falls back to a manual CSV upload when they opt out or have no connector. Use this whenever the user asks for a cash flow forecast, runway, cash dashboard, multi-entity or group consolidation view, "how much cash will we have", or a forecast for their MosoFin / QuickBooks workspace — even if they don't say "dashboard". Also use it to refresh or restyle an existing forecast dashboard so it stays visually consistent.
+description: Build an interactive, single-file cash forecast dashboard for a multi-entity business (several QuickBooks company files) in a fixed "quiet analytics" visual style, with per-entity and consolidated views, P10/P90 forecast band, accounts/receivables detail, and a paper-style report. Reads the books through the MosoFin connector when the user agrees, or works from a CSV upload when they opt out or have no connector; the file it produces is static and makes no network calls of its own. Use this whenever the user asks for a cash flow forecast, runway, cash dashboard, multi-entity or group consolidation view, "how much cash will we have", or a forecast for their MosoFin / QuickBooks workspace — even if they don't say "dashboard". Also use it to refresh or restyle an existing forecast dashboard so it stays visually consistent.
 ---
 
 # Multi-entity forecast dashboard
 
 Produces one self-contained HTML file: Overview · Accounts · Forecast · Report tabs, an entity
-switcher (Group + each company file), scenario presets and sliders, and — on the MosoFin path —
-a live **Sync from QuickBooks** button and an **Ask** drawer that read the books through the
-connector.
+switcher (Group + each company file), scenario presets and sliders. The file is static: it shows
+the data this skill read or the user supplied, and it makes no network calls of its own. To
+refresh the figures, run the skill again; every read goes through the consent step below.
 
 The look is fixed. Read `references/ui-spec.md` before touching any HTML and never restyle
 ad hoc; the template already implements the spec.
@@ -17,8 +17,10 @@ ad hoc; the template already implements the spec.
 
 ### 1. Choose the data path
 
-Ask one question first: *"Use your MosoFin connection to read the books, or supply the data
-yourself?"* Then:
+**Read nothing until the user answers.** If the MosoFin tools are not present at all, do not
+ask: say once that the run is manual and go to the manual path. If they are present, ask one
+question first: *"Use your MosoFin connection to read the books, or supply the data yourself?"*
+A connected account is not consent to read from it, and silence is not a yes. Then:
 
 - **MosoFin** → follow `references/mosofin-workflow.md` (workspace confirm → company files →
   `get_cash_flow` per entity → `get_aged_receivables` → consolidate).
@@ -59,9 +61,9 @@ the last cumulative cash figure you computed. Then `present_files`.
 ### 5. Tell the user
 
 In prose, not bullets: the cash position, which scenario rate was chosen and why, the largest
-caveat (intercompany, sandbox data, missing aging), and — MosoFin path only — that the Sync and
-Ask buttons work when the file runs inside Claude with the connector attached and degrade to an
-amber strip elsewhere. End with a single "Data sources" line listing the tools and fetch time.
+caveat (intercompany, sandbox data, missing aging), and that the figures are as of the fetch
+time: to refresh them, run the skill again. End with a single "Data sources" line listing the
+tools and fetch time.
 
 ## Files
 
@@ -81,6 +83,9 @@ amber strip elsewhere. End with a single "Data sources" line listing the tools a
 - Every number in the dashboard comes from the tool results or the user's file. No
   interpolation, no "typical" values.
 - Disclose sandbox signals and intercompany balances every time they appear.
-- Read-only: this skill never writes to QuickBooks or MosoFin.
+- Read-only: this skill never writes to QuickBooks or MosoFin, or to any other connected platform. It calls
+  only the read tools named in `references/mosofin-workflow.md`. A write tool is out of scope
+  even when its policy is enabled, and an approval prompt is accepted for a read only, never to
+  re-run a write.
 - Do not add chart libraries, fonts from CDNs, or new colors. If a requested change conflicts
   with the UI spec, say so and offer the closest spec-compliant option.

@@ -20,7 +20,7 @@ a layout change, and even then keep every token below.
 > `#dbe6e9`. Left: wordmark in soft sky blue (`#7cbcda`) beside a thin outlined ring glyph, then
 > a small uppercase 9.5px letter-spaced outlined tag pill. Tabs are 13px, inactive `#7b8f96`,
 > active near-black `#16262e` with a 2px black underline flush to the nav's bottom edge. Right:
-> a plain 31px white search field and a soft-teal "Ask ⌘" button (`#e3f1f6` fill, `#1c6c7d` text).
+> a plain 31px white search field.
 >
 > **Type.** DM Sans throughout, `font-variant-numeric: tabular-nums` globally. Page titles
 > 29px/600 at `-0.7px` tracking. Hero metrics 30–40px/600 at `-1px` tracking, sitting under
@@ -46,14 +46,10 @@ a layout change, and even then keep every token below.
 > repeated consistently in the nav, in page metadata, in the report footer, and in the assistant
 > panel, so provenance is always one glance away.
 >
-> **Assistant panel.** 396px right drawer, white, 1px left border, slides in from the right in
-> 180ms. Assistant replies are unstyled prose on white; user messages are `#eef7fb` bubbles with
-> `#26647d` text and one squared corner (`12px 12px 4px 12px`). Follow-up suggestions are
-> left-aligned, self-sizing outlined 10px-radius chips.
+> **Motion.** None beyond what a control needs. Nothing decorative.
 >
-> **Motion.** Only functional: 140–200ms `popin` (6px rise + `0.985` scale) for dropdowns and
-> toasts, `slidein` for drawers, a 0.8s spinner, a 1.1s opacity pulse for syncing. Nothing
-> decorative.
+> **No live calls.** The file is static: no sync button, no assistant panel, no request to any API
+> or MCP server. Fonts load from Google Fonts; nothing else leaves the page.
 >
 > Primary action is deep teal `#1c6c7d`; destructive/connect actions borrow the vendor green.
 > Interactive rows highlight on hover with `#f6fafb`, selected rows with `#f2f8fa` and a
@@ -73,20 +69,19 @@ a layout change, and even then keep every token below.
 | `--secondary` / `--tertiary` | `#7b8f96` / `#9db0b6` | secondary text / axis labels |
 | `--meta` | `#728790` | provenance text next to vendor square |
 | `--sky` / `--sky-line` / `--sky-band` | `#7cbcda` / `#5fb4d8` / `#7fc7e4` | wordmark / forecast line / band |
-| `--teal` / `--teal-soft` | `#1c6c7d` / `#e3f1f6` | primary action / Ask button |
-| `--qb` | `#2CA01C` | vendor square, connect button |
+| `--teal` / `--teal-soft` | `#1c6c7d` / `#e3f1f6` | primary action / soft accent |
+| `--qb` | `#2CA01C` | vendor square |
 | green / amber / blue / neutral | see brief | status pills |
 | `--hover` / `--selected` / `--selected-border` | `#f6fafb` / `#f2f8fa` / `#9ecfe4` | table rows |
 
 ## Fixed layout (do not reorder)
 
-1. Nav: wordmark · tag · tabs (Overview, Accounts, Forecast, Report) · vendor provenance · search · Ask
-2. Optional warning strip (only when something needs attention)
-3. Page head: title, provenance + fetch time + status pill; right side: entity segmented control + connect-green sync button
-4. **Overview**: KPI band (4) → two-column: forecast chart card (with scenario presets and three sliders) + outlook card → monthly cash flow table with a history note
-5. **Accounts**: working-capital-by-entity table (group total + intercompany-removed subtotal) + aging chart card → customer-level receivables table with status pills
-6. **Forecast**: projected balances table (P10 / Base / P90 / monthly net) + scenario basis note
-7. **Report**: 660px paper document — position, what happened, receivables, outlook, caveats, provenance footer
+1. Nav: wordmark · tag · tabs (Overview, Accounts, Forecast, Report) · vendor provenance · search
+2. Page head: title, provenance + fetch time + status pill; right side: entity segmented control
+3. **Overview**: KPI band (4) → two-column: forecast chart card (with scenario presets and three sliders) + outlook card → monthly cash flow table with a history note
+4. **Accounts**: working-capital-by-entity table (group total + intercompany-removed subtotal) + aging chart card → customer-level receivables table with status pills
+5. **Forecast**: projected balances table (P10 / Base / P90 / monthly net) + scenario basis note
+6. **Report**: 660px paper document — position, what happened, receivables, outlook, caveats, provenance footer
 
 ## Things that must never appear
 

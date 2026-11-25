@@ -29,13 +29,10 @@ skill?** Skip to step 3 — it will ask you for the data it needs.
 
 **1. Subscribe** *(optional)*. The gateway returns data only for an authenticated, subscribed account. See [Sign in and account basics](https://docs.mosofin.com/start-here/register-a-mosofin-account) and [Billing](https://docs.mosofin.com/account/billing).
 
-**2. Connect the gateway** *(optional)*.
-
-```bash
-claude mcp add --transport http mosofin https://mcp.mosofin.com/mcp
-```
-
-On claude.ai, add it through connector settings instead. Authentication is **OAuth** —
+**2. Connect the gateway** *(optional)*. The gateway is the MosoFin MCP server,
+`https://mcp.mosofin.com/mcp`. Add it the way your Claude client adds a remote MCP server:
+on claude.ai through connector settings, in Claude Code as its
+[MCP documentation](https://code.claude.com/docs/en/mcp) describes. Authentication is **OAuth** —
 no credentials are stored locally, and **no skill here ever asks you for a password,
 token or account number.**
 
@@ -46,21 +43,12 @@ and [Connect QuickBooks](https://docs.mosofin.com/source-and-destination/sources
 If a connection will not authenticate, see
 [Common issues](https://docs.mosofin.com/source-and-destination/destinations/claude/common-issues).
 
-**3. Install the skills.** Either as a plugin, from the MosoFin marketplace in
-[MosoFin/mosofin-mcp-plugin](https://github.com/MosoFin/mosofin-mcp-plugin) — this installs
-all ten and keeps them updatable:
-
-```text
-/plugin marketplace add mosofin/mosofin-mcp-plugin
-/plugin install mosofin-finance@financehub
-```
-
-Or copy individual folders into `~/.claude/skills/` (all projects) or
-`.claude/skills/` (one project), taking only what you want:
-
-```bash
-cp -R skills/month-end-close-checklist ~/.claude/skills/
-```
+**3. Install the skills.** Either as the `mosofin-finance` plugin, which installs every skill
+here and keeps them updatable (see Claude Code's
+[Install and manage plugins](https://code.claude.com/docs/en/plugins/install)), or take only the
+skills you want: each folder under `skills/` is a complete skill, and Claude Code's
+[skills documentation](https://code.claude.com/docs/en/skills) says where a skill folder goes for
+one project or for all of them.
 
 **4. Run it.** The skill confirms your workspace by name and waits for an explicit yes
 before reading anything.
@@ -195,16 +183,11 @@ Each dashboard skill carries its own `references/` — the UI spec, both data pa
 method — and is checked by [`.github/validate-dashboard.sh`](.github/validate-dashboard.sh)
 against the rules it sets for itself, not against the analysis-skill protocol.
 
-**Install one dashboard without cloning the repo.** Each is self-contained, so you can pull
-just that folder:
-
-```bash
-curl -sL https://github.com/MosoFin/mosofin-finance-skills/archive/refs/heads/main.tar.gz | tar -xz -C ~/.claude/skills --strip-components=2 mosofin-finance-skills-main/dashboards/multi-entity-forecast-dashboard
-```
-
+**Each dashboard is self-contained.** It comes with the plugin, or you can use its folder on
+its own as a skill (see the [skills documentation](https://code.claude.com/docs/en/skills)).
 Python 3 and nothing else — the generator is standard library only. See
-[`dashboards/README.md`](dashboards/README.md) for pinning a release, the `git sparse-checkout`
-alternative, and a one-line check that the copy works.
+[`dashboards/README.md`](dashboards/README.md) for what it needs and a one-line check that the
+copy works.
 
 ---
 
@@ -249,7 +232,7 @@ Related repos:
 
 | | |
 |---|---|
-| [MosoFin/mosofin-mcp-plugin](https://github.com/MosoFin/mosofin-mcp-plugin) | The `financehub` marketplace that publishes these skills as the `mosofin-finance` plugin, and the `mosofin` plugin that provides the MCP connection itself |
+| [MosoFin/mosofin-llm-plugin](https://github.com/MosoFin/mosofin-llm-plugin) | The `financehub` marketplace and the `mosofin` plugin that provides the MCP connection itself |
 
 ---
 

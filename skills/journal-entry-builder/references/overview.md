@@ -37,7 +37,7 @@ become an entry.**
 
 ## What the workspace changes: validation stops being aspirational
 
-The original's Step 6 asks you to *verify* nine things. **In a Mosofin workspace, six of them become
+The original's Step 6 asks you to *verify* nine things. **In a Mosofin workspace, seven of them become
 queries** rather than intentions:
 
 | Validation | Original | Here |

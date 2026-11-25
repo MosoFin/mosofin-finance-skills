@@ -222,9 +222,9 @@ For each item requiring follow-up — **[gated]**:
 - **Resolution: legitimate** (with rationale), **error** (correction needed), **or escalate** — potential
   impropriety → a fraud investigation
 
-**On escalation**: **the fraud skill's rules apply from the moment you escalate** — objectivity, no
+**On escalation**: **fraud-investigation discipline applies from the moment you escalate** — objectivity, no
 accusation, evidence preservation as a separate discipline, and **no approval prompt to someone within
-scope.** Read it before proceeding.
+scope.** Hand the matter to whoever owns investigations before proceeding.
 
 ## Step 7 — Assess control implications
 
